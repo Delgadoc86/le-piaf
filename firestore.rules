@@ -1,0 +1,240 @@
+rules_version = '2';
+
+// MiMenu: reglas de Firestore v1 (ROADMAP §7).
+// Denegar por defecto. Todo lo que no está explícitamente permitido, no se puede.
+// Cada regla tiene su test en tests/reglas/firestore.test.ts.
+
+service cloud.firestore {
+  match /databases/{db}/documents {
+
+    // ─── Helpers de sesión y roles (custom claims: { sa: bool, l: { [localId]: rol } }) ───
+
+    function signedIn() { return request.auth != null; }
+    function esSA() { return signedIn() && request.auth.token.get('sa', false) == true; }
+    function rol(localId) {
+      return signedIn() ? request.auth.token.get('l', {}).get(localId, null) : null;
+    }
+    function esDueno(localId) { return rol(localId) == 'dueno'; }
+    function esGestor(localId) { return rol(localId) in ['dueno', 'encargado'] || esSA(); }
+    function esStaff(localId) { return rol(localId) in ['dueno', 'encargado', 'mozo', 'cocina'] || esSA(); }
+
+    // ─── Helpers de validación ───
+
+    function cambios() { return request.resource.data.diff(resource.data).affectedKeys(); }
+    function soloCambia(campos) { return cambios().hasOnly(campos); }
+    function datos() { return request.resource.data; }
+    function esPesos(v) { return v is int && v >= 0; }
+    function esTextoCorto(v) { return v is string && v.size() > 0 && v.size() <= 80; }
+
+    // ─── Raíz ───
+
+    match /usuarios/{uid} {
+      allow read: if (signedIn() && request.auth.uid == uid) || esSA();
+      // El usuario crea su propio perfil al registrarse; nunca superAdmin ni claimsVersion.
+      allow create: if signedIn() && request.auth.uid == uid
+        && datos().keys().hasOnly(['email', 'nombre', 'telefono', 'creadoEn'])
+        && datos().keys().hasAll(['email', 'nombre', 'creadoEn'])
+        && datos().email == request.auth.token.email
+        && esTextoCorto(datos().nombre)
+        && datos().creadoEn == request.time;
+      allow update: if signedIn() && request.auth.uid == uid
+        && soloCambia(['nombre', 'telefono'])
+        && esTextoCorto(datos().nombre);
+      allow delete: if false;
+    }
+
+    // Unicidad del slug: se consulta en vivo desde el registro; solo lo escribe crearLocal.
+    match /slugs/{slug} {
+      allow get: if true;
+      allow list, write: if false;
+    }
+
+    // Planes y configuración de la plataforma: públicos (landing de precios), solo Functions.
+    match /plataforma/{doc} {
+      allow read: if true;
+      allow write: if false;
+    }
+
+    // ─── Local ───
+
+    match /locales/{localId} {
+      allow read: if true;
+      // Lo crea crearLocal. El dueño edita todo salvo lo que controla la plataforma.
+      allow create, delete: if false;
+      allow update: if esDueno(localId)
+        && !cambios().hasAny(['suscripcion', 'duenoUid', 'slug', 'creadoEn'])
+        && datos().activo is bool
+        && esTextoCorto(datos().nombre);
+
+      // Equipo: lo crea invitarMiembro. El dueño puede cambiar rol/nombre/activo de otros,
+      // nunca crear otro dueño ni tocarse a sí mismo (así no se queda sin dueño).
+      match /miembros/{uid} {
+        allow read: if esGestor(localId) || (signedIn() && request.auth.uid == uid);
+        allow create, delete: if false;
+        allow update: if esDueno(localId)
+          && request.auth.uid != uid
+          && resource.data.rol != 'dueno'
+          && soloCambia(['rol', 'nombre', 'activo'])
+          && datos().rol in ['encargado', 'mozo', 'cocina']
+          && datos().activo is bool;
+      }
+
+      // Tokens de Mercado Pago del local: nunca desde el cliente.
+      match /privado/{doc} {
+        allow read, write: if false;
+      }
+
+      // ─── Carta (lectura pública) ───
+
+      match /categorias/{id} {
+        allow read: if true;
+        allow delete: if esGestor(localId);
+        allow create, update: if esGestor(localId)
+          && datos().keys().hasOnly(['nombre', 'orden', 'visible', 'icono', 'descripcion'])
+          && esTextoCorto(datos().nombre)
+          && datos().orden is int
+          && datos().visible is bool;
+      }
+
+      match /productos/{id} {
+        allow read: if true;
+        allow delete: if esGestor(localId);
+        allow create: if esGestor(localId) && productoValido();
+        // Gestores editan todo; cualquier miembro del staff puede marcar "Agotado".
+        allow update: if (esGestor(localId) && productoValido())
+          || (esStaff(localId)
+              && soloCambia(['disponible', 'actualizadoEn'])
+              && datos().disponible is bool);
+
+        function productoValido() {
+          return datos().keys().hasOnly(['categoriaId', 'nombre', 'descripcion', 'precio', 'fotoUrl',
+              'orden', 'visible', 'disponible', 'diasDisponible', 'estacion', 'etiquetas',
+              'variantes', 'gruposExtras', 'actualizadoEn'])
+            && datos().keys().hasAll(['categoriaId', 'nombre', 'precio', 'orden', 'visible',
+              'disponible', 'estacion'])
+            && esTextoCorto(datos().nombre)
+            && datos().categoriaId is string
+            && esPesos(datos().precio)
+            && datos().orden is int
+            && datos().visible is bool
+            && datos().disponible is bool
+            && datos().estacion in ['cocina', 'barra'];
+        }
+      }
+
+      match /promos/{id} {
+        allow read: if true;
+        allow delete: if esGestor(localId);
+        allow create, update: if esGestor(localId)
+          && datos().keys().hasOnly(['titulo', 'descripcion', 'precio', 'fotoUrl', 'orden', 'activa',
+              'items', 'vigencia'])
+          && esTextoCorto(datos().titulo)
+          && esPesos(datos().precio)
+          && datos().orden is int
+          && datos().activa is bool;
+      }
+
+      match /zonasDelivery/{id} {
+        allow read: if true;
+        allow delete: if esGestor(localId);
+        allow create, update: if esGestor(localId)
+          && datos().keys().hasOnly(['nombre', 'costo', 'pedidoMinimo', 'activa', 'orden'])
+          && esTextoCorto(datos().nombre)
+          && esPesos(datos().costo)
+          && (!('pedidoMinimo' in datos()) || esPesos(datos().pedidoMinimo))
+          && datos().activa is bool
+          && datos().orden is int;
+      }
+
+      // ─── Salón ───
+
+      // No es pública: el qrToken es lo que evita pedidos falsos desde casa.
+      match /mesas/{id} {
+        allow read: if esStaff(localId);
+        allow delete: if esGestor(localId);
+        allow create, update: if esGestor(localId)
+          && datos().keys().hasOnly(['nombre', 'sector', 'capacidad', 'orden', 'estado',
+              'pedidoActualId', 'qrToken'])
+          && esTextoCorto(datos().nombre)
+          && datos().capacidad is int
+          && datos().estado in ['libre', 'ocupada', 'cuenta'];
+        // El mozo cambia el estado de la mesa desde el salón.
+        allow update: if rol(localId) == 'mozo'
+          && soloCambia(['estado', 'pedidoActualId'])
+          && datos().estado in ['libre', 'ocupada', 'cuenta'];
+      }
+
+      // ─── Pedidos ───
+
+      // Nadie los crea ni borra desde el cliente: los crea crearPedido (Admin SDK).
+      // El staff solo toca los campos operativos; precios, totales y número son inmutables.
+      match /pedidos/{id} {
+        allow read: if esStaff(localId);
+        allow create, delete: if false;
+        allow update: if datos().estado in ['pendiente', 'aceptado', 'en_preparacion', 'listo',
+              'en_camino', 'entregado', 'rechazado', 'cancelado', 'abierto', 'cuenta_pedida', 'cerrado']
+          && (
+            (esGestor(localId) && soloCambia(camposGestion()))
+            || (rol(localId) == 'mozo'
+                && (resource.data.tipo == 'salon' || resource.data.get('mozoUid', null) == request.auth.uid)
+                && soloCambia(camposGestion()))
+            || (rol(localId) == 'cocina' && soloCambia(['items', 'historial', 'actualizadoEn']))
+          );
+
+        function camposGestion() {
+          return ['estado', 'items', 'pagos', 'estadoPago', 'tiempoEstimadoMin', 'motivoCancelacion',
+                  'historial', 'actualizadoEn', 'comensales'];
+        }
+      }
+
+      // Espejo público mínimo para /[slug]/pedido/[token]: get sí, list nunca.
+      match /seguimiento/{token} {
+        allow get: if true;
+        allow list, write: if false;
+      }
+
+      match /contadores/{dia} {
+        allow read, write: if false;
+      }
+
+      match /clientes/{telefono} {
+        allow read: if esGestor(localId);
+        allow write: if false;
+      }
+
+      // ─── Caja ───
+
+      // Abrir, cerrar y totalizar turnos lo hacen Functions (un solo turno abierto a la vez).
+      match /turnosCaja/{turnoId} {
+        allow read: if esGestor(localId);
+        allow write: if false;
+
+        // Los movimientos no se editan ni se borran: quedan como registro.
+        match /movimientos/{movId} {
+          allow read: if esGestor(localId);
+          allow create: if esGestor(localId)
+            && datos().keys().hasOnly(['tipo', 'categoria', 'monto', 'detalle', 'porUid', 'en'])
+            && datos().tipo in ['ingreso', 'egreso']
+            && datos().categoria in ['proveedor', 'cambio', 'retiro', 'otro']
+            && esPesos(datos().monto) && datos().monto > 0
+            && datos().detalle is string && datos().detalle.size() <= 200
+            && datos().porUid == request.auth.uid
+            && datos().en == request.time;
+          allow update, delete: if false;
+        }
+      }
+
+      // ─── Solo Functions escriben ───
+
+      match /statsDiarias/{dia} {
+        allow read: if esGestor(localId);
+        allow write: if false;
+      }
+
+      match /auditoria/{id} {
+        allow read: if esDueno(localId) || esSA();
+        allow write: if false;
+      }
+    }
+  }
+}

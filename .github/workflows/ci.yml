@@ -1,0 +1,52 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  calidad:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      # La app compila contra los emuladores: CI nunca toca un proyecto real.
+      NEXT_PUBLIC_USE_EMULATORS: 'true'
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-mimenu
+      NEXT_PUBLIC_FIREBASE_API_KEY: demo-api-key
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      # Los emuladores de Firestore y Storage necesitan Java.
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Tests unitarios
+        run: pnpm test
+
+      - name: Tests de reglas (emuladores)
+        run: pnpm test:reglas
+
+      - name: Build
+        run: pnpm build

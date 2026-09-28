@@ -1,0 +1,7 @@
+{
+  "projects": {
+    "default": "demo-mimenu",
+    "dev": "mimenu-dev",
+    "prod": "mimenu-prod"
+  }
+}

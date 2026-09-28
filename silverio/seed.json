@@ -1,0 +1,84 @@
+{
+  "_nota": "Exportado de Firestore del proyecto viejo (silverio-foodtruck) el 2026-09-28. Los datos se cargaron en abril 2025: PRECIOS DESACTUALIZADOS, confirmar con el dueño antes de publicar. Precios en pesos enteros (ARS). Fotos: rutas relativas a silverio/assets/.",
+  "local": {
+    "slug": "silverio",
+    "nombre": "Silverio Food Truck Beer",
+    "nombreCorto": "Silverio",
+    "bajada": "FOOD TRUCK & BEER",
+    "descripcionCorta": "Comida casera y cerveza artesanal en Rodeo del Medio, Maipú.",
+    "moneda": "ARS",
+    "zonaHoraria": "America/Argentina/Mendoza",
+    "contacto": {
+      "whatsapp": "5492616367525",
+      "instagram": "https://www.instagram.com/silveriofoodtruckbeer/",
+      "facebook": "https://www.facebook.com/profile.php?id=61567065565366"
+    },
+    "direccion": {
+      "calle": "Juan Isidro Maza 826",
+      "localidad": "Rodeo del Medio",
+      "departamento": "Maipú",
+      "provincia": "Mendoza",
+      "codigoPostal": "M5519",
+      "pais": "AR",
+      "googleMapsUrl": "https://maps.app.goo.gl/AMiSEvthqArNnmB58",
+      "geo": { "lat": -32.9876, "lng": -68.7672 },
+      "_confirmar": "Es la dirección del food truck. Reemplazar por la del LOCAL FÍSICO nuevo."
+    },
+    "horarios": [
+      { "dias": [1, 2, 3, 4, 5], "desde": "11:00", "hasta": "02:00" },
+      { "dias": [6, 0], "desde": "11:00", "hasta": "03:00" }
+    ],
+    "_horariosConfirmar": "El footer dice L-V 11-02 y S-D 11-03; el schema SEO decía L-V 23-02. Confirmar horarios reales del local. dias: 0=domingo ... 6=sábado.",
+    "marca": {
+      "colorPrimario": "#f59716",
+      "colorPrimarioHover": "#e08512",
+      "colorFondo": "#000000",
+      "colorSuperficie": "#1e1e1e",
+      "colorSuperficieAlt": "#121212",
+      "colorNavbar": "#1D1D1D",
+      "colorTexto": "#FFFFFF",
+      "colorTextoSecundario": "#CCCCCC",
+      "colorTextoTenue": "#AAAAAA",
+      "fuenteTitulos": "Sriracha",
+      "fuenteTexto": "Roboto",
+      "logo": "assets/marca/logo.webp",
+      "logoSvg": "assets/marca/logo.svg",
+      "ogImage": "assets/marca/logo.png",
+      "heroDesktop": "assets/fotos/heropc.webp",
+      "heroMovil": "assets/fotos/heromovil.webp"
+    }
+  },
+  "categorias": [
+    { "id": "viandas", "nombre": "Viandas", "orden": 1, "icono": "set-meal", "_nota": "Existía en el código pero sin productos. En el viejo, las viandas eran productos llamados 'Lunes'...'Viernes'. En el nuevo: producto con disponibilidad por día de semana." },
+    { "id": "hamburguesas", "nombre": "Hamburguesas", "orden": 2, "icono": "burger" },
+    { "id": "lomos", "nombre": "Lomos y Milanesas", "orden": 3, "icono": "sandwich", "_nota": "En el viejo se llamaba 'Lomos' pero contiene milanesas y sándwiches. Confirmar nombre." },
+    { "id": "pizzas", "nombre": "Pizzas", "orden": 4, "icono": "pizza" },
+    { "id": "empanadas", "nombre": "Empanadas", "orden": 5, "icono": "empanada" },
+    { "id": "pollos", "nombre": "Pollos", "orden": 6, "icono": "chicken" },
+    { "id": "choripan", "nombre": "Choripán", "orden": 7, "icono": "sausage" },
+    { "id": "panchos", "nombre": "Panchos", "orden": 8, "icono": "hotdog" },
+    { "id": "papas", "nombre": "Papas", "orden": 9, "icono": "fries" },
+    { "id": "bebidas", "nombre": "Bebidas", "orden": 10, "icono": "drink" }
+  ],
+  "productos": [
+    { "categoriaId": "hamburguesas", "nombre": "Hamburguesa XL de carne", "descripcion": "Hamburguesa XL de carne.", "precio": 9000, "orden": 1 },
+    { "categoriaId": "lomos", "nombre": "Lomo al plato", "descripcion": "Lomo al plato a caballo con papas fritas y ensalada.", "precio": 14000, "orden": 1 },
+    { "categoriaId": "lomos", "nombre": "Milanesa de carne al plato", "descripcion": "Milanesa de carne napolitana o a caballo, con papas fritas y ensalada.", "precio": 12000, "orden": 2, "_variantesSugeridas": ["Napolitana", "A caballo"] },
+    { "categoriaId": "lomos", "nombre": "Milanesa de pollo al plato", "descripcion": "Milanesa de pollo napolitana o a caballo, con papas fritas y ensalada.", "precio": 11000, "orden": 3, "_variantesSugeridas": ["Napolitana", "A caballo"] },
+    { "categoriaId": "lomos", "nombre": "Sándwich de milanesa de carne", "descripcion": "Sándwich de milanesa de carne.", "precio": 9000, "orden": 4 },
+    { "categoriaId": "lomos", "nombre": "Sándwich de milanesa de pollo", "descripcion": "Sándwich de milanesa de pollo.", "precio": 8500, "orden": 5 },
+    { "categoriaId": "choripan", "nombre": "Choripán", "descripcion": "Choripán clásico.", "precio": 7000, "orden": 1 },
+    { "categoriaId": "panchos", "nombre": "Super Pancho", "descripcion": "Simple.", "precio": 2300, "orden": 1 },
+    { "categoriaId": "panchos", "nombre": "Pancho con lluvia de papas", "descripcion": "Pancho con lluvia de papas.", "precio": 2400, "orden": 2 },
+    { "categoriaId": "panchos", "nombre": "Pancho con poncho", "descripcion": "Super pancho con poncho.", "precio": 3000, "orden": 3 },
+    { "categoriaId": "papas", "nombre": "Cono de papas", "descripcion": "Cono de papas fritas.", "precio": 3500, "orden": 1 },
+    { "categoriaId": "papas", "nombre": "Salchipapa", "descripcion": "Salchichas con papas fritas.", "precio": 8000, "orden": 2 }
+  ],
+  "promos": [
+    { "titulo": "Sándwich mila carne + papas", "descripcion": "Sándwich de milanesa de carne con papas fritas.", "precio": 11000, "foto": "assets/promos/sandwich-mila-carne-papas.webp", "orden": 1 },
+    { "titulo": "Sándwich mila pollo + papas", "descripcion": "Sándwich de milanesa de pollo con papas fritas.", "precio": 10000, "foto": "assets/promos/sandwich-mila-pollo-papas.webp", "orden": 2 },
+    { "titulo": "Lomo + papas", "descripcion": "Lomo con papas fritas.", "precio": 14000, "foto": "assets/promos/lomo-papas.webp", "orden": 3 },
+    { "titulo": "Hamburguesa XL carne + papas", "descripcion": "Hamburguesa XL de carne con papas fritas.", "precio": 11000, "foto": "assets/promos/hamburguesa-xl-carne-papas.webp", "orden": 4 },
+    { "titulo": "Choripán + papas", "descripcion": "Choripán con papas fritas.", "precio": 9000, "foto": "assets/promos/choripan-papas.webp", "orden": 5 }
+  ]
+}

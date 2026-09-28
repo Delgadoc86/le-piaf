@@ -1,0 +1,16 @@
+packages:
+  - apps/*
+  - packages/*
+  - functions
+  - tests
+
+# Scripts de instalación de dependencias (pnpm los bloquea por defecto).
+allowBuilds:
+  # Solo imprime un aviso de versión.
+  protobufjs: false
+  # Genera defaults para Firebase App Hosting; usamos Vercel.
+  '@firebase/util': false
+  # Binarios precompilados de @img/sharp-*; Vercel trae el suyo.
+  sharp: false
+  # Fallback de napi-postinstall; usa binarios precompilados.
+  unrs-resolver: false

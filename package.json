@@ -1,0 +1,34 @@
+{
+  "name": "mimenu",
+  "private": true,
+  "type": "module",
+  "packageManager": "pnpm@11.9.0",
+  "engines": {
+    "node": ">=22.12"
+  },
+  "scripts": {
+    "build:shared": "pnpm --filter @mimenu/shared build",
+    "dev": "pnpm build:shared && pnpm --filter @mimenu/functions build && firebase emulators:exec --ui \"pnpm seed && pnpm -r --parallel --filter !@mimenu/tests run dev\"",
+    "emuladores": "firebase emulators:start",
+    "seed": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/seed.ts",
+    "test": "pnpm -r --filter !@mimenu/tests run test",
+    "test:reglas": "firebase emulators:exec --project demo-mimenu-tests --only firestore,storage \"pnpm --filter @mimenu/tests test\"",
+    "lint": "pnpm -r run lint && eslint scripts",
+    "typecheck": "pnpm build:shared && pnpm -r run typecheck && tsc -p scripts",
+    "build": "pnpm -r run build",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.5",
+    "@mimenu/shared": "workspace:*",
+    "@types/node": "^22.20.4",
+    "eslint": "^9.39.5",
+    "firebase-admin": "^14.5.0",
+    "firebase-tools": "^15.31.0",
+    "globals": "^17.12.0",
+    "prettier": "^3.9.9",
+    "typescript": "~6.0.3",
+    "typescript-eslint": "^8.70.1",
+    "vitest": "^5.0.2"
+  }
+}
