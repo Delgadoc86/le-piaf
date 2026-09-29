@@ -17,7 +17,9 @@
     "lint": "pnpm -r run lint && eslint scripts",
     "typecheck": "pnpm build:shared && pnpm -r run typecheck && tsc -p scripts",
     "build": "pnpm build:shared && pnpm --filter @app/functions build && firebase emulators:exec --only auth,firestore,storage \"pnpm seed && pnpm --filter @app/web build\"",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "deploy:functions": "pnpm build:shared && pnpm --filter @app/functions empaquetar && firebase deploy --only functions --config firebase.deploy.json -P prod --force",
+    "deploy:reglas": "firebase deploy --only firestore,storage -P prod"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.5",

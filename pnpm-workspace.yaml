@@ -16,3 +16,5 @@ allowBuilds:
   unrs-resolver: false
   # Opcional de superstatic (emulador de Firebase Hosting, que no usamos); compila código nativo en Linux.
   re2: false
+  # El binario viene en @esbuild/<plataforma> (dependencia opcional); el script solo lo verifica.
+  esbuild: false

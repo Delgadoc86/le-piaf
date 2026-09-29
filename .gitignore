@@ -1,6 +1,7 @@
 node_modules/
 /packages/*/dist/
 /functions/lib/
+/functions/deploy/
 .next/
 out/
 coverage/
@@ -8,6 +9,10 @@ coverage/
 .env
 .env.*
 !.env.example
+# Parámetros de Functions por proyecto (no son secretos); los .local sí se ignoran.
+!/functions/.env.*
+/functions/.env.local
+/functions/.env.*.local
 *.log
 firebase-debug.log*
 firestore-debug.log*
@@ -22,3 +27,6 @@ service-account*.json
 
 # Secretos locales del emulador de Functions
 .secret.local
+
+# Secreto de revalidación para cargar en Firebase (no se sube)
+/revalidate-secret.txt

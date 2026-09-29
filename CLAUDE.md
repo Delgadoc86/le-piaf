@@ -29,4 +29,5 @@ Este repo es también la **base que se copia** para cada local nuevo (un repo, u
 - `pnpm dev`: compila shared + functions, levanta emuladores (UI en http://localhost:4000), corre el seed y arranca Next.js (http://localhost:3000) con watchers.
 - `pnpm seed`: carga el kit del local (`silverio/`) en los emuladores (necesita los emuladores corriendo, p. ej. `pnpm emuladores`). Usuarios: `dueno@local.test`, `encargado@…`, `mozo@…`, `cocina@…`; contraseña `local123`.
 - `pnpm test` (unitarios de shared) · `pnpm test:reglas` (reglas contra emuladores) · `pnpm lint` · `pnpm typecheck` · `pnpm build`.
+- `pnpm deploy:functions` / `pnpm deploy:reglas`: deploy a producción (**solo con OK explícito**). Las Functions se empaquetan con esbuild (`functions/empaquetar.mjs`).
 - TypeScript fijado en 6.0.x hasta que typescript-eslint soporte TS 7.

@@ -8,11 +8,11 @@ import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
 
-function arg(nombre: string): string | undefined {
+export function arg(nombre: string): string | undefined {
   const i = process.argv.indexOf(`--${nombre}`);
   return i >= 0 ? process.argv[i + 1] : undefined;
 }
-const flag = (nombre: string) => process.argv.includes(`--${nombre}`);
+export const flag = (nombre: string) => process.argv.includes(`--${nombre}`);
 
 export const projectId = arg('proyecto') ?? 'demo-local';
 export const usaEmuladores = projectId.startsWith('demo-');

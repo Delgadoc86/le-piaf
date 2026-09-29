@@ -538,7 +538,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 **Infra**
 - [x] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
 - [x] **Generador de QR:** QR con el logo, PNG y PDF listos para imprimir (PDF desde el diálogo de impresión; 1 grande o 4 por hoja).
-- [ ] Empaquetar las Functions para el deploy (Firebase no resuelve dependencias `workspace:*`): proponer `esbuild` u otra alternativa antes de instalar.
+- [x] Empaquetar las Functions para el deploy con `esbuild` (`functions/empaquetar.mjs` → `functions/deploy/`: un `index.js` con `@app/shared` adentro y un `package.json` sin dependencias internas).
 
 **Silverio en producción**
 - [ ] Revisar con el dueño la lista pendiente de [`silverio/SILVERIO.md` §7](silverio/SILVERIO.md#7-pendiente-de-confirmar-con-el-dueño-antes-de-la-fase-1).
@@ -738,7 +738,9 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 **Deploy**
 - Web: push a `main` → Vercel Production. Los PR generan Preview.
-- Functions, reglas e índices: `firebase deploy --only functions,firestore,storage -P prod` (GitHub Action manual con aprobación).
+- Functions: `pnpm deploy:functions` (usa `firebase.deploy.json`, que empaqueta con esbuild en el predeploy). Los emuladores siguen usando `firebase.json` y el código de `functions/` tal cual.
+- Reglas, índices y Storage: `pnpm deploy:reglas`.
+- Más adelante: GitHub Action manual con aprobación.
 
 ---
 
@@ -750,7 +752,12 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
    `git remote add base https://github.com/<usuario>/silverio-club.git`
 2. **Firebase:** crear el proyecto `<local>` con los mismos pasos que Silverio (Blaze + alerta de presupuesto, Firestore y Storage en `southamerica-east1`, Auth email + Google, app web registrada; App Check al llegar a pedidos online). Actualizar el alias `prod` en `.firebaserc`.
 3. **Kit del local:** reemplazar la carpeta `silverio/` por la del nuevo local (`seed.json` con el mismo formato, `assets/`, `<LOCAL>.md` con marca y textos) y apuntar `KIT` en `scripts/entorno.ts`.
-4. **Variables:** `.env.local` y variables de Vercel (`NEXT_PUBLIC_NOMBRE_LOCAL`, config de Firebase, secretos). Secretos de Functions con las credenciales de MP del local.
+4. **Variables** (los archivos con secretos no vienen con la copia: se regeneran):
+   - `pnpm dev` crea `apps/web/.env.local` y `functions/.secret.local` desde sus `.example`.
+   - `functions/.env.<local>` con `WEB_URL` (la dirección de Vercel del local).
+   - `apps/web/.env.vercel-produccion` (no se sube): config de la app web de Firebase, `FIREBASE_SERVICE_ACCOUNT_JSON` (clave de la cuenta de servicio en base64), `REVALIDATE_SECRET` (aleatorio), `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_NOMBRE_LOCAL` y `ENABLE_EXPERIMENTAL_COREPACK=1`. Se pega completo en Vercel → Environment Variables.
+   - El mismo `REVALIDATE_SECRET` en Firebase: `firebase functions:secrets:set REVALIDATE_SECRET`.
+   - Guardar `.env.vercel-produccion` y `service-account.json` en un gestor de contraseñas (nunca en carpetas sincronizadas ni en el chat).
 5. **Diseño:** ajustar `components/publico/` y estilos a la marca del local (lo propio del local; ver §11).
 6. **Datos:** `pnpm seed --kit <carpeta> --proyecto <local> --si-estoy-seguro` y crear el usuario real del dueño (desde el seed o invitándolo).
 7. **Deploy:** Vercel (Root Directory `apps/web`) + `firebase deploy -P prod`. Apuntar el dominio.

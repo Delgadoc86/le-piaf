@@ -3,7 +3,11 @@
  * Es idempotente: se puede correr las veces que quieras (pisa los documentos).
  *
  *   pnpm seed                                          → emuladores (default)
- *   pnpm seed --proyecto silverio-club --si-estoy-seguro
+ *   pnpm seed --proyecto silverio-club --si-estoy-seguro --dueno <email>   → producción
+ *
+ * En producción: crea SOLO al dueño (sin usuarios de prueba) y le genera un link para elegir
+ * su contraseña. Si el local ya tiene datos, no pisa nada salvo con --pisar (así nunca se
+ * borra lo que el dueño cargó desde el panel).
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -20,7 +24,7 @@ import {
   type Rol,
 } from '@app/shared';
 import { FieldValue } from 'firebase-admin/firestore';
-import { auth, db, destino, KIT } from './entorno.ts';
+import { arg, auth, db, destino, flag, KIT, usaEmuladores } from './entorno.ts';
 import { subirAssets } from './subir-assets.ts';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
@@ -85,16 +89,21 @@ function validar<T>(esquema: { parse(d: unknown): T }, datos: unknown, que: stri
   }
 }
 
+/** Links para elegir contraseña (producción): se muestran al final para mandarlos por WhatsApp. */
+const linksContrasena: string[] = [];
+
 async function usuario(email: string, nombre: string, claims: ClaimsLocal): Promise<string> {
   const existente = await auth.getUserByEmail(email).catch(() => null);
   const u =
     existente ??
-    (await auth.createUser({
-      email,
-      password: CONTRASENA,
-      displayName: nombre,
-      emailVerified: true,
-    }));
+    (await auth.createUser(
+      usaEmuladores
+        ? { email, password: CONTRASENA, displayName: nombre, emailVerified: true }
+        : { email, displayName: nombre },
+    ));
+  if (!usaEmuladores && !existente) {
+    linksContrasena.push(`${email}: ${await auth.generatePasswordResetLink(email)}`);
+  }
   // Se setean acá para no depender de que el emulador de Functions esté corriendo;
   // en la app real los mantiene sincronizarClaims.
   await auth.setCustomUserClaims(u.uid, claims);
@@ -279,12 +288,17 @@ async function seedLocal(): Promise<void> {
   };
 
   // Equipo de prueba. Con datos reales, el dueño invita al resto desde Panel → Equipo.
-  await guardarLocal(local, [
-    { email: 'dueno@local.test', nombre: 'Dueño (prueba)', rol: 'dueno' },
-    { email: 'encargado@local.test', nombre: 'Encargado (prueba)', rol: 'encargado' },
-    { email: 'mozo@local.test', nombre: 'Mozo (prueba)', rol: 'mozo' },
-    { email: 'cocina@local.test', nombre: 'Cocina (prueba)', rol: 'cocina' },
-  ]);
+  await guardarLocal(
+    local,
+    usaEmuladores
+      ? [
+          { email: 'dueno@local.test', nombre: 'Dueño (prueba)', rol: 'dueno' },
+          { email: 'encargado@local.test', nombre: 'Encargado (prueba)', rol: 'encargado' },
+          { email: 'mozo@local.test', nombre: 'Mozo (prueba)', rol: 'mozo' },
+          { email: 'cocina@local.test', nombre: 'Cocina (prueba)', rol: 'cocina' },
+        ]
+      : [{ email: DUENO!, nombre: 'Dueño', rol: 'dueno' }],
+  );
 
   const productos = seed.productos.map((p) => {
     const variantes = p._variantesSugeridas?.map((nombre) => ({
@@ -332,9 +346,31 @@ async function seedLocal(): Promise<void> {
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
+const DUENO = arg('dueno')?.trim().toLowerCase();
+if (!usaEmuladores) {
+  if (!DUENO || !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(DUENO)) {
+    console.error('✋ En producción hay que indicar el email del dueño: --dueno <email>');
+    process.exit(1);
+  }
+  if ((await db.doc(DOC_LOCAL).get()).exists && !flag('pisar')) {
+    console.error(
+      '✋ El local ya tiene datos en producción. Para reemplazarlos TODOS, repetí con --pisar.',
+    );
+    process.exit(1);
+  }
+}
+
 console.log(`🌱 Seed en ${destino()}`);
 await seedLocal();
-console.log(`
+if (usaEmuladores) {
+  console.log(`
 ✅ Listo. Usuarios (contraseña "${CONTRASENA}"):
    dueno@local.test · encargado@local.test · mozo@local.test · cocina@local.test`);
+} else {
+  console.log(`
+✅ Listo. Dueño: ${DUENO}`);
+  for (const l of linksContrasena) console.log(`   Link para elegir contraseña → ${l}`);
+  if (linksContrasena.length === 0)
+    console.log('   (el usuario ya existía: entra con su contraseña de siempre)');
+}
 process.exit(0);
