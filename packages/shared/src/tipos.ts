@@ -9,10 +9,8 @@ import type {
   EstadoPago,
   EstadoPagoPedido,
   EstadoPedido,
-  EstadoSuscripcion,
   MedioPago,
   OrigenPedido,
-  PlanId,
   Rol,
   TipoPedido,
 } from './constantes.js';
@@ -37,68 +35,30 @@ export interface Timestamp {
 /** Documento con su id (lo que devuelven los hooks y servicios). */
 export type ConId<T> = T & { id: string };
 
-// ─── Raíz ────────────────────────────────────────────────────────────────────
+// ─── Sesión ──────────────────────────────────────────────────────────────────
 
+/** Perfil técnico del usuario. Solo lo escriben las Functions. */
 export interface Usuario {
   email: string;
   nombre: string;
-  telefono?: string;
-  creadoEn: Timestamp;
-  /** Solo lo escriben las Functions. */
-  superAdmin?: boolean;
   /** Se incrementa cuando cambian los claims; el cliente refresca el token. */
   claimsVersion?: number;
 }
 
-export interface SlugDoc {
-  localId: string;
-}
-
-export interface Limites {
-  productos: number;
-  usuarios: number;
-  mesas: number;
-}
-
-export type Feature =
-  | 'pedidos_online'
-  | 'mercadopago'
-  | 'salon'
-  | 'cocina'
-  | 'caja'
-  | 'reportes'
-  | 'dominio_propio';
-
-export interface PlataformaConfig {
-  planes: Record<PlanId, { nombre: string; precioMensual: number; limites: Limites; features: Feature[] }>;
-  diasPrueba: number;
-}
-
-/** Custom claims del token (§6). */
-export interface ClaimsMiMenu {
-  sa?: boolean;
-  l?: Record<string, Rol>;
+/** Custom claims del token (§6): el rol del usuario en el local. */
+export interface ClaimsLocal {
+  rol?: Rol;
 }
 
 // ─── Local ───────────────────────────────────────────────────────────────────
 
-export interface Suscripcion {
-  plan: PlanId;
-  estado: EstadoSuscripcion;
-  pruebaHasta?: Timestamp;
-  proximoCobro?: Timestamp;
-  mpPreapprovalId?: string;
-}
-
+/** Documento local/datos. */
 export type Local = Omit<LocalEditable, 'pedidos'> & {
-  slug: string;
   pedidos: ConfigPedidos & { pausadoHasta?: Timestamp };
-  suscripcion: Suscripcion;
-  duenoUid: string;
-  creadoEn: Timestamp;
   actualizadoEn: Timestamp;
 };
 
+/** miembros/{uid} */
 export interface Miembro {
   rol: Rol;
   nombre: string;

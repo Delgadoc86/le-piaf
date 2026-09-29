@@ -1,16 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { crearPedidoInputSchema, grupoExtrasSchema, productoSchema, slugSchema } from './esquemas.js';
-
-describe('slugSchema', () => {
-  it('acepta slugs válidos y rechaza reservados o mal formados', () => {
-    expect(slugSchema.safeParse('silverio').success).toBe(true);
-    expect(slugSchema.safeParse('la-birra-2').success).toBe(true);
-    expect(slugSchema.safeParse('panel').success).toBe(false);
-    expect(slugSchema.safeParse('Silverio').success).toBe(false);
-    expect(slugSchema.safeParse('-abc').success).toBe(false);
-    expect(slugSchema.safeParse('ab').success).toBe(false);
-  });
-});
+import { crearPedidoInputSchema, grupoExtrasSchema, productoSchema } from './esquemas.js';
 
 describe('productoSchema', () => {
   const p = {
@@ -38,7 +27,6 @@ describe('productoSchema', () => {
 
 describe('crearPedidoInputSchema', () => {
   const pedido = {
-    localId: 'silverio',
     tipo: 'take_away',
     cliente: { nombre: 'Juan', telefono: '5492611234567' },
     items: [{ tipo: 'producto', productoId: 'hamburguesa', cantidad: 1 }],

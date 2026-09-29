@@ -12,7 +12,7 @@
       "codebase": "default",
       "runtime": "nodejs22",
       "ignore": ["node_modules", ".git", "firebase-debug.log", "firebase-debug.*.log", "*.local", "src"],
-      "predeploy": ["pnpm --filter @mimenu/shared build", "pnpm --filter @mimenu/functions build"]
+      "predeploy": ["pnpm --filter @app/shared build", "pnpm --filter @app/functions build"]
     }
   ],
   "emulators": {

@@ -1,5 +1,5 @@
 /**
- * Sube silverio/assets/** a Storage (locales/silverio/...) y devuelve un mapa
+ * Sube <kit>/assets/** a Storage (imagenes/...) y devuelve un mapa
  * "ruta relativa del kit" → URL pública. Se puede correr solo o desde seed.ts.
  *
  *   node --experimental-strip-types scripts/subir-assets.ts [--proyecto <id> --si-estoy-seguro]
@@ -7,7 +7,8 @@
 import { readdirSync, readFileSync, statSync } from 'node:fs';
 import { extname, join, relative, sep } from 'node:path';
 import { fileURLToPath, pathToFileURL } from 'node:url';
-import { bucket, destino, urlPublica } from './entorno.ts';
+import { CARPETA_IMAGENES } from '@app/shared';
+import { bucket, destino, KIT, urlPublica } from './entorno.ts';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
 
@@ -27,14 +28,14 @@ function listar(dir: string): string[] {
 }
 
 /** @returns mapa "assets/marca/logo.webp" → URL pública */
-export async function subirAssets(localId: string, carpetaKit = 'silverio'): Promise<Map<string, string>> {
+export async function subirAssets(carpetaKit = KIT): Promise<Map<string, string>> {
   const base = join(raiz, carpetaKit);
   const urls = new Map<string, string>();
   for (const archivo of listar(join(base, 'assets'))) {
     const rel = relative(base, archivo).split(sep).join('/'); // assets/marca/logo.webp
     const contentType = TIPOS[extname(archivo).toLowerCase()];
     if (!contentType) continue;
-    const ruta = `locales/${localId}/${rel.replace(/^assets\//, '')}`;
+    const ruta = `${CARPETA_IMAGENES}/${rel.replace(/^assets\//, '')}`;
     await bucket.file(ruta).save(readFileSync(archivo), {
       contentType,
       metadata: { cacheControl: 'public, max-age=31536000' },
@@ -46,6 +47,6 @@ export async function subirAssets(localId: string, carpetaKit = 'silverio'): Pro
 
 // Uso directo desde la terminal.
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  const urls = await subirAssets('silverio');
+  const urls = await subirAssets();
   console.log(`✅ ${urls.size} archivos subidos a ${destino()}`);
 }

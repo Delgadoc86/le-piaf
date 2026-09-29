@@ -9,12 +9,9 @@ import {
   ESTADOS_MESA,
   FUENTES,
   MEDIOS_PAGO,
-  REGEX_SLUG,
   ROLES,
   SECCIONES_WEB,
-  SLUGS_RESERVADOS,
   TIPOS_PEDIDO,
-  VARIANTES_ESTILO,
   CANTIDAD_MAXIMA_ITEM,
   ITEMS_MAXIMOS_PEDIDO,
 } from './constantes.js';
@@ -38,11 +35,6 @@ export const idSchema = z
   .min(1)
   .max(64)
   .regex(/^[A-Za-z0-9_-]+$/, 'Id inválido');
-
-export const slugSchema = z
-  .string()
-  .regex(REGEX_SLUG, 'Solo minúsculas, números y guiones (3 a 40)')
-  .refine((s) => !(SLUGS_RESERVADOS as readonly string[]).includes(s), 'Ese nombre está reservado');
 
 /** Teléfono normalizado: solo dígitos, con código de país (ej. 5492616367525). */
 export const telefonoSchema = z.string().regex(/^\d{8,15}$/, 'Solo números, con código de área');
@@ -101,22 +93,10 @@ export const marcaSchema = z.object({
   heroMovilUrl: z.string(),
 });
 
-export const estiloWebSchema = z.object({
-  hero: z.enum(VARIANTES_ESTILO.hero),
-  promos: z.enum(VARIANTES_ESTILO.promos),
-  carta: z.enum(VARIANTES_ESTILO.carta),
-  nosotros: z.enum(VARIANTES_ESTILO.nosotros),
-  bordes: z.enum(VARIANTES_ESTILO.bordes),
-  titulosSeccion: z.enum(VARIANTES_ESTILO.titulosSeccion),
-  separadores: z.enum(VARIANTES_ESTILO.separadores),
-  botones: z.enum(VARIANTES_ESTILO.botones),
-});
-
 export const webSchema = z.object({
   secciones: z.array(
     z.object({ tipo: z.enum(SECCIONES_WEB), visible: z.boolean(), orden: z.number().int() }),
   ),
-  estilo: estiloWebSchema,
   hero: z.object({ bajada: z.string().max(80), titulo: z.string().max(80), textoBoton: z.string().max(40) }),
   nosotros: z.object({
     titulo: z.string().max(80),
@@ -158,10 +138,10 @@ export const configPagosSchema = z.object({
     cbu: z.string().regex(/^\d{22}$/).optional(),
     titular: z.string().max(80),
   }),
-  mercadoPago: z.object({ habilitado: z.boolean(), conectado: z.boolean() }),
+  mercadoPago: z.object({ habilitado: z.boolean() }),
 });
 
-/** Campos del local que edita el dueño desde el panel (sin suscripción, slug ni dueño). */
+/** Datos del local (documento local/datos). Los edita el dueño desde el panel. */
 export const localEditableSchema = z.object({
   nombre: textoCorto,
   nombreCorto: z.string().trim().min(1).max(30),
@@ -268,14 +248,7 @@ export const mesaSchema = z.object({
 
 // ─── Inputs de Functions ─────────────────────────────────────────────────────
 
-export const crearLocalInputSchema = z.object({
-  slug: slugSchema,
-  nombre: textoCorto,
-  zonaHoraria: z.string().min(1).optional(),
-});
-
 export const invitarMiembroInputSchema = z.object({
-  localId: idSchema,
   email: z.email(),
   nombre: textoCorto,
   rol: z.enum(ROLES),
@@ -301,7 +274,6 @@ export const seleccionItemSchema = z.discriminatedUnion('tipo', [
 
 export const crearPedidoInputSchema = z
   .object({
-    localId: idSchema,
     tipo: z.enum(TIPOS_PEDIDO),
     cliente: z.object({ nombre: z.string().trim().min(2).max(60), telefono: telefonoSchema }),
     entrega: z
@@ -331,7 +303,6 @@ export type Contacto = z.infer<typeof contactoSchema>;
 export type Direccion = z.infer<typeof direccionSchema>;
 export type Marca = z.infer<typeof marcaSchema>;
 export type ContenidoWeb = z.infer<typeof webSchema>;
-export type EstiloWebDatos = z.infer<typeof estiloWebSchema>;
 export type ConfigPedidos = z.infer<typeof configPedidosSchema>;
 export type ConfigPagos = z.infer<typeof configPagosSchema>;
 export type LocalEditable = z.infer<typeof localEditableSchema>;
@@ -343,7 +314,6 @@ export type ProductoDatos = z.infer<typeof productoSchema>;
 export type PromoDatos = z.infer<typeof promoSchema>;
 export type ZonaDeliveryDatos = z.infer<typeof zonaDeliverySchema>;
 export type MesaDatos = z.infer<typeof mesaSchema>;
-export type CrearLocalInput = z.infer<typeof crearLocalInputSchema>;
 export type InvitarMiembroInput = z.infer<typeof invitarMiembroInputSchema>;
 export type SeleccionItem = z.infer<typeof seleccionItemSchema>;
 export type CrearPedidoInput = z.infer<typeof crearPedidoInputSchema>;

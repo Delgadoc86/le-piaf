@@ -1,22 +1,20 @@
-/** Entorno compartido de los tests de reglas: usuarios con sus claims y datos base. */
+/** Entorno compartido de los tests de reglas: usuarios con sus claims. */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { initializeTestEnvironment, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
 
 const raiz = fileURLToPath(new URL('../../', import.meta.url));
 
-export const LOCAL_A = 'local-a';
-export const LOCAL_B = 'local-b';
-
 /** Usuarios de prueba: uid → custom claims (mismo formato que sincronizarClaims). */
 export const USUARIOS = {
-  duenoA: { l: { [LOCAL_A]: 'dueno' } },
-  encargadoA: { l: { [LOCAL_A]: 'encargado' } },
-  mozoA: { l: { [LOCAL_A]: 'mozo' } },
-  cocinaA: { l: { [LOCAL_A]: 'cocina' } },
-  duenoB: { l: { [LOCAL_B]: 'dueno' } },
-  superAdmin: { sa: true },
-  sinLocal: {},
+  dueno: { rol: 'dueno' },
+  encargado: { rol: 'encargado' },
+  mozo: { rol: 'mozo' },
+  cocina: { rol: 'cocina' },
+  /** Entró con Google (o tiene cuenta) pero no es parte del equipo. */
+  sinRol: {},
+  /** Tiene un rol que no existe (claims corruptos o viejos). */
+  rolInvalido: { rol: 'superadmin' },
 } as const;
 
 export type NombreUsuario = keyof typeof USUARIOS;
@@ -24,7 +22,7 @@ export type NombreUsuario = keyof typeof USUARIOS;
 export async function crearEntorno(): Promise<RulesTestEnvironment> {
   return initializeTestEnvironment({
     // emulators:exec define GCLOUD_PROJECT; el prefijo demo- garantiza que nunca toque un proyecto real.
-    projectId: process.env.GCLOUD_PROJECT ?? 'demo-mimenu-tests',
+    projectId: process.env.GCLOUD_PROJECT ?? 'demo-local-tests',
     firestore: { rules: readFileSync(`${raiz}firestore.rules`, 'utf8') },
     storage: { rules: readFileSync(`${raiz}storage.rules`, 'utf8') },
   });

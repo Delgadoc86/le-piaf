@@ -1,7 +1,6 @@
 {
   "projects": {
-    "default": "demo-mimenu",
-    "dev": "mimenu-dev",
-    "prod": "mimenu-prod"
+    "default": "demo-local",
+    "prod": "silverio-club"
   }
 }

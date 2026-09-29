@@ -1,6 +1,6 @@
 # Silverio: cliente piloto (kit de personalización)
 
-Todo lo que hace falta para que la web de Silverio en la plataforma nueva se vea y se lea como la actual, pero mejor.
+Todo lo que hace falta para que la web de Silverio (repo `silverio-club`) se vea y se lea como la actual, pero mejor. Es el **kit del local**: en una copia del repo para otro local, esta carpeta se reemplaza (ROADMAP §16).
 Extraído del proyecto viejo (React + Vite + Firebase, repo `Silverio-FoodTruck`) el 2026-09-28.
 
 - Datos estructurados (local, marca, categorías, productos, promos): [`seed.json`](seed.json)
@@ -102,7 +102,7 @@ Extraído del proyecto viejo (React + Vite + Firebase, repo `Silverio-FoodTruck`
 - Menú superior: Inicio · Menú · Promos · Ubicación
 - Footer: ENLACES (Inicio, Menú, Promociones) · SÍGUENOS · botón **Cómo llegar**
 - Copyright: *© {año} Silverio Food Truck. Todos los derechos reservados.*
-- Crédito: *Desarrollado por **DelgadoDev*** → https://delgadodev-rho.vercel.app. En la plataforma nueva pasa a ser un "Hecho con MiMenu", que funciona como marketing.
+- Crédito: *Desarrollado por **DelgadoDev*** → https://delgadodev-rho.vercel.app. Se mantiene en la web nueva: funciona como marketing para vender la web a otros locales.
 
 ### Mensajes de WhatsApp
 - Botón flotante: `Hola, quiero hacer un pedido.`

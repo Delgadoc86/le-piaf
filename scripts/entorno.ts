@@ -1,7 +1,7 @@
 /**
- * Conexión de los scripts a Firebase. Por defecto, SIEMPRE los emuladores (proyecto demo-mimenu).
- * Para un proyecto real hay que pasar --proyecto <id> y --si-estoy-seguro, con credenciales en
- * GOOGLE_APPLICATION_CREDENTIALS. mimenu-prod además exige --confirmo-prod.
+ * Conexión de los scripts a Firebase. Por defecto, SIEMPRE los emuladores (proyecto demo-local).
+ * Para el proyecto real (producción) hay que pasar --proyecto <id> y --si-estoy-seguro, con
+ * credenciales en GOOGLE_APPLICATION_CREDENTIALS.
  */
 import { getApps, initializeApp } from 'firebase-admin/app';
 import { getAuth } from 'firebase-admin/auth';
@@ -14,16 +14,12 @@ function arg(nombre: string): string | undefined {
 }
 const flag = (nombre: string) => process.argv.includes(`--${nombre}`);
 
-export const projectId = arg('proyecto') ?? 'demo-mimenu';
+export const projectId = arg('proyecto') ?? 'demo-local';
 export const usaEmuladores = projectId.startsWith('demo-');
 
 if (!usaEmuladores) {
   if (!flag('si-estoy-seguro')) {
-    console.error(`✋ Vas a escribir en el proyecto REAL "${projectId}". Repetí con --si-estoy-seguro.`);
-    process.exit(1);
-  }
-  if (projectId.endsWith('-prod') && !flag('confirmo-prod')) {
-    console.error('✋ Es producción. Repetí con --confirmo-prod además de --si-estoy-seguro.');
+    console.error(`✋ "${projectId}" es un proyecto REAL (producción). Si es lo que querés, repetí con --si-estoy-seguro.`);
     process.exit(1);
   }
 } else {
@@ -51,3 +47,6 @@ export function urlPublica(ruta: string): string {
 export function destino(): string {
   return usaEmuladores ? `emuladores (${projectId})` : `proyecto REAL ${projectId}`;
 }
+
+/** Carpeta con el kit del local (seed.json, assets/, textos). En una copia del repo, se cambia acá. */
+export const KIT = arg('kit') ?? 'silverio';

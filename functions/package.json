@@ -1,5 +1,5 @@
 {
-  "name": "@mimenu/functions",
+  "name": "@app/functions",
   "version": "0.0.0",
   "private": true,
   "type": "module",
@@ -14,7 +14,7 @@
     "lint": "eslint src"
   },
   "dependencies": {
-    "@mimenu/shared": "workspace:*",
+    "@app/shared": "workspace:*",
     "firebase-admin": "^14.5.0",
     "firebase-functions": "^7.4.0",
     "zod": "^4.6.5"

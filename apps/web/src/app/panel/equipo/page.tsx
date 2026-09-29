@@ -4,13 +4,14 @@ import { useEffect, useState, type FormEvent } from 'react';
 import { collection, onSnapshot, orderBy, query } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
 import { FirebaseError } from 'firebase/app';
-import { invitarMiembroInputSchema, type InvitarMiembroInput, type Miembro, type Rol } from '@mimenu/shared';
+import { invitarMiembroInputSchema, type InvitarMiembroInput, type Miembro, type Rol } from '@app/shared';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useLocalActivo } from '@/features/panel/use-local-activo';
+import { useSesion } from '@/features/auth/sesion';
+import { NOMBRE_LOCAL } from '@/lib/local';
 import { NOMBRE_ROL } from '@/features/panel/menu';
 import { firebase } from '@/lib/firebase/client';
 
@@ -18,32 +19,29 @@ type MiembroConId = Miembro & { id: string };
 const ROLES_INVITABLES: Exclude<Rol, 'dueno'>[] = ['encargado', 'mozo', 'cocina'];
 
 export default function EquipoPage() {
-  const local = useLocalActivo();
+  const sesion = useSesion();
   const [miembros, setMiembros] = useState<MiembroConId[]>([]);
   const [form, setForm] = useState({ nombre: '', email: '', rol: 'mozo' as Rol });
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resultado, setResultado] = useState<{ nombre: string; link: string | null } | null>(null);
 
-  const localId = local?.id;
+  const esDueno = sesion.estado === 'lista' && sesion.rol === 'dueno';
   useEffect(() => {
-    if (!localId) return;
-    const { db } = firebase();
-    const q = query(collection(db, 'locales', localId, 'miembros'), orderBy('nombre'));
+    if (!esDueno) return;
+    const q = query(collection(firebase().db, 'miembros'), orderBy('nombre'));
     return onSnapshot(q, (snap) => setMiembros(snap.docs.map((d) => ({ ...(d.data() as Miembro), id: d.id }))));
-  }, [localId]);
+  }, [esDueno]);
 
-  if (!local) return null;
-  if (local.rol !== 'dueno' && local.rol !== null) {
+  if (!esDueno) {
     return <p className="text-muted-foreground">Solo el dueño administra el equipo.</p>;
   }
 
   async function invitar(e: FormEvent) {
     e.preventDefault();
-    if (!localId) return;
     setError(null);
     setResultado(null);
-    const datos = invitarMiembroInputSchema.safeParse({ ...form, localId });
+    const datos = invitarMiembroInputSchema.safeParse(form);
     if (!datos.success) {
       setError('Revisá el nombre y el email.');
       return;
@@ -68,7 +66,7 @@ export default function EquipoPage() {
     <div className="max-w-2xl space-y-6">
       <header>
         <h1 className="text-2xl font-semibold">Equipo</h1>
-        <p className="text-muted-foreground">Quiénes usan el panel de {local.nombre}.</p>
+        <p className="text-muted-foreground">Quiénes usan el panel de {NOMBRE_LOCAL}.</p>
       </header>
 
       <Card>

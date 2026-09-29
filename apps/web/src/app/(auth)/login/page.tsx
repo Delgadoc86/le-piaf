@@ -15,6 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSesion } from '@/features/auth/sesion';
 import { firebase, usaEmuladores } from '@/lib/firebase/client';
+import { NOMBRE_LOCAL } from '@/lib/local';
 
 function mensajeDeError(e: unknown): string {
   const codigo = e instanceof FirebaseError ? e.code : '';
@@ -85,8 +86,8 @@ export default function LoginPage() {
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
-        <CardTitle className="text-2xl">MiMenu</CardTitle>
-        <CardDescription>Entrá al panel de tu local.</CardDescription>
+        <CardTitle className="text-2xl">{NOMBRE_LOCAL}</CardTitle>
+        <CardDescription>Entrá al panel del local.</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <form onSubmit={entrar} className="space-y-4">
@@ -140,7 +141,7 @@ export default function LoginPage() {
         </button>
         {usaEmuladores && (
           <p className="text-center text-xs text-muted-foreground">
-            Emuladores: dueno@silverio.test, mozo@silverio.test, dueno@demo.test… · contraseña mimenu123
+            Emuladores: dueno@local.test, encargado@…, mozo@…, cocina@… · contraseña local123
           </p>
         )}
       </CardFooter>

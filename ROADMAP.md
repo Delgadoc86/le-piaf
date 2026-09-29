@@ -1,10 +1,10 @@
-# MiMenu: roadmap y especificación técnica
+# Silverio Club: roadmap y especificación técnica
 
-> Plataforma de gestión gastronómica tipo "semi-FUDO" para locales chicos y medianos.
-> **Cliente piloto:** Silverio Food Truck Beer (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)).
-> **Objetivo:** que funcione de verdad en Silverio y después venderla como **suscripción mensual** a otros locales.
+> Web + sistema de gestión gastronómica tipo "semi-FUDO" para **un** local.
+> **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
+> **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.2, del 2026-09-28.
+Versión del documento: 1.4, del 2026-09-28.
 
 ---
 
@@ -25,6 +25,7 @@ Versión del documento: 1.2, del 2026-09-28.
 13. [Planes comerciales](#13-planes-comerciales)
 14. [Riesgos](#14-riesgos)
 15. [Entornos, variables y deploy](#15-entornos-variables-y-deploy)
+16. [Cómo crear la web de un local nuevo](#16-cómo-crear-la-web-de-un-local-nuevo)
 
 ---
 
@@ -32,7 +33,7 @@ Versión del documento: 1.2, del 2026-09-28.
 
 **Problema:** el local chico o mediano está entre dos opciones. Por un lado, "carta QR + WhatsApp", que es desordenada y no da números. Por otro, un POS completo como Fudo o Maxirest, que es caro, complejo y del que usa el 20%.
 
-**Propuesta:** una sola plataforma con web propia del local, carta, pedidos online **sin comisión**, salón y cocina, caja y reportes. Se configura en una tarde.
+**Propuesta:** una web propia del local, hecha a su medida, con carta, pedidos online **sin comisión**, salón y cocina, caja y reportes. Cada local tiene **su propia copia** del sistema: su diseño, su dominio, su base de datos y su factura de Firebase.
 
 ### Dentro del alcance
 - Web pública del local con su marca y carta digital con QR.
@@ -40,14 +41,15 @@ Versión del documento: 1.2, del 2026-09-28.
 - Panel de pedidos en tiempo real y pantalla de cocina.
 - Mesas y app de mozo (PWA).
 - Caja por turnos y reportes de ventas.
-- Cobro con efectivo, transferencia y Mercado Pago.
-- Multi-local (SaaS) con planes y suscripción.
+- Cobro con efectivo, transferencia y Mercado Pago (cuenta del local).
+- **Plantilla replicable:** la web de un local nuevo se arma copiando este repo, en menos de un día.
 
 ### Fuera del alcance (explícito)
 - ❌ Facturación electrónica ARCA/AFIP.
 - ❌ Stock por insumos o recetas (a lo sumo, stock simple por producto, más adelante).
 - ❌ Integración con PedidosYa o Rappi.
 - ❌ Apps nativas en tiendas: todo es web/PWA.
+- ❌ Plataforma multi-local (muchos locales en un mismo deploy), alta autoservicio y cobro de suscripciones dentro de la app.
 
 ---
 
@@ -55,22 +57,23 @@ Versión del documento: 1.2, del 2026-09-28.
 
 | Capa | Elección | Motivo |
 |---|---|---|
-| Framework | **Next.js** (última estable, App Router) | SSR/cache para SEO de la carta de cada local, API routes, `next/image`, `next/og` |
+| Modelo | **Un repo, un Firebase y un Vercel por local** | Aislamiento total entre clientes, diseño 100 % a medida, cada local paga su consumo |
+| Framework | **Next.js** (última estable, App Router) | SSR/cache para SEO de la carta, API routes, `next/image`, `next/og` |
 | Lenguaje | **TypeScript** estricto | Tipos compartidos entre app y Cloud Functions |
-| UI | **Tailwind CSS** + **shadcn/ui** (Radix) + **lucide-react** | La marca de cada local se aplica con variables CSS; bundle liviano para la carta en celulares |
+| UI | **Tailwind CSS** + **shadcn/ui** (Radix) + **lucide-react** | La marca se aplica con variables CSS; bundle liviano para la carta en celulares |
 | Formularios | react-hook-form + **zod** | Los mismos esquemas zod validan en el front y en las Functions |
 | Estado cliente | **zustand** (carrito, UI) | Chico y simple; los datos de Firestore se leen con hooks propios |
 | Backend | **Firebase**: Auth, Firestore, Storage, Cloud Functions (2ª gen), App Check | Tiempo real nativo, cache offline para el panel, ya conocido |
-| Pagos | **Mercado Pago**: Checkout Pro (pedidos) y Suscripciones/preapproval (planes) | Estándar en Argentina |
+| Pagos | **Mercado Pago** Checkout Pro con las credenciales **del local** | Estándar en Argentina; al ser un proyecto por local, no hace falta OAuth |
 | Hosting | **Vercel** (web) + Firebase (Functions) | Deploy directo de Next.js |
 | Paquetes | **pnpm** workspaces | App, Functions y paquete compartido en un solo repo |
 | Tests | **Vitest**, **@firebase/rules-unit-testing** (emuladores), **Playwright** (e2e desde Fase 2) | Las reglas de seguridad se testean sí o sí |
 | Calidad | ESLint + Prettier + GitHub Actions (lint, typecheck, tests de reglas) | |
-| Fechas | date-fns + date-fns-tz | Zona horaria por local (Argentina) |
+| Fechas | `Intl` (en `packages/shared/horarios.ts`); date-fns si hace falta más | Zona horaria del local (Argentina) |
 | Gráficos | Recharts | Reportes (Fase 4) |
 | Otros | `qrcode` (QRs), `browser-image-compression` (fotos → webp), `@dnd-kit` (ordenar), `xlsx`/SheetJS (exportar), `@serwist/next` (PWA) | |
 
-> **Por qué no MUI (como en el proyecto viejo):** cada local necesita su propia paleta y tipografía en tiempo de ejecución. Con Tailwind y variables CSS eso es trivial, y la carta pública carga mucho más rápido en celular.
+> **Por qué no MUI (como en el proyecto viejo):** con Tailwind y variables CSS la marca y el diseño de cada copia se cambian fácil, y la carta pública carga mucho más rápido en celular.
 
 ---
 
@@ -78,33 +81,31 @@ Versión del documento: 1.2, del 2026-09-28.
 
 ```
                         ┌──────────────────────────────────────────┐
-  Cliente final  ──────▶│  Next.js en Vercel                       │
-  (celular)             │  /[slug]  web + carta (Server Components │
-                        │           + cache con revalidación)      │
-                        │  /[slug]/checkout (client island)        │
-  Staff          ──────▶│  /panel/[localId]/…  (client, realtime)  │
-  (PWA mozo/cocina)     │  /admin  (superadmin plataforma)         │
-                        └───────┬───────────────┬──────────────────┘
+  Cliente final  ──────▶│  Next.js en Vercel (un deploy por local) │
+  (celular)             │  /          web + carta (Server Comp.    │
+                        │             + cache con revalidación)    │
+                        │  /checkout  (client island)              │
+  Staff          ──────▶│  /panel/…   (client, realtime)           │
+  (PWA mozo/cocina)     └───────┬───────────────┬──────────────────┘
                      Admin SDK  │               │  Firebase JS SDK
                     (lecturas   │               │  (Auth, onSnapshot,
                      públicas)  ▼               ▼   Storage)
                         ┌──────────────────────────────────────────┐
-                        │  Firebase                                │
+                        │  Firebase (un proyecto por local)        │
                         │  Auth · Firestore · Storage · App Check  │
                         │  Cloud Functions:                        │
                         │   - crearPedido (callable, recalcula $)  │
                         │   - triggers: stats, claims, revalidate  │
-                        │   - webhooks Mercado Pago                │
+                        │   - webhook Mercado Pago                 │
                         └───────┬──────────────────────────────────┘
                                 ▼
-                        Mercado Pago (pagos de pedidos: cuenta DEL LOCAL;
-                                      suscripciones: cuenta DE LA PLATAFORMA)
+                        Mercado Pago (cuenta DEL LOCAL)
 ```
 
 ### Principios
 1. **El cliente final nunca escribe precios.** Los pedidos se crean solo desde la Function `crearPedido`, que recalcula todo desde la base.
 2. **La web pública no lee Firestore en cada visita.** Next.js lee con el Admin SDK, cachea por etiqueta y una Function invalida la cache cuando cambia la carta.
-3. **Aislamiento por local.** Todo cuelga de `locales/{localId}` y las reglas validan la pertenencia con custom claims.
+3. **Un local por proyecto.** No hay `locales/{id}`: todo cuelga de la raíz de Firestore. El aislamiento entre clientes lo da tener proyectos separados; dentro del proyecto, las reglas separan lo público del staff según el rol.
 4. **Los agregados se calculan en el servidor.** Los reportes leen un documento por día (`statsDiarias`), nunca todos los pedidos.
 5. **Dinero en pesos enteros** (`number`, sin decimales).
 
@@ -113,53 +114,48 @@ Versión del documento: 1.2, del 2026-09-28.
 ## 4. Estructura del repositorio
 
 ```
-mimenu/
+silverio-club/
 ├─ CLAUDE.md                     # instrucciones para Claude Code
 ├─ ROADMAP.md                    # este documento
-├─ silverio/                     # kit del cliente piloto (seed.json, assets, SILVERIO.md)
+├─ silverio/                     # KIT del local: seed.json, assets/, SILVERIO.md (en una copia, se reemplaza)
 ├─ pnpm-workspace.yaml
-├─ firebase.json  .firebaserc
+├─ firebase.json  .firebaserc     # .firebaserc: alias dev/prod del proyecto de este local
 ├─ firestore.rules  firestore.indexes.json  storage.rules
 ├─ apps/
 │  └─ web/                       # Next.js
 │     └─ src/
 │        ├─ app/
-│        │  ├─ (marketing)/page.tsx            # landing de la plataforma (Fase 5)
-│        │  ├─ (auth)/login/  (auth)/registro/
-│        │  ├─ [slug]/                          # web pública del local
-│        │  │  ├─ layout.tsx                    # inyecta marca (CSS vars, fuente)
-│        │  │  ├─ page.tsx                      # hero, promos, carta, nosotros, ubicación
-│        │  │  ├─ carta/page.tsx
-│        │  │  ├─ checkout/page.tsx
-│        │  │  ├─ pedido/[token]/page.tsx       # seguimiento
-│        │  │  ├─ mesa/[mesaId]/page.tsx        # entrada por QR de mesa
-│        │  │  ├─ opengraph-image.tsx
-│        │  │  └─ sitemap.ts
+│        │  ├─ page.tsx                        # web pública: hero, promos, carta, nosotros, ubicación (Fase 1)
+│        │  ├─ layout.tsx                      # marca (CSS vars, fuente), SEO
+│        │  ├─ (auth)/login/
+│        │  ├─ carta/page.tsx
+│        │  ├─ checkout/page.tsx
+│        │  ├─ pedido/[token]/page.tsx         # seguimiento
+│        │  ├─ mesa/[mesaId]/page.tsx          # entrada por QR de mesa
+│        │  ├─ opengraph-image.tsx  sitemap.ts  robots.ts
 │        │  ├─ panel/
-│        │  │  ├─ page.tsx                      # selector de local
-│        │  │  └─ [localId]/
-│        │  │     ├─ page.tsx                   # resumen del día
-│        │  │     ├─ pedidos/  cocina/  salon/  caja/
-│        │  │     ├─ carta/  promos/  mesas/  zonas/
-│        │  │     ├─ reportes/  clientes/
-│        │  │     └─ configuracion/  equipo/  suscripcion/
-│        │  ├─ admin/                           # superadmin
+│        │  │  ├─ page.tsx                     # resumen del día
+│        │  │  ├─ pedidos/  cocina/  salon/  caja/
+│        │  │  ├─ carta/  promos/  mesas/  zonas/
+│        │  │  ├─ reportes/  clientes/
+│        │  │  └─ configuracion/  equipo/
 │        │  └─ api/revalidate/route.ts
 │        ├─ components/
 │        │  ├─ ui/                              # shadcn
-│        │  ├─ publico/                         # Hero, CartaLista, PromoCarrusel…
-│        │  └─ panel/                           # KanbanPedidos, TicketImprimible…
+│        │  ├─ publico/                         # Hero, CartaLista, PromoCarrusel… (lo que más se personaliza por local)
+│        │  └─ panel/                           # BarraLateral, KanbanPedidos, TicketImprimible…
 │        ├─ features/                           # lógica por dominio (hooks + servicios)
-│        │  ├─ carta/  pedidos/  salon/  caja/  reportes/  auth/  local/
+│        │  ├─ carta/  pedidos/  salon/  caja/  reportes/  auth/  panel/
 │        ├─ lib/
 │        │  ├─ firebase/client.ts               # SDK cliente (singleton, cache persistente)
 │        │  ├─ firebase/admin.ts                # Admin SDK (solo servidor)
+│        │  ├─ local.ts                         # datos fijos del local desde .env (nombre)
 │        │  └─ utils.ts
-│        └─ styles/globals.css
+│        └─ app/globals.css
 ├─ functions/
 │  └─ src/
-│     ├─ index.ts
-│     ├─ pedidos/  pagos/  suscripciones/  stats/  auth/  cache/  util/
+│     ├─ index.ts  opciones.ts   # opciones.ts: región southamerica-east1
+│     ├─ pedidos/  pagos/  stats/  auth/  cache/  util/
 ├─ packages/
 │  └─ shared/
 │     └─ src/
@@ -168,10 +164,10 @@ mimenu/
 │        ├─ dinero.ts            # formatARS, redondeos
 │        ├─ horarios.ts          # estaAbierto(local, fecha)
 │        ├─ precios.ts           # calcularItem, calcularPedido (usado en front Y en Function)
-│        └─ constantes.ts        # estados, roles, límites por plan
+│        └─ constantes.ts        # estados, roles, DOC_LOCAL
 ├─ scripts/
-│  ├─ seed.ts                    # carga silverio/seed.json + local "demo" en emulador o proyecto
-│  └─ subir-assets.ts            # sube silverio/assets a Storage
+│  ├─ seed.ts                    # carga el kit del local (silverio/) en el emulador o el proyecto elegido
+│  └─ subir-assets.ts            # sube <kit>/assets/** a Storage (imagenes/)
 └─ tests/
    ├─ reglas/                    # tests de firestore.rules y storage.rules
    └─ e2e/                       # Playwright
@@ -181,29 +177,14 @@ mimenu/
 
 ## 5. Modelo de datos (Firestore)
 
-Notación: `coleccion/{id}` → campos. `ts` = `Timestamp`. `$` = entero en pesos.
+Notación: `coleccion/{id}` → campos. `ts` = `Timestamp`. `$` = entero en pesos. Todo cuelga de la raíz: **un proyecto = un local**.
 
-### Nivel raíz
-
-```ts
-usuarios/{uid}
-  email, nombre, telefono?, creadoEn: ts
-  superAdmin?: boolean                 // solo escribible por Functions
-
-slugs/{slug}                            // garantiza unicidad del slug
-  localId
-
-plataforma/config
-  planes: Record<PlanId, { nombre, precioMensual: $, limites: Limites, features: Feature[] }>
-  diasPrueba: number
-```
-
-### Local
+### Local y equipo
 
 ```ts
-locales/{localId}
-  slug, nombre, nombreCorto, bajada?, descripcionCorta
-  activo: boolean
+local/datos                              // documento único (DOC_LOCAL en packages/shared)
+  nombre, nombreCorto, bajada?, descripcionCorta
+  activo: boolean                         // false → la web muestra "Volvemos pronto"
   zonaHoraria: "America/Argentina/Mendoza"
   contacto: { whatsapp, telefono?, email?, instagram?, facebook?, tiktok? }
   direccion: { calle, localidad, departamento, provincia, cp, pais, geo: {lat,lng}, googleMapsUrl }
@@ -217,16 +198,6 @@ locales/{localId}
   }
   web: {                                   // contenido editable de la web pública
     secciones: { tipo: "hero"|"promos"|"carta"|"nosotros"|"galeria"|"ubicacion", visible, orden }[]
-    estilo: {                              // variantes de diseño (ver §11 "Diseño por local")
-      hero: "pantalla_completa"|"partido"|"compacto"
-      promos: "carrusel"|"grilla"
-      carta: "lista"|"tarjetas"|"fotos"
-      nosotros: "clasico"|"destacado"
-      bordes: "redondeado"|"recto"|"pill"
-      titulosSeccion: "simple"|"overline"   // overline = etiqueta en mayúsculas + título + barrita
-      separadores: "ninguno"|"linea"|"degradado"
-      botones: "solido"|"contorno"|"pulso"
-    }
     hero: { bajada, titulo, textoBoton }
     nosotros: { titulo, parrafos: string[], fotoUrl, frase, tarjetas: {icono,titulo,texto}[], cierre }
     galeria: { fotoUrl, titulo }[]
@@ -246,28 +217,26 @@ locales/{localId}
   pagos: {
     efectivo: boolean
     transferencia: { habilitado, alias, cbu?, titular }
-    mercadoPago: { habilitado, conectado: boolean }   // tokens en /privado
+    mercadoPago: { habilitado }            // credenciales en Secret Manager (§15)
   }
-  suscripcion: {                           // SOLO Functions escriben
-    plan: PlanId, estado: "prueba"|"activa"|"en_mora"|"suspendida"|"cancelada"
-    pruebaHasta?: ts, proximoCobro?: ts, mpPreapprovalId?
-  }
-  duenoUid, creadoEn, actualizadoEn
-```
+  actualizadoEn
 
-### Subcolecciones del local
-
-```ts
-locales/{localId}/miembros/{uid}
+miembros/{uid}                            // equipo; lo crea invitarMiembro
   rol: "dueno"|"encargado"|"mozo"|"cocina", nombre, email, activo, creadoEn
 
-locales/{localId}/privado/mercadopago          // reglas: nadie lee ni escribe desde el cliente
-  accessToken, refreshToken, userId, expiraEn
+usuarios/{uid}                            // perfil técnico; SOLO Functions escriben
+  email, nombre, claimsVersion
 
-locales/{localId}/categorias/{categoriaId}
+privado/{doc}                             // reglas: nadie lee ni escribe desde el cliente
+```
+
+### Carta
+
+```ts
+categorias/{categoriaId}
   nombre, orden, visible, icono?, descripcion?
 
-locales/{localId}/productos/{productoId}
+productos/{productoId}
   categoriaId, nombre, descripcion, precio: $, fotoUrl?
   orden, visible: boolean, disponible: boolean          // disponible=false → "Agotado"
   diasDisponible?: number[]                              // viandas del día, etc.
@@ -280,20 +249,24 @@ locales/{localId}/productos/{productoId}
   }[]
   actualizadoEn
 
-locales/{localId}/promos/{promoId}
+promos/{promoId}
   titulo, descripcion, precio: $, fotoUrl?, orden, activa
   items?: { productoId, varianteId?, cantidad }[]       // qué incluye (para cocina y stats)
-  vigencia?: { dias: number[], desde?: "HH:mm", hasta?: "HH:mm", fechaFin?: ts }
+  vigencia?: { dias: number[], desde?: "HH:mm", hasta?: "HH:mm", fechaFin?: "YYYY-MM-DD" }
 
-locales/{localId}/zonasDelivery/{zonaId}
+zonasDelivery/{zonaId}
   nombre, costo: $, pedidoMinimo?: $, activa, orden
+```
 
-locales/{localId}/mesas/{mesaId}
+### Operación
+
+```ts
+mesas/{mesaId}
   nombre ("Mesa 4"), sector ("Salón"|"Patio"|"Barra"), capacidad, orden
   estado: "libre"|"ocupada"|"cuenta"          // denormalizado para el plano
   pedidoActualId?, qrToken                     // qrToken rota al cerrar la mesa
 
-locales/{localId}/pedidos/{pedidoId}
+pedidos/{pedidoId}
   numero: number                               // correlativo diario: #1, #2…
   tipo: "take_away"|"delivery"|"salon"
   origen: "web"|"qr_mesa"|"mozo"|"mostrador"|"telefono"
@@ -311,38 +284,38 @@ locales/{localId}/pedidos/{pedidoId}
   estadoPago: "pendiente"|"parcial"|"pagado"
   turnoCajaId?
   tiempoEstimadoMin?, motivoCancelacion?
-  seguimientoToken                             // para /[slug]/pedido/[token]
+  seguimientoToken                             // para /pedido/[token]
   contabilizado: boolean                       // idempotencia de stats
   historial: { estado, en: ts, porUid? }[]
   creadoEn: ts, actualizadoEn: ts
 
-locales/{localId}/seguimiento/{token}         // espejo PÚBLICO mínimo (get sí, list no)
+seguimiento/{token}                            // espejo PÚBLICO mínimo (get sí, list no)
   numero, estado, tipo, tiempoEstimadoMin, actualizadoEn, localNombre
 
-locales/{localId}/contadores/{YYYY-MM-DD}
+contadores/{YYYY-MM-DD}
   ultimoNumero
 
-locales/{localId}/clientes/{telefono}
+clientes/{telefono}
   nombre, telefono, direcciones: string[], cantidadPedidos, totalGastado: $, ultimoPedido: ts
 
-locales/{localId}/turnosCaja/{turnoId}
+turnosCaja/{turnoId}
   estado: "abierto"|"cerrado"
   abiertoPor, abiertoEn, montoInicial: $
   totales: Record<MedioPago, $>                 // actualizado por Function
   cantidadPedidos
   cerradoPor?, cerradoEn?, contado?: Record<MedioPago, $>, diferencia?: Record<MedioPago, $>, notas?
 
-locales/{localId}/turnosCaja/{turnoId}/movimientos/{movId}
+turnosCaja/{turnoId}/movimientos/{movId}
   tipo: "ingreso"|"egreso", categoria ("proveedor"|"cambio"|"retiro"|"otro"), monto: $, detalle, porUid, en: ts
 
-locales/{localId}/statsDiarias/{YYYY-MM-DD}    // SOLO Functions escriben
+statsDiarias/{YYYY-MM-DD}                      // SOLO Functions escriben
   ventas: $, pedidos, ticketPromedio: $, cancelados
   porTipo: Record<Tipo, { ventas, pedidos }>
   porMedio: Record<MedioPago, $>
   porHora: Record<"00".."23", { ventas, pedidos }>
   porProducto: Record<productoId, { nombre, cantidad, ventas }>
 
-locales/{localId}/auditoria/{id}               // cambios sensibles (precios masivos, cierres de caja, cancelaciones)
+auditoria/{id}                                 // cambios sensibles (precios masivos, cierres de caja, cancelaciones)
   accion, detalle, porUid, en: ts
 ```
 
@@ -370,11 +343,11 @@ Una Function contabiliza el pedido en `statsDiarias` y en el turno de caja cuand
 
 ## 6. Roles y permisos
 
-**Custom claims** en el token (los sincroniza una Function cuando cambia `miembros`):
+**Custom claim** en el token (lo sincroniza `sincronizarClaims` cuando cambia `miembros/{uid}`):
 ```json
-{ "sa": true, "l": { "<localId>": "dueno" | "encargado" | "mozo" | "cocina" } }
+{ "rol": "dueno" | "encargado" | "mozo" | "cocina" }
 ```
-El cliente fuerza el refresco del token con `getIdToken(true)` cuando `usuarios/{uid}.claimsVersion` cambia.
+El cliente fuerza el refresco del token con `getIdToken(true)` cuando `usuarios/{uid}.claimsVersion` cambia. Alguien con cuenta pero sin rol (por ejemplo, que entró con Google) no ve nada del panel.
 
 | Permiso | Dueño | Encargado | Mozo | Cocina |
 |---|:-:|:-:|:-:|:-:|
@@ -388,9 +361,8 @@ El cliente fuerza el refresco del token con `getIdToken(true)` cuando `usuarios/
 | Reportes | ✅ | ⚙️ configurable | — | — |
 | Configuración del local y marca | ✅ | — | — | — |
 | Equipo (invitar y quitar) | ✅ | — | — | — |
-| Suscripción y pagos de la plataforma | ✅ | — | — | — |
 
-**Superadmin** (`sa`): acceso de lectura a todos los locales para soporte, activar o suspender, y panel `/admin`.
+**Soporte (DelgadoDev):** acceso a la consola de Firebase del proyecto del local. No hay superadmin dentro de la app.
 
 ---
 
@@ -398,44 +370,34 @@ El cliente fuerza el refresco del token con `getIdToken(true)` cuando `usuarios/
 
 Principios:
 - **Denegar por defecto.**
-- Lectura pública **solo** de: `locales/{id}` (sin `privado`), `categorias`, `productos`, `promos`, `zonasDelivery`, y `seguimiento/{token}` (solo `get`, nunca `list`).
+- Lectura pública **solo** de: `local/datos`, `categorias`, `productos`, `promos`, `zonasDelivery`, y `seguimiento/{token}` (solo `get`, nunca `list`).
 - `pedidos`: el cliente final **no crea** pedidos (los crea `crearPedido` con el Admin SDK). El staff solo actualiza campos permitidos según su rol (`estado`, `items[].estadoCocina`, `pagos`…).
-- `suscripcion`, `statsDiarias`, `contadores`, `privado`, `usuarios.superAdmin`: solo Functions.
+- `usuarios`, `statsDiarias`, `contadores`, `privado`, `clientes`, `turnosCaja`, `auditoria`: solo Functions escriben.
 - Validar tipos y campos permitidos en cada escritura (`request.resource.data.keys().hasOnly([...])`).
-- **Storage:** `locales/{localId}/**` se escribe solo por dueño o encargado, solo imágenes de hasta 2 MB; lectura pública.
+- **Storage:** `imagenes/**` se escribe solo por dueño o encargado, solo imágenes (sin SVG) de hasta 2 MB; lectura pública.
 
 Esqueleto:
 ```
 rules_version = '2';
 service cloud.firestore {
   match /databases/{db}/documents {
-    function signedIn() { return request.auth != null; }
-    function rol(localId) { return signedIn() ? request.auth.token.l[localId] : null; }
-    function esSA() { return signedIn() && request.auth.token.sa == true; }
-    function esStaff(localId) { return rol(localId) in ['dueno','encargado','mozo','cocina'] || esSA(); }
-    function esGestor(localId) { return rol(localId) in ['dueno','encargado'] || esSA(); }
+    function rol() { return request.auth != null ? request.auth.token.get('rol', null) : null; }
+    function esStaff() { return rol() in ['dueno','encargado','mozo','cocina']; }
+    function esGestor() { return rol() in ['dueno','encargado']; }
 
-    match /locales/{localId} {
-      allow read: if true;
-      allow update: if rol(localId) == 'dueno'
-        && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['suscripcion','duenoUid','slug']);
-
-      match /categorias/{id}  { allow read: if true; allow write: if esGestor(localId); }
-      match /productos/{id}   { allow read: if true; allow write: if esGestor(localId);
-                                allow update: if esStaff(localId)
+    match /local/{doc}        { allow read: if true; allow update: if rol() == 'dueno'; }
+    match /productos/{id}     { allow read: if true; allow write: if esGestor();
+                                allow update: if esStaff()
                                   && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['disponible','actualizadoEn']); }
-      match /promos/{id}      { allow read: if true; allow write: if esGestor(localId); }
-      match /seguimiento/{t}  { allow get: if true; allow list, write: if false; }
-      match /pedidos/{id}     { allow read: if esStaff(localId); allow create, delete: if false;
-                                allow update: if esStaff(localId) /* + validación de campos por rol */; }
-      match /privado/{doc}    { allow read, write: if false; }
-      match /statsDiarias/{d} { allow read: if esGestor(localId); allow write: if false; }
-      // … resto según §5
-    }
+    match /seguimiento/{t}    { allow get: if true; allow list, write: if false; }
+    match /pedidos/{id}       { allow read: if esStaff(); allow create, delete: if false;
+                                allow update: if esStaff() /* + validación de campos por rol */; }
+    match /privado/{doc}      { allow read, write: if false; }
+    // … resto según §5
   }
 }
 ```
-> Cada regla lleva su test en `tests/reglas/`. Caso crítico: **un usuario del local A no puede leer ni escribir nada del local B.**
+> Cada regla lleva su test en `tests/reglas/`. Caso crítico: **alguien con cuenta pero sin rol (o sin sesión) no lee ni escribe nada privado.**
 
 ---
 
@@ -443,22 +405,17 @@ service cloud.firestore {
 
 | Function | Tipo | Qué hace | Fase |
 |---|---|---|---|
-| `sincronizarClaims` | trigger `miembros` onWrite | Recalcula los custom claims del usuario y sube `claimsVersion` | 0 |
-| `crearLocal` | callable | Valida el slug, crea `locales`, `slugs`, `miembros` (dueño), suscripción en prueba | 0 / 5 |
-| `invitarMiembro` | callable | Crea o busca el usuario por email, crea `miembros`, manda email | 0 |
-| `revalidarWeb` | trigger en `locales`, `categorias`, `productos`, `promos` | POST a `/api/revalidate` con secreto → `revalidateTag('local:{id}')` | 1 |
+| `sincronizarClaims` | trigger `miembros/{uid}` onWrite | Recalcula el claim `rol` y sube `usuarios/{uid}.claimsVersion` | 0 |
+| `invitarMiembro` | callable | Solo el dueño. Crea o busca el usuario por email, crea `miembros` y devuelve un link para elegir contraseña (el dueño lo manda por WhatsApp) | 0 |
+| `revalidarWeb` | trigger en `local`, `categorias`, `productos`, `promos` | POST a `/api/revalidate` con secreto → `revalidateTag('carta')` | 1 |
 | `crearPedido` | callable (App Check) | Valida el esquema zod, local activo y abierto, disponibilidad, zona y mínimo; **recalcula precios** con `packages/shared/precios.ts`; número correlativo por transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`; si paga con MP, crea la preferencia y devuelve `init_point` | 2 |
 | `espejarSeguimiento` | trigger `pedidos` onUpdate | Actualiza `seguimiento/{token}` | 2 |
-| `mpOAuthCallback` | https | Intercambia el code por tokens de MP del local → `privado/mercadopago` | 2 |
 | `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | 2 |
 | `contabilizarPedido` | trigger `pedidos` onUpdate | Al cerrar o entregar y estar pagado: suma en `statsDiarias` y en el `turnosCaja` abierto (con `contabilizado` como candado) | 4 |
 | `revertirContabilizacion` | trigger `pedidos` onUpdate | Si un pedido contabilizado se cancela, resta | 4 |
-| `crearSuscripcion` | callable | Crea el preapproval de MP con la cuenta de la plataforma | 5 |
-| `mpWebhookSuscripciones` | https | Actualiza `locales.suscripcion` | 5 |
-| `controlSuscripciones` | scheduled (diario) | Fin de prueba, mora → suspendida, emails | 5 |
 | `limpiezaDiaria` | scheduled | Rota los `qrToken` de mesas libres, archiva seguimientos viejos | 3 |
 
-Región: `southamerica-east1` (São Paulo), la más cercana a Argentina. Secretos (tokens de MP de la plataforma, secreto de revalidación) en **Secret Manager** vía `defineSecret`.
+Región: `southamerica-east1` (São Paulo), la más cercana a Argentina; se fija en `functions/src/opciones.ts`, que `index.ts` importa primero. Secretos (credenciales de MP del local, secreto de revalidación) en **Secret Manager** vía `defineSecret`.
 
 ---
 
@@ -466,19 +423,14 @@ Región: `southamerica-east1` (São Paulo), la más cercana a Argentina. Secreto
 
 | Ruta | Quién | Render |
 |---|---|---|
-| `/` | Público | Landing comercial de MiMenu (Fase 5; antes redirige a `/silverio` o a `/login`) |
-| `/login`, `/registro` | Público | Client |
-| `/[slug]` | Público | Server Component con cache por etiqueta |
-| `/[slug]/carta` | Público | Igual; carta completa con buscador y tabs de categoría fijas |
-| `/[slug]/checkout` | Público | Client island (carrito en zustand persistido por slug) |
-| `/[slug]/pedido/[token]` | Público | Client, `onSnapshot` sobre `seguimiento/{token}` |
-| `/[slug]/mesa/[mesaId]?k=qrToken` | Público | Carta en modo mesa |
-| `/panel` | Staff | Selector de local |
-| `/panel/[localId]/…` | Staff | Client, tiempo real, menú lateral según rol |
-| `/admin` | Superadmin | Client |
+| `/` | Público | Web del local: Server Component con cache por etiqueta (Fase 1; antes redirige a `/panel`) |
+| `/carta` | Público | Igual; carta completa con buscador y tabs de categoría fijas |
+| `/checkout` | Público | Client island (carrito en zustand persistido) |
+| `/pedido/[token]` | Público | Client, `onSnapshot` sobre `seguimiento/{token}` |
+| `/mesa/[mesaId]?k=qrToken` | Público | Carta en modo mesa |
+| `/login` | Staff | Client |
+| `/panel/…` | Staff | Client, tiempo real, menú lateral según rol |
 | `/api/revalidate` | Functions | Route handler con secreto |
-
-**Dominios propios** (plan superior, Fase 5+): el middleware mapea `host → slug` leyendo `dominios/{host}` (cacheado).
 
 ---
 
@@ -486,14 +438,14 @@ Región: `southamerica-east1` (São Paulo), la más cercana a Argentina. Secreto
 
 Firestore cobra por lectura. Estas reglas mantienen la factura baja y la app rápida:
 
-- **Web pública:** Server Components leen con el Admin SDK una sola vez y cachean (`unstable_cache` / `"use cache"` con `cacheTag('local:{id}')`). Las visitas no generan lecturas. La cache se invalida sola con `revalidarWeb`.
+- **Web pública:** Server Components leen con el Admin SDK una sola vez y cachean (`unstable_cache` / `"use cache"` con `cacheTag('carta')`). Las visitas no generan lecturas. La cache se invalida sola con `revalidarWeb`.
 - **Carrito y checkout** son la única parte "client" de la web pública. El resto es HTML del servidor, con Lighthouse móvil ≥ 90 como objetivo.
 - **Imágenes:** se comprimen en el navegador antes de subir (webp, máximo 1600 px, ~200 KB) y se sirven con `next/image`.
 - **Listeners acotados:** el panel escucha solo pedidos activos (`estado in [...]`, `limit`). El historial es paginado y sin tiempo real.
 - **Reportes:** leen `statsDiarias` (un documento por día), así que un mes cuesta unas 30 lecturas.
 - **Panel offline:** `initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) })`. Si se corta internet, el mozo sigue viendo y cargando datos, y se sincroniza al volver.
-- **Code splitting:** el panel y la web pública no comparten bundle pesado.
-- **Presupuesto:** plan Blaze con **alertas de presupuesto** configuradas desde el día 1.
+- **Code splitting:** el panel y la web pública no comparten bundle pesado (Firebase cliente solo se carga en el panel y el checkout).
+- **Presupuesto:** plan Blaze con **alertas de presupuesto** configuradas desde el día 1, en cada proyecto de cada local.
 
 ---
 
@@ -503,13 +455,11 @@ Firestore cobra por lectura. Estas reglas mantienen la factura baja y la app rá
 - **Dinero:** enteros en pesos. Formato con `Intl.NumberFormat('es-AR', { style: 'currency', currency: 'ARS', maximumFractionDigits: 0 })`.
 - **Fechas:** `serverTimestamp()` al escribir; se muestran en la `zonaHoraria` del local. Las claves de día (`YYYY-MM-DD`) se calculan en la zona del local, y un turno que cruza la medianoche cuenta para el día en que abrió.
 - **Validación:** todo input pasa por un esquema zod de `packages/shared`, en el front y en las Functions.
-- **Fuentes por local:** lista curada precargada con `next/font`: Sriracha, Bebas Neue, Poppins, Playfair Display, Oswald, Roboto, Inter y Montserrat. El local elige una para títulos y otra para texto, y se aplican vía variables CSS.
-- **Marca por local:** `[slug]/layout.tsx` inyecta `--color-primario`, etc. Tailwind los consume (`bg-[var(--color-primario)]` o tokens del tema).
-- **Diseño por local (3 niveles).** Todos los locales comparten el código, pero cada web se ve propia:
-  1. **Marca** (`marca`): colores, fuentes, logo, favicon, fotos del hero. La edita el dueño.
-  2. **Variantes de diseño** (`web.estilo`): cada sección tiene 2–3 diseños (hero a pantalla completa, partido o compacto; carta en lista, tarjetas o con fotos grandes; etc.) y hay estilos globales (bordes, títulos con overline, separadores degradados, botones con pulso). Los componentes de `components/publico/` reciben la variante y la resuelven con clases; agregar una variante nueva la deja disponible para todos los locales.
-  3. **A medida** (plan superior o acuerdo puntual): un componente propio en `components/publico/a-medida/{localId}/`, registrado en `a-medida/index.ts` como reemplazo de una sección para ese local. Sigue en el mismo repo, así que recibe todos los arreglos compartidos. Usarlo solo cuando las variantes no alcanzan.
-  - Silverio usa: hero `pantalla_completa`, títulos `overline`, separadores `degradado`, botones `pulso`, bordes `redondeado`.
+- **Fuentes:** lista curada precargada con `next/font`: Sriracha, Bebas Neue, Poppins, Playfair Display, Oswald, Roboto, Inter y Montserrat. El local elige una para títulos y otra para texto, y se aplican vía variables CSS.
+- **Marca:** `app/layout.tsx` inyecta `--color-primario`, etc. desde `local/datos.marca`. Tailwind los consume (`bg-[var(--color-primario)]` o tokens del tema). El dueño cambia colores, fotos y textos desde el panel sin tocar código.
+- **Diseño por local:** cada copia del repo es libre de cambiar su diseño en `components/publico/`. Para no perder los arreglos de la base (ver §16):
+  - lo **genérico** (panel, Functions, reglas, `packages/shared`, componentes reutilizables) se cambia **primero en la base** y se trae a las copias con git;
+  - lo **propio del local** (kit, `.env`, `.firebaserc`, `components/publico/`, estilos) vive solo en su copia.
 - **Accesibilidad:** contraste AA, foco visible, botones con `aria-label`, carta navegable por teclado.
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`…). Una rama por tarea y PR a `main`.
 - **Nada de secretos en el repo.** Van en `.env.local` (git-ignored) y en Secret Manager.
@@ -529,26 +479,25 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] GitHub Actions: lint, typecheck, build y tests de reglas contra el emulador. *(workflow escrito y verificado localmente; falta la primera corrida en GitHub)*
 
 **Firebase**
-- [ ] Proyectos `mimenu-dev` y `mimenu-prod`, plan Blaze y alertas de presupuesto.
+- [ ] Proyecto `silverio-club` (producción), plan Blaze y alerta de presupuesto. Para probar se usan los emuladores; un proyecto `-dev` se agrega solo si hace falta (§15).
 - [x] `firebase.json` con emuladores (Auth, Firestore, Storage, Functions) y `pnpm dev` que levante todo.
 - [x] Región de Functions `southamerica-east1`.
-- [ ] App Check (reCAPTCHA Enterprise) registrado; se hace obligatorio en `crearPedido` en la Fase 2.
 
 **Dominio compartido**
 - [x] `packages/shared`: tipos del §5, esquemas zod, `dinero.ts`, `horarios.ts` (`estaAbierto`, con test de horarios que cruzan medianoche), `precios.ts` (`calcularItem`, `calcularPedido`, con tests).
 
-**Auth y multi-local**
+**Auth y equipo**
 - [x] Login con email/contraseña y Google; recuperación de contraseña.
-- [x] Functions `sincronizarClaims`, `crearLocal` e `invitarMiembro`. *(`invitarMiembro` devuelve un link para elegir contraseña, que el dueño manda por WhatsApp, hasta que haya emails en la Fase 5)*
-- [x] Hook `useSesion()` con usuario, claims, locales y rol activo.
-- [x] Panel base: layout con barra lateral según rol, selector de local y página "resumen" vacía. *(incluye la página Equipo para invitar miembros)*
-- [x] `firestore.rules` y `storage.rules` v1 con tests de aislamiento entre locales.
+- [x] Functions `sincronizarClaims` e `invitarMiembro`.
+- [x] Hook `useSesion()` con usuario y rol.
+- [x] Panel base: layout con barra lateral según rol, página "resumen" vacía y página Equipo para invitar.
+- [x] `firestore.rules` y `storage.rules` v1 con tests por rol (incluido "con cuenta pero sin rol").
 
 **Datos**
-- [x] `scripts/seed.ts`: crea el local **silverio** desde `silverio/seed.json` y un local **demo**, en el emulador o el proyecto elegido.
+- [x] `scripts/seed.ts`: crea el local desde `silverio/seed.json` y su equipo de prueba, en el emulador o el proyecto elegido.
 - [x] `scripts/subir-assets.ts`: sube `silverio/assets/**` a Storage y actualiza las URLs.
 
-✅ **Listo cuando:** con los emuladores corriendo, un dueño de "silverio" y uno de "demo" entran al panel y **cada uno ve solo su local**, y los tests de reglas pasan en CI.
+✅ **Listo cuando:** con los emuladores corriendo, el dueño entra al panel con su menú completo, el mozo ve solo lo suyo, alguien sin rol no ve nada, y los tests de reglas pasan en CI.
 
 ---
 
@@ -558,7 +507,6 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] Datos, contacto, dirección (con link de Maps) y horarios (editor por día, con cierres especiales).
 - [ ] Marca: colores (con vista previa en vivo y aviso de contraste), fuentes (lista curada), logo, favicon, hero para escritorio y móvil.
 - [ ] Contenido web: hero, nosotros (párrafos, tarjetas, frase, cierre), galería, nota de la carta, secciones visibles y su orden, SEO e ID de GA4.
-- [ ] **Diseño:** selector de variantes por sección y estilos globales (`web.estilo`), con vista previa en vivo de la web.
 
 **Panel: carta**
 - [ ] Categorías: alta, baja, modificación, ordenar con arrastrar, visible/oculta.
@@ -567,10 +515,8 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] **Actualización masiva de precios:** alcance (todo, categorías, productos seleccionados), % o monto fijo, redondeo (a 10, 50, 100 o 500), **vista previa antes/después**, aplicación con `writeBatch` en lotes de 500 y registro en `auditoria`.
 - [ ] Duplicar producto y buscador en la lista.
 
-**Web pública `/[slug]`**
+**Web pública `/`** (diseño de Silverio: [`silverio/SILVERIO.md` §1](silverio/SILVERIO.md#1-identidad-visual))
 - [ ] Layout con la marca del local (variables CSS y fuentes).
-- [ ] Variantes de diseño de cada sección y estilos globales según `web.estilo` (§11), incluidas las que necesita Silverio.
-- [ ] Registro de componentes **a medida** por local (`components/publico/a-medida/`), vacío por ahora.
 - [ ] Navbar con logo, anclas y un indicador **Abierto / Cerrado · abre a las 20:00**.
 - [ ] Hero (fotos distintas para escritorio y móvil, que no tapen contenido en móvil).
 - [ ] Carrusel de promos táctil, con solo las promos vigentes ahora.
@@ -579,11 +525,12 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] Botón flotante de WhatsApp con mensaje configurable.
 - [ ] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica.
 - [ ] GA4 con el ID del local.
-- [ ] Página 404 del local y local inactivo → "Volvemos pronto".
+- [ ] Página 404 y local inactivo → "Volvemos pronto".
 
 **Infra**
 - [ ] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
 - [ ] **Generador de QR:** carta general, PNG y PDF listos para imprimir con el logo del local.
+- [ ] Empaquetar las Functions para el deploy (Firebase no resuelve dependencias `workspace:*`): proponer `esbuild` u otra alternativa antes de instalar.
 
 **Silverio en producción**
 - [ ] Revisar con el dueño la lista pendiente de [`silverio/SILVERIO.md` §7](silverio/SILVERIO.md#7-pendiente-de-confirmar-con-el-dueño-antes-de-la-fase-1).
@@ -591,7 +538,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] Deploy a producción y apuntar el dominio de Silverio. La web vieja queda de respaldo 2 semanas.
 - [ ] Mantener el ID de GA4 `G-8CN2SBDQ5R`.
 
-✅ **Listo cuando:** la web de Silverio corre en la plataforma, el dueño cambió precios y marcó agotados solo, y Lighthouse móvil da ≥ 90 en rendimiento y SEO.
+✅ **Listo cuando:** la web de Silverio corre en producción, el dueño cambió precios y marcó agotados solo, y Lighthouse móvil da ≥ 90 en rendimiento y SEO.
 
 ---
 
@@ -599,7 +546,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 **Cliente**
 - [ ] Modal de producto: variante, extras (respeta mín/máx), cantidad y nota.
-- [ ] Carrito: drawer persistente por local, editar y quitar, subtotal en vivo con `precios.ts`.
+- [ ] Carrito: drawer persistente, editar y quitar, subtotal en vivo con `precios.ts`.
 - [ ] Checkout:
   - tipo (take away, delivery o salón según config), nombre y teléfono;
   - delivery: dirección, referencia y selector de zona con costo;
@@ -607,12 +554,13 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
   - medio de pago: efectivo ("¿con cuánto pagás?"), transferencia (muestra alias y titular) o Mercado Pago.
 - [ ] Si el local está cerrado o pausado, no se puede confirmar y se explica por qué.
 - [ ] Confirmación con número de pedido, link de seguimiento y botón opcional "Avisar por WhatsApp" con el mensaje armado.
-- [ ] Seguimiento `/[slug]/pedido/[token]`: estado en tiempo real, tiempo estimado y datos del local.
+- [ ] Seguimiento `/pedido/[token]`: estado en tiempo real, tiempo estimado y datos del local.
 
 **Backend**
+- [ ] App Check (reCAPTCHA Enterprise) registrado con el dominio de producción.
 - [ ] `crearPedido` (ver §8) con App Check obligatorio y límite de frecuencia por teléfono.
 - [ ] `espejarSeguimiento`.
-- [ ] Mercado Pago: vinculación **OAuth** de la cuenta del local, preferencia de Checkout Pro, `mpWebhookPedidos` con validación de firma, y conciliación del estado del pago.
+- [ ] Mercado Pago con las credenciales del local (Secret Manager): preferencia de Checkout Pro, `mpWebhookPedidos` con validación de firma, y conciliación del estado del pago.
 
 **Panel de pedidos**
 - [ ] Tablero kanban (Nuevos · En preparación · Listos · En camino) y lista del día con filtros.
@@ -630,7 +578,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 **Calidad**
 - [ ] Tests e2e con Playwright: pedido take away en efectivo, delivery con zona, y pago con MP en sandbox.
 
-✅ **Listo cuando:** Silverio toma **todos sus pedidos de un fin de semana** por la plataforma sin perder ninguno, y cobra al menos uno con Mercado Pago.
+✅ **Listo cuando:** Silverio toma **todos sus pedidos de un fin de semana** por la web sin perder ninguno, y cobra al menos uno con Mercado Pago.
 
 ---
 
@@ -639,7 +587,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 **Mesas**
 - [ ] Mesas: alta, baja, modificación, por sector (Salón, Patio, Barra), con capacidad y orden.
 - [ ] Plano en grilla con estados de color: libre, ocupada o cuenta pedida, y tiempo desde que se abrió.
-- [ ] **QR por mesa** (`/[slug]/mesa/[id]?k=token`) con impresión en lote. El token rota al cerrar la mesa para evitar pedidos falsos desde casa.
+- [ ] **QR por mesa** (`/mesa/[id]?k=token`) con impresión en lote. El token rota al cerrar la mesa para evitar pedidos falsos desde casa.
 
 **App del mozo (PWA instalable)**
 - [ ] Abrir mesa (comensales), cargar ítems rápido (buscador y categorías) y **enviar ronda a cocina**.
@@ -688,33 +636,21 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 ---
 
-### Fase 5: Producto vendible (2–3 semanas)
+### Fase 5: Plantilla replicable y venta (1–2 semanas)
 
-**Alta autoservicio**
-- [ ] `/registro` → asistente:
-  1. datos del local y slug (validación en vivo);
-  2. marca (color, logo, fuente);
-  3. carta inicial (plantilla por rubro: hamburguesería, pizzería, parrilla, cafetería; o importar desde Excel/CSV);
-  4. horarios;
-  5. publicar.
-- [ ] Prueba gratis de N días (configurable en `plataforma/config`).
-- [ ] Checklist de "primeros pasos" en el resumen del panel.
+**Replicar**
+- [ ] Guía de §16 probada de punta a punta con un local de prueba, y ajustada con lo que falte.
+- [ ] Script `scripts/nuevo-local.ts` que valida el kit (`seed.json`, assets), `.env` y `.firebaserc`, y avisa lo que falta.
+- [ ] Separar claramente lo **genérico** de lo **propio del local** (§11) para que traer arreglos de la base sea un `git merge` sin conflictos.
+- [ ] **Web demo para vender:** una copia con datos ficticios, en su propio Firebase y Vercel.
 
-**Planes y cobro**
-- [ ] `plataforma/config.planes` con límites (productos, usuarios, mesas) y features por plan.
-- [ ] Restricción de features en la UI (con "Mejorá tu plan") **y** en las Functions.
-- [ ] `crearSuscripcion` (preapproval de MP), `mpWebhookSuscripciones` y `controlSuscripciones`.
-- [ ] Estados: prueba → activa → en_mora (gracia de 7 días, banner) → suspendida (panel en solo lectura; la web muestra la carta pero no toma pedidos).
-- [ ] Página `/panel/[localId]/suscripcion`: plan actual, cambiar plan, historial de pagos, cancelar.
-
-**Plataforma**
-- [ ] `/admin`: locales (búsqueda, estado, plan, último uso), MRR, altas y bajas, activar o suspender, ver panel en solo lectura para soporte.
-- [ ] Emails transaccionales (Resend o la extensión "Trigger Email"): bienvenida, invitación de equipo, fin de prueba, pago fallido, suspensión.
-- [ ] Landing comercial en `/`: propuesta ("pedidos sin comisión"), features, precios, **demo en vivo** (`/demo`), caso Silverio, FAQ y contacto por WhatsApp.
+**Venta**
+- [ ] Cobro del abono mensual por Mercado Pago (link de suscripción de la cuenta de DelgadoDev, fuera de la app).
+- [ ] Emails transaccionales (Resend o la extensión "Trigger Email"): invitación de equipo y avisos al dueño.
 - [ ] Legales: términos y condiciones, política de privacidad (Ley 25.326), aviso de datos de clientes finales.
 - [ ] Centro de ayuda: artículos cortos y videos de 1–2 minutos por función clave.
 
-✅ **Listo cuando:** **3 locales piloto pagan** la suscripción por Mercado Pago y operan sin ayuda diaria.
+✅ **Listo cuando:** un **segundo local** está online con su propia copia, creada en menos de un día siguiendo la guía, y paga el abono por Mercado Pago.
 
 ---
 
@@ -726,23 +662,24 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - Impresión directa en térmica (QZ Tray o agente local) y comandas automáticas.
 - Notificaciones push (FCM) para staff y clientes.
 - App de repartidor (asignar delivery y ubicación).
-- Multi-sucursal (varios locales bajo una marca, reportes consolidados).
-- Dominio propio por local (API de dominios de Vercel).
 - Encuestas post-pedido y reseñas en Google.
 
 ---
 
 ## 13. Planes comerciales
 
+Cada local paga un **abono mensual** a DelgadoDev (web + sistema + mantenimiento). El consumo de Firebase y Vercel de su proyecto va aparte o incluido según el plan.
+
 | Plan | Incluye | Pensado para |
 |---|---|---|
-| **Carta** | Web del local, carta con QR, promos, precios masivos | Locales que hoy tienen una carta en PDF o Instagram |
+| **Carta** | Web del local a medida, carta con QR, promos, precios masivos | Locales que hoy tienen una carta en PDF o Instagram |
 | **Pedidos** | Carta + pedidos online (take away y delivery), panel en tiempo real, Mercado Pago, clientes | Hamburgueserías, pizzerías, rotiserías |
 | **Completo** | Pedidos + salón, mesas y QR, pantalla de cocina, caja, reportes, más usuarios | Locales con salón |
 
 - Los precios se definen en la Fase 5, comparando con Pedix y Fudo, en ARS con ajuste periódico.
+- Un plan se "activa" habilitando o no secciones en la copia de ese local (menú del panel y config de pedidos).
 - **Argumento central:** *"Tus pedidos, sin comisión"*, frente a PedidosYa y Rappi.
-- **Silverio = cliente fundador:** bonificado a cambio de feedback, testimonio y uso como caso público. **Firmarlo por escrito, incluyendo que la plataforma es propiedad de DelgadoDev.**
+- **Silverio = cliente fundador:** bonificado a cambio de feedback, testimonio y uso como caso público. **Firmarlo por escrito, incluyendo que el código es propiedad de DelgadoDev.**
 
 ---
 
@@ -750,13 +687,14 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 | Riesgo | Mitigación |
 |---|---|
+| **Las copias se desincronizan de la base** (un arreglo hay que hacerlo N veces) | Cambios genéricos siempre primero en la base; cada copia tiene el remoto `base` y trae los arreglos con `git merge` (§16); lo propio del local, separado (§11) |
 | **Soporte en horario de servicio** (viernes 22 hs) | UX a prueba de errores, estado del sistema visible, canal de WhatsApp de soporte con horario definido por plan |
 | **Internet del local se corta** | Cache persistente de Firestore en el panel, indicador de sin conexión, carga manual que se sincroniza después |
 | **Impresoras térmicas** (cada modelo es distinto) | Arrancar con impresión del navegador; integración directa recién cuando haya demanda |
-| **Costos de Firebase** con muchos locales | Principios del §10, alertas de presupuesto y monitoreo de lecturas por local |
-| **Crecimiento del alcance** antes de vender | La Fase 2 ya es vendible (plan "Pedidos"); no saltear el criterio de "listo" |
+| **Costos de Firebase** | Principios del §10 y alertas de presupuesto en cada proyecto |
+| **Mantener muchos proyectos** (deploys, secretos, Firebase) | Guía y script de §16, CI igual en todas las copias, checklist de deploy |
 | **Pedidos falsos o en broma** | App Check, límite por teléfono, confirmación del mozo en QR, token de mesa rotativo |
-| **Seguridad multi-local** | Reglas con tests obligatorios en CI y precios siempre recalculados en el servidor |
+| **Seguridad** | Reglas con tests obligatorios en CI y precios siempre recalculados en el servidor |
 | **Dependencia de un solo dev** | Este documento, código tipado, tests y README de operación |
 
 ---
@@ -765,12 +703,16 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 | Entorno | Firebase | Web | Uso |
 |---|---|---|---|
-| local | Emuladores | `localhost:3000` | Desarrollo diario, seed automático |
-| dev | `mimenu-dev` | Vercel Preview (cada PR) | Pruebas con datos de demo |
-| prod | `mimenu-prod` | Vercel Production | Clientes reales |
+| local | Emuladores (`demo-local`) | `localhost:3000` | Desarrollo diario y pruebas, seed automático al correr `pnpm dev` |
+| prod | `silverio-club` (alias `prod` en `.firebaserc`) | Vercel Production | Silverio real |
+
+**Un solo proyecto real por local.** Las pruebas se hacen en los emuladores. Si más adelante hace falta probar algo con servicios reales (p. ej. webhooks de Mercado Pago o un deploy de Functions riesgoso), se agrega un proyecto `<local>-dev` con alias `dev`; el código ya lo soporta. Los Preview de Vercel apuntan a los emuladores o a ese `-dev`, **nunca** a producción.
+
+En una copia para otro local, el proyecto pasa a ser `<local>`.
 
 **`apps/web/.env.local`**
 ```env
+NEXT_PUBLIC_NOMBRE_LOCAL=Silverio Club
 NEXT_PUBLIC_FIREBASE_API_KEY=
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=
@@ -784,7 +726,7 @@ REVALIDATE_SECRET=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Secretos de Functions** (`firebase functions:secrets:set`): `REVALIDATE_SECRET`, `MP_PLATAFORMA_ACCESS_TOKEN`, `MP_CLIENT_ID`, `MP_CLIENT_SECRET`, `MP_WEBHOOK_SECRET`, `RESEND_API_KEY`.
+**Secretos de Functions** (`firebase functions:secrets:set`): `REVALIDATE_SECRET`, `MP_ACCESS_TOKEN` (del local), `MP_WEBHOOK_SECRET`, `RESEND_API_KEY`.
 
 **Deploy**
 - Web: push a `main` → Vercel Production. Los PR generan Preview.
@@ -792,13 +734,37 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ---
 
+## 16. Cómo crear la web de un local nuevo
+
+Este repo (Silverio Club) es la **base**. Para un local nuevo:
+
+1. **Repo:** crear el repo `<local>` en GitHub a partir de este (copia completa del historial). En la copia, agregar el remoto de la base:
+   `git remote add base https://github.com/<usuario>/silverio-club.git`
+2. **Firebase:** crear el proyecto `<local>` con los mismos pasos que Silverio (Blaze + alerta de presupuesto, Firestore y Storage en `southamerica-east1`, Auth email + Google, app web registrada; App Check al llegar a pedidos online). Actualizar el alias `prod` en `.firebaserc`.
+3. **Kit del local:** reemplazar la carpeta `silverio/` por la del nuevo local (`seed.json` con el mismo formato, `assets/`, `<LOCAL>.md` con marca y textos) y apuntar `KIT` en `scripts/entorno.ts`.
+4. **Variables:** `.env.local` y variables de Vercel (`NEXT_PUBLIC_NOMBRE_LOCAL`, config de Firebase, secretos). Secretos de Functions con las credenciales de MP del local.
+5. **Diseño:** ajustar `components/publico/` y estilos a la marca del local (lo propio del local; ver §11).
+6. **Datos:** `pnpm seed --kit <carpeta> --proyecto <local> --si-estoy-seguro` y crear el usuario real del dueño (desde el seed o invitándolo).
+7. **Deploy:** Vercel (Root Directory `apps/web`) + `firebase deploy -P prod`. Apuntar el dominio.
+
+**Traer arreglos de la base a una copia:** `git fetch base && git merge base/main`. Los conflictos solo deberían aparecer en archivos propios del local; si aparecen en código genérico, es señal de que ese cambio tenía que hacerse en la base.
+
+---
+
 ## Registro de cambios de este documento
 - **1.0 (2026-09-28):** versión inicial, backend definido en Firebase.
-- **1.1 (2026-09-28):** nombre del producto: **MiMenu** (proyectos `mimenu-dev` y `mimenu-prod`). Ajustes de tooling de la Fase 0:
+- **1.1 (2026-09-28):** nombre provisorio del producto "MiMenu". Ajustes de tooling de la Fase 0 que siguen vigentes:
   - TypeScript fijado en **6.0.x** (typescript-eslint todavía no soporta TS 7) y **ESLint 9** (los plugins de `eslint-config-next` piden v9).
   - Los scripts (`seed.ts`, `subir-assets.ts`) corren con `node --experimental-strip-types`, sin sumar `tsx`.
-  - Local: los emuladores usan el proyecto `demo-mimenu` (el prefijo `demo-` impide tocar recursos reales) y `pnpm dev` corre el seed automático al arrancar, sin persistir datos. Los tests de reglas usan `demo-mimenu-tests`.
-  - `horarios.ts` usa solo `Intl` (sin date-fns) para funcionar igual en navegador, Next y Functions.
+  - Emuladores con proyecto `demo-…` (el prefijo impide tocar recursos reales) y `pnpm dev` corre el seed automático, sin persistir datos.
+  - `horarios.ts` usa solo `Intl` (sin date-fns).
   - `shadcn/ui` con base Radix y preset Nova; `cn` (de shadcn) reemplaza a clsx + tailwind-merge.
   - Storage no acepta SVG subidos por usuarios (pueden llevar scripts).
-- **1.2 (2026-09-28):** se confirma el modelo **multi-local** (un repo, un Firebase, un deploy; cada local con su marca y su dominio) frente a "un repo por cliente". Para que cada web se vea propia se suman las **variantes de diseño** (`web.estilo`) y los **componentes a medida** por local (§5, §11 y Fase 1).
+- **1.2 (2026-09-28):** se evaluó el modelo multi-local con variantes de diseño. **Reemplazado por 1.3.**
+- **1.3 (2026-09-28):** **un repo por local**. Este repo es **Silverio Club** y la base que se copia para cada local nuevo (§16). Cambios:
+  - Firestore **aplanado**: `local/datos` + colecciones en la raíz; claims `{ rol }`; Storage en `imagenes/`.
+  - Salen lo que era de plataforma: `slugs`, `plataforma/config`, suscripción dentro de la app, superadmin y `/admin`, `crearLocal`, `/registro`, local demo, variantes de diseño (`web.estilo`) y OAuth de Mercado Pago (se usan las credenciales del local).
+  - Web pública en `/` y panel en `/panel` (sin `[slug]` ni `[localId]`). Nombre del local por `NEXT_PUBLIC_NOMBRE_LOCAL`.
+  - Paquetes con nombres genéricos (`@app/*`) y emulador `demo-local`, para que copiar el repo no requiera renombrar.
+  - La Fase 5 pasa a ser "Plantilla replicable y venta".
+- **1.4 (2026-09-28):** **un solo proyecto de Firebase por local** (`silverio-club`, producción); las pruebas se hacen en los emuladores y un `-dev` se agrega solo si hace falta. App Check pasa de la Fase 0 a la Fase 2 (necesita el dominio de producción).

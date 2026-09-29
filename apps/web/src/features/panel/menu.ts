@@ -1,10 +1,9 @@
 /** Menú lateral del panel según el rol (ROADMAP §6). */
-import type { Rol } from '@mimenu/shared';
+import type { Rol } from '@app/shared';
 import {
   BarChart3,
   ChefHat,
   ClipboardList,
-  CreditCard,
   Home,
   LayoutGrid,
   MapPin,
@@ -19,7 +18,7 @@ import {
 } from 'lucide-react';
 
 export interface ItemMenu {
-  ruta: string; // relativa a /panel/[localId]
+  ruta: string; // relativa a /panel
   titulo: string;
   icono: LucideIcon;
   roles: readonly Rol[];
@@ -43,15 +42,13 @@ export const MENU: readonly ItemMenu[] = [
   { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 2 },
   { ruta: 'configuracion', titulo: 'Configuración', icono: Settings, roles: ['dueno'], fase: 1 },
   { ruta: 'equipo', titulo: 'Equipo', icono: Users, roles: ['dueno'], fase: 0 },
-  { ruta: 'suscripcion', titulo: 'Suscripción', icono: CreditCard, roles: ['dueno'], fase: 5 },
 ];
 
 /** Fase actual del desarrollo: lo de fases posteriores aparece como "Pronto". */
 export const FASE_ACTUAL = 0;
 
-/** El superadmin (rol null en el local) ve todo el menú, en modo soporte. */
-export function menuPara(rol: Rol | null): ItemMenu[] {
-  return MENU.filter((i) => rol === null || i.roles.includes(rol));
+export function menuPara(rol: Rol): ItemMenu[] {
+  return MENU.filter((i) => i.roles.includes(rol));
 }
 
 export const NOMBRE_ROL: Record<Rol, string> = {

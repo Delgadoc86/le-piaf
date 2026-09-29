@@ -16,8 +16,9 @@ jobs:
     env:
       # La app compila contra los emuladores: CI nunca toca un proyecto real.
       NEXT_PUBLIC_USE_EMULATORS: 'true'
-      NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-mimenu
+      NEXT_PUBLIC_FIREBASE_PROJECT_ID: demo-local
       NEXT_PUBLIC_FIREBASE_API_KEY: demo-api-key
+      NEXT_PUBLIC_NOMBRE_LOCAL: CI
     steps:
       - uses: actions/checkout@v4
 

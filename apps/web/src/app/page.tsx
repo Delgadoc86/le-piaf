@@ -1,6 +1,6 @@
 import { redirect } from 'next/navigation';
 
-// Hasta la Fase 5 no hay landing comercial: la raíz lleva al panel (ROADMAP §9).
+// La raíz será la web pública del local (Fase 1). Mientras tanto, lleva al panel.
 export default function Home() {
   redirect('/panel');
 }

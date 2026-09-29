@@ -2,43 +2,48 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ArrowLeftRight, LogOut } from 'lucide-react';
+import { LogOut } from 'lucide-react';
+import type { Rol } from '@app/shared';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
-import type { LocalDeSesion } from '@/features/auth/sesion';
+import { NOMBRE_LOCAL } from '@/lib/local';
 import { FASE_ACTUAL, menuPara, NOMBRE_ROL } from '@/features/panel/menu';
 
 interface Props {
-  local: LocalDeSesion;
+  rol: Rol;
   email: string;
-  variosLocales: boolean;
   onCerrarSesion: () => void;
 }
 
 /** En escritorio es una barra lateral; en celular, una fila de pestañas con scroll horizontal. */
-export function BarraLateral({ local, email, variosLocales, onCerrarSesion }: Props) {
+export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
   const pathname = usePathname();
-  const base = `/panel/${local.id}`;
 
   return (
     <aside className="border-b bg-muted/30 md:sticky md:top-0 md:flex md:h-dvh md:w-60 md:flex-col md:border-r md:border-b-0">
       <div className="flex items-center justify-between gap-2 p-4">
         <div className="min-w-0">
-          <p className="truncate font-semibold">{local.nombre}</p>
+          <p className="truncate font-semibold">{NOMBRE_LOCAL}</p>
           <Badge variant="secondary" className="mt-1">
-            {local.rol ? NOMBRE_ROL[local.rol] : 'Soporte'}
+            {NOMBRE_ROL[rol]}
           </Badge>
         </div>
-        {variosLocales && (
-          <Link href="/panel" aria-label="Cambiar de local" className="rounded-md p-2 hover:bg-muted">
-            <ArrowLeftRight className="size-4" aria-hidden />
-          </Link>
-        )}
+        <button
+          type="button"
+          onClick={onCerrarSesion}
+          aria-label="Cerrar sesión"
+          className="rounded-md p-2 hover:bg-muted md:hidden"
+        >
+          <LogOut className="size-4" aria-hidden />
+        </button>
       </div>
 
-      <nav aria-label="Secciones del panel" className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-1 md:flex-col md:overflow-y-auto">
-        {menuPara(local.rol).map((item) => {
-          const href = item.ruta ? `${base}/${item.ruta}` : base;
+      <nav
+        aria-label="Secciones del panel"
+        className="flex gap-1 overflow-x-auto px-2 pb-2 md:flex-1 md:flex-col md:overflow-y-auto"
+      >
+        {menuPara(rol).map((item) => {
+          const href = item.ruta ? `/panel/${item.ruta}` : '/panel';
           const activo = pathname === href;
           const disponible = item.fase <= FASE_ACTUAL;
           const Icono = item.icono;
@@ -46,9 +51,7 @@ export function BarraLateral({ local, email, variosLocales, onCerrarSesion }: Pr
             <>
               <Icono className="size-4 shrink-0" aria-hidden />
               <span className="whitespace-nowrap">{item.titulo}</span>
-              {!disponible && (
-                <span className="ml-auto hidden text-xs text-muted-foreground md:inline">Pronto</span>
-              )}
+              {!disponible && <span className="ml-auto hidden text-xs text-muted-foreground md:inline">Pronto</span>}
             </>
           );
           const clases = 'flex items-center gap-2 rounded-md px-3 py-2 text-sm';

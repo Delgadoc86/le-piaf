@@ -1,37 +1,36 @@
 /**
- * Carga el local "silverio" (desde silverio/seed.json + assets) y un local "demo".
+ * Carga el local desde su kit (<kit>/seed.json + <kit>/assets; por defecto silverio/) y su equipo.
  * Es idempotente: se puede correr las veces que quieras (pisa los documentos).
  *
- *   pnpm seed                                  → emuladores (default)
- *   pnpm seed --proyecto mimenu-dev --si-estoy-seguro
+ *   pnpm seed                                          → emuladores (default)
+ *   pnpm seed --proyecto silverio-club --si-estoy-seguro
  */
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import {
   categoriaSchema,
   localEditableSchema,
-  localPorDefecto,
   productoSchema,
   promoSchema,
-  type ClaimsMiMenu,
+  DOC_LOCAL,
+  type ClaimsLocal,
   type LocalEditable,
   type ProductoDatos,
   type PromoDatos,
   type Rol,
-} from '@mimenu/shared';
-import { FieldValue, Timestamp } from 'firebase-admin/firestore';
-import { auth, db, destino } from './entorno.ts';
+} from '@app/shared';
+import { FieldValue } from 'firebase-admin/firestore';
+import { auth, db, destino, KIT } from './entorno.ts';
 import { subirAssets } from './subir-assets.ts';
 
 const raiz = fileURLToPath(new URL('../', import.meta.url));
-const CONTRASENA = 'mimenu123';
+const CONTRASENA = 'local123';
 const ahora = FieldValue.serverTimestamp();
 
 // ─── Tipos del seed.json (formato del proyecto viejo, ya normalizado) ─────────
 
 interface SeedJson {
   local: {
-    slug: string;
     nombre: string;
     nombreCorto: string;
     bajada: string;
@@ -76,7 +75,7 @@ function idDe(texto: string): string {
     .slice(0, 60);
 }
 
-/** Valida con el esquema de @mimenu/shared: si el seed tiene un dato mal, falla acá y no en la app. */
+/** Valida con el esquema de @app/shared: si el seed tiene un dato mal, falla acá y no en la app. */
 function validar<T>(esquema: { parse(d: unknown): T }, datos: unknown, que: string): T {
   try {
     return esquema.parse(datos);
@@ -86,89 +85,63 @@ function validar<T>(esquema: { parse(d: unknown): T }, datos: unknown, que: stri
   }
 }
 
-async function usuario(email: string, nombre: string, claims: ClaimsMiMenu): Promise<string> {
+async function usuario(email: string, nombre: string, claims: ClaimsLocal): Promise<string> {
   const existente = await auth.getUserByEmail(email).catch(() => null);
   const u =
     existente ?? (await auth.createUser({ email, password: CONTRASENA, displayName: nombre, emailVerified: true }));
   // Se setean acá para no depender de que el emulador de Functions esté corriendo;
   // en la app real los mantiene sincronizarClaims.
   await auth.setCustomUserClaims(u.uid, claims);
-  await db.doc(`usuarios/${u.uid}`).set({ email, nombre, creadoEn: ahora, claimsVersion: 1 }, { merge: true });
+  await db.doc(`usuarios/${u.uid}`).set({ email, nombre, claimsVersion: 1 }, { merge: true });
   return u.uid;
 }
 
-async function crearLocal(
-  localId: string,
-  slug: string,
-  datos: LocalEditable,
-  equipo: { email: string; nombre: string; rol: Rol }[],
-): Promise<void> {
-  const local = validar(localEditableSchema, datos, `locales/${localId}`);
-  const uids: { uid: string; email: string; nombre: string; rol: Rol }[] = [];
+async function guardarLocal(datos: LocalEditable, equipo: { email: string; nombre: string; rol: Rol }[]): Promise<void> {
+  const local = validar(localEditableSchema, datos, DOC_LOCAL);
+  if (!equipo.some((m) => m.rol === 'dueno')) throw new Error('El local no tiene dueño');
+  await db.doc(DOC_LOCAL).set({ ...local, actualizadoEn: ahora });
   for (const m of equipo) {
-    uids.push({ ...m, uid: await usuario(m.email, m.nombre, { l: { [localId]: m.rol } }) });
-  }
-  const dueno = uids.find((m) => m.rol === 'dueno');
-  if (!dueno) throw new Error(`El local ${localId} no tiene dueño`);
-
-  await db.doc(`locales/${localId}`).set({
-    ...local,
-    slug,
-    suscripcion: {
-      plan: 'completo',
-      estado: 'prueba',
-      pruebaHasta: Timestamp.fromMillis(Date.now() + 365 * 24 * 3600 * 1000),
-    },
-    duenoUid: dueno.uid,
-    creadoEn: ahora,
-    actualizadoEn: ahora,
-  });
-  await db.doc(`slugs/${slug}`).set({ localId });
-  for (const m of uids) {
-    await db
-      .doc(`locales/${localId}/miembros/${m.uid}`)
-      .set({ rol: m.rol, nombre: m.nombre, email: m.email, activo: true, creadoEn: ahora });
+    const uid = await usuario(m.email, m.nombre, { rol: m.rol });
+    await db.doc(`miembros/${uid}`).set({ rol: m.rol, nombre: m.nombre, email: m.email, activo: true, creadoEn: ahora });
   }
 }
 
-/** Borra una subcolección entera (para que el seed no deje productos viejos). */
+/** Borra una colección entera (para que el seed no deje productos viejos). */
 async function vaciar(ruta: string): Promise<void> {
   const docs = await db.collection(ruta).listDocuments();
   await Promise.all(docs.map((d) => d.delete()));
 }
 
 async function cargarCarta(
-  localId: string,
   categorias: ({ id: string } & Record<string, unknown>)[],
   productos: ({ id: string } & ProductoDatos)[],
   promos: ({ id: string } & PromoDatos)[],
 ): Promise<void> {
-  for (const col of ['categorias', 'productos', 'promos']) await vaciar(`locales/${localId}/${col}`);
+  for (const col of ['categorias', 'productos', 'promos']) await vaciar(col);
   const batch = db.batch();
   for (const { id, ...c } of categorias) {
-    batch.set(db.doc(`locales/${localId}/categorias/${id}`), validar(categoriaSchema, c, `categoria ${id}`));
+    batch.set(db.doc(`categorias/${id}`), validar(categoriaSchema, c, `categoria ${id}`));
   }
   for (const { id, ...p } of productos) {
-    batch.set(db.doc(`locales/${localId}/productos/${id}`), {
+    batch.set(db.doc(`productos/${id}`), {
       ...validar(productoSchema, p, `producto ${id}`),
       actualizadoEn: ahora,
     });
   }
   for (const { id, ...p } of promos) {
-    batch.set(db.doc(`locales/${localId}/promos/${id}`), validar(promoSchema, p, `promo ${id}`));
+    batch.set(db.doc(`promos/${id}`), validar(promoSchema, p, `promo ${id}`));
   }
   await batch.commit();
 }
 
-// ─── Silverio ─────────────────────────────────────────────────────────────────
+// ─── Local ────────────────────────────────────────────────────────────────────
 
-async function seedSilverio(): Promise<void> {
-  const seed = JSON.parse(readFileSync(`${raiz}silverio/seed.json`, 'utf8')) as SeedJson;
+async function seedLocal(): Promise<void> {
+  const seed = JSON.parse(readFileSync(`${raiz}${KIT}/seed.json`, 'utf8')) as SeedJson;
   const { local: s } = seed;
-  const localId = s.slug;
 
-  console.log('  · subiendo assets de silverio…');
-  const url = await subirAssets(localId);
+  console.log(`  · subiendo assets de ${KIT}/…`);
+  const url = await subirAssets();
   const foto = (rel: string | undefined) => (rel ? (url.get(rel) ?? '') : '');
 
   const local: LocalEditable = {
@@ -220,17 +193,6 @@ async function seedSilverio(): Promise<void> {
         { tipo: 'galeria', visible: true, orden: 5 },
         { tipo: 'ubicacion', visible: true, orden: 6 },
       ],
-      // Reproduce el lenguaje visual de la web actual (SILVERIO.md §1).
-      estilo: {
-        hero: 'pantalla_completa',
-        promos: 'carrusel',
-        carta: 'lista',
-        nosotros: 'clasico',
-        bordes: 'redondeado',
-        titulosSeccion: 'overline',
-        separadores: 'degradado',
-        botones: 'pulso',
-      },
       hero: { bajada: 'FOOD TRUCK & BEER', titulo: 'SILVERIO', textoBoton: 'Ver Promos' },
       nosotros: {
         titulo: 'Nuestra Historia',
@@ -283,15 +245,16 @@ async function seedSilverio(): Promise<void> {
     pagos: {
       efectivo: true,
       transferencia: { habilitado: false, alias: '', titular: '' }, // pendiente de confirmar
-      mercadoPago: { habilitado: false, conectado: false },
+      mercadoPago: { habilitado: false },
     },
   };
 
-  await crearLocal(localId, s.slug, local, [
-    { email: 'dueno@silverio.test', nombre: 'Dueño Silverio', rol: 'dueno' },
-    { email: 'encargado@silverio.test', nombre: 'Encargado Silverio', rol: 'encargado' },
-    { email: 'mozo@silverio.test', nombre: 'Mozo Silverio', rol: 'mozo' },
-    { email: 'cocina@silverio.test', nombre: 'Cocina Silverio', rol: 'cocina' },
+  // Equipo de prueba. Con datos reales, el dueño invita al resto desde Panel → Equipo.
+  await guardarLocal(local, [
+    { email: 'dueno@local.test', nombre: 'Dueño (prueba)', rol: 'dueno' },
+    { email: 'encargado@local.test', nombre: 'Encargado (prueba)', rol: 'encargado' },
+    { email: 'mozo@local.test', nombre: 'Mozo (prueba)', rol: 'mozo' },
+    { email: 'cocina@local.test', nombre: 'Cocina (prueba)', rol: 'cocina' },
   ]);
 
   const productos = seed.productos.map((p) => {
@@ -328,171 +291,15 @@ async function seedSilverio(): Promise<void> {
     ...(c.icono ? { icono: c.icono } : {}),
   }));
 
-  await cargarCarta(localId, categorias, productos, promos);
-  console.log(`  ✓ silverio: ${categorias.length} categorías, ${productos.length} productos, ${promos.length} promos`);
-}
-
-// ─── Demo ─────────────────────────────────────────────────────────────────────
-
-async function seedDemo(): Promise<void> {
-  const localId = 'demo';
-  const base = localPorDefecto({ nombre: 'La Esquina Demo' });
-  await crearLocal(
-    localId,
-    'demo',
-    {
-      ...base,
-      descripcionCorta: 'Local de demostración de MiMenu.',
-      contacto: { whatsapp: '5492610000000' },
-      horarios: [{ dias: [0, 1, 2, 3, 4, 5, 6], desde: '12:00', hasta: '00:00' }],
-      // Deliberadamente distinto de Silverio: claro, verde, tarjetas y bordes rectos.
-      marca: {
-        ...base.marca,
-        colorPrimario: '#15803d',
-        colorPrimarioHover: '#166534',
-        fuenteTitulos: 'Playfair Display',
-        fuenteTexto: 'Inter',
-      },
-      web: {
-        ...base.web,
-        estilo: {
-          hero: 'partido',
-          promos: 'grilla',
-          carta: 'tarjetas',
-          nosotros: 'destacado',
-          bordes: 'recto',
-          titulosSeccion: 'simple',
-          separadores: 'linea',
-          botones: 'contorno',
-        },
-      },
-      pedidos: { ...base.pedidos, habilitados: true, tipos: { takeAway: true, delivery: true, salon: true } },
-    },
-    [{ email: 'dueno@demo.test', nombre: 'Dueño Demo', rol: 'dueno' }],
-  );
-
-  await cargarCarta(
-    localId,
-    [
-      { id: 'hamburguesas', nombre: 'Hamburguesas', orden: 1, visible: true },
-      { id: 'bebidas', nombre: 'Bebidas', orden: 2, visible: true },
-    ],
-    [
-      {
-        id: 'clasica',
-        categoriaId: 'hamburguesas',
-        nombre: 'Hamburguesa clásica',
-        descripcion: 'Medallón de 180 g, lechuga, tomate y aderezo de la casa.',
-        precio: 0,
-        orden: 1,
-        visible: true,
-        disponible: true,
-        estacion: 'cocina',
-        etiquetas: ['recomendado'],
-        variantes: [
-          { id: 'simple', nombre: 'Simple', precio: 8500 },
-          { id: 'doble', nombre: 'Doble', precio: 11000 },
-        ],
-        gruposExtras: [
-          {
-            id: 'guarnicion',
-            nombre: 'Guarnición',
-            min: 1,
-            max: 1,
-            opciones: [
-              { id: 'papas', nombre: 'Papas fritas', precio: 0, disponible: true },
-              { id: 'batatas', nombre: 'Batatas fritas', precio: 800, disponible: true },
-            ],
-          },
-          {
-            id: 'extras',
-            nombre: 'Agregados',
-            min: 0,
-            max: 3,
-            opciones: [
-              { id: 'cheddar', nombre: 'Cheddar', precio: 900, disponible: true },
-              { id: 'bacon', nombre: 'Bacon', precio: 1200, disponible: true },
-              { id: 'huevo', nombre: 'Huevo', precio: 600, disponible: false },
-            ],
-          },
-        ],
-      },
-      {
-        id: 'veggie',
-        categoriaId: 'hamburguesas',
-        nombre: 'Hamburguesa veggie',
-        descripcion: 'Medallón de lentejas y quinoa.',
-        precio: 9000,
-        orden: 2,
-        visible: true,
-        disponible: false,
-        estacion: 'cocina',
-        etiquetas: ['vegetariano'],
-      },
-      {
-        id: 'cerveza',
-        categoriaId: 'bebidas',
-        nombre: 'Cerveza tirada',
-        descripcion: 'Pinta de 500 ml.',
-        precio: 4500,
-        orden: 1,
-        visible: true,
-        disponible: true,
-        estacion: 'barra',
-      },
-    ],
-    [
-      {
-        id: 'combo',
-        titulo: 'Clásica + cerveza',
-        descripcion: 'Hamburguesa clásica simple con papas y una pinta.',
-        precio: 12000,
-        orden: 1,
-        activa: true,
-        items: [
-          { productoId: 'clasica', varianteId: 'simple', cantidad: 1 },
-          { productoId: 'cerveza', cantidad: 1 },
-        ],
-        vigencia: { dias: [1, 2, 3, 4], desde: '19:00', hasta: '21:00' },
-      },
-    ],
-  );
-  console.log('  ✓ demo: 2 categorías, 3 productos, 1 promo');
-}
-
-// ─── Plataforma ───────────────────────────────────────────────────────────────
-
-async function seedPlataforma(): Promise<void> {
-  // Los precios reales se definen en la Fase 5.
-  await db.doc('plataforma/config').set({
-    diasPrueba: 14,
-    planes: {
-      carta: { nombre: 'Carta', precioMensual: 0, limites: { productos: 150, usuarios: 2, mesas: 0 }, features: [] },
-      pedidos: {
-        nombre: 'Pedidos',
-        precioMensual: 0,
-        limites: { productos: 300, usuarios: 5, mesas: 0 },
-        features: ['pedidos_online', 'mercadopago'],
-      },
-      completo: {
-        nombre: 'Completo',
-        precioMensual: 0,
-        limites: { productos: 1000, usuarios: 20, mesas: 60 },
-        features: ['pedidos_online', 'mercadopago', 'salon', 'cocina', 'caja', 'reportes'],
-      },
-    },
-  });
-  await usuario('admin@mimenu.test', 'Superadmin', { sa: true });
-  await db.doc('usuarios/' + (await auth.getUserByEmail('admin@mimenu.test')).uid).set({ superAdmin: true }, { merge: true });
+  await cargarCarta(categorias, productos, promos);
+  console.log(`  ✓ ${s.nombre}: ${categorias.length} categorías, ${productos.length} productos, ${promos.length} promos`);
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────
 
 console.log(`🌱 Seed en ${destino()}`);
-await seedPlataforma();
-await seedSilverio();
-await seedDemo();
-console.log(`\n✅ Listo. Usuarios (contraseña "${CONTRASENA}"):
-   dueno@silverio.test · encargado@silverio.test · mozo@silverio.test · cocina@silverio.test
-   dueno@demo.test · admin@mimenu.test (superadmin)`);
+await seedLocal();
+console.log(`
+✅ Listo. Usuarios (contraseña "${CONTRASENA}"):
+   dueno@local.test · encargado@local.test · mozo@local.test · cocina@local.test`);
 process.exit(0);

@@ -1,27 +1,24 @@
 rules_version = '2';
 
-// MiMenu: reglas de Storage v1 (ROADMAP §7).
-// Imágenes del local: lectura pública; escriben solo dueño/encargado, imágenes de hasta 2 MB.
+// Reglas de Storage v1 (ROADMAP §7).
+// Imágenes del local (imagenes/**): lectura pública; escriben solo dueño/encargado, imágenes de hasta 2 MB.
 // No se aceptan SVG subidos por usuarios (pueden llevar scripts). Tests en tests/reglas/storage.test.ts.
 
 service firebase.storage {
   match /b/{bucket}/o {
 
-    function signedIn() { return request.auth != null; }
-    function esSA() { return signedIn() && request.auth.token.get('sa', false) == true; }
-    function esGestor(localId) {
-      return (signedIn() && request.auth.token.get('l', {}).get(localId, null) in ['dueno', 'encargado'])
-        || esSA();
+    function esGestor() {
+      return request.auth != null && request.auth.token.get('rol', null) in ['dueno', 'encargado'];
     }
     function esImagenValida() {
       return request.resource.size <= 2 * 1024 * 1024
         && request.resource.contentType.matches('image/(webp|jpeg|png|avif|gif)');
     }
 
-    match /locales/{localId}/{ruta=**} {
+    match /imagenes/{ruta=**} {
       allow read: if true;
-      allow create, update: if esGestor(localId) && esImagenValida();
-      allow delete: if esGestor(localId);
+      allow create, update: if esGestor() && esImagenValida();
+      allow delete: if esGestor();
     }
 
     // Todo lo demás, denegado.

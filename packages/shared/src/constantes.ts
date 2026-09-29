@@ -1,5 +1,14 @@
 /** Constantes del dominio. Los tipos se derivan de estos arrays para no duplicar listas. */
 
+/**
+ * Documento único con los datos del local. Cada repo es UN local (ROADMAP §3):
+ * no hay locales/{id}; todo lo demás cuelga de la raíz de Firestore.
+ */
+export const DOC_LOCAL = 'local/datos';
+
+/** Carpeta de Storage para las imágenes públicas del local. */
+export const CARPETA_IMAGENES = 'imagenes';
+
 export const ROLES = ['dueno', 'encargado', 'mozo', 'cocina'] as const;
 export type Rol = (typeof ROLES)[number];
 
@@ -76,19 +85,6 @@ export type EstadoMesa = (typeof ESTADOS_MESA)[number];
 export const SECCIONES_WEB = ['hero', 'promos', 'carta', 'nosotros', 'galeria', 'ubicacion'] as const;
 export type SeccionWeb = (typeof SECCIONES_WEB)[number];
 
-/** Variantes de diseño de la web pública (§11 "Diseño por local"). El primer valor es el default. */
-export const VARIANTES_ESTILO = {
-  hero: ['pantalla_completa', 'partido', 'compacto'],
-  promos: ['carrusel', 'grilla'],
-  carta: ['lista', 'tarjetas', 'fotos'],
-  nosotros: ['clasico', 'destacado'],
-  bordes: ['redondeado', 'recto', 'pill'],
-  titulosSeccion: ['simple', 'overline'],
-  separadores: ['ninguno', 'linea', 'degradado'],
-  botones: ['solido', 'contorno', 'pulso'],
-} as const;
-export type EstiloWeb = { [K in keyof typeof VARIANTES_ESTILO]: (typeof VARIANTES_ESTILO)[K][number] };
-
 /** Lista curada de fuentes (§11). Se precargan con next/font. */
 export const FUENTES = [
   'Sriracha',
@@ -102,35 +98,8 @@ export const FUENTES = [
 ] as const;
 export type FuenteId = (typeof FUENTES)[number];
 
-export const PLANES = ['carta', 'pedidos', 'completo'] as const;
-export type PlanId = (typeof PLANES)[number];
-
-export const ESTADOS_SUSCRIPCION = ['prueba', 'activa', 'en_mora', 'suspendida', 'cancelada'] as const;
-export type EstadoSuscripcion = (typeof ESTADOS_SUSCRIPCION)[number];
-
 export const CATEGORIAS_MOVIMIENTO = ['proveedor', 'cambio', 'retiro', 'otro'] as const;
 export type CategoriaMovimiento = (typeof CATEGORIAS_MOVIMIENTO)[number];
-
-export const ZONA_HORARIA_DEFAULT = 'America/Argentina/Mendoza';
-
-/** Slug: minúsculas, números y guiones; 3 a 40 caracteres; sin guion al inicio ni al final. */
-export const REGEX_SLUG = /^[a-z0-9](?:[a-z0-9-]{1,38})[a-z0-9]$/;
-
-/** Slugs que chocan con rutas de la app y no se pueden usar para un local. */
-export const SLUGS_RESERVADOS = [
-  'admin',
-  'api',
-  'panel',
-  'login',
-  'registro',
-  'ayuda',
-  'precios',
-  'terminos',
-  'privacidad',
-  '_next',
-] as const;
-
-export const DIAS_PRUEBA_DEFAULT = 14;
 
 /** Límites de una línea de pedido. */
 export const CANTIDAD_MAXIMA_ITEM = 99;
