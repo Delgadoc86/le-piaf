@@ -1,6 +1,6 @@
 node_modules/
-dist/
-lib/
+/packages/*/dist/
+/functions/lib/
 .next/
 out/
 coverage/
