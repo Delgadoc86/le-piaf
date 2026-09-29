@@ -50,17 +50,20 @@ export const MENU: readonly ItemMenu[] = [
   { ruta: 'promos', titulo: 'Promos', icono: Percent, roles: GESTORES, fase: 1 },
   { ruta: 'qr', titulo: 'QR de la carta', icono: QrCode, roles: GESTORES, fase: 1 },
   { ruta: 'mesas', titulo: 'Mesas', icono: LayoutGrid, roles: GESTORES, fase: 3 },
-  { ruta: 'zonas', titulo: 'Zonas de delivery', icono: MapPin, roles: GESTORES, fase: 2 },
+  { ruta: 'zonas', titulo: 'Zonas de delivery', icono: MapPin, roles: GESTORES, fase: 9 },
   { ruta: 'reportes', titulo: 'Reportes', icono: BarChart3, roles: GESTORES, fase: 4 },
-  { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 2 },
+  { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 9 },
   { ruta: 'configuracion', titulo: 'Configuración', icono: Settings, roles: ['dueno'], fase: 1 },
 ];
 
-/** Fase actual del desarrollo: lo de fases posteriores aparece como "Pronto". */
-export const FASE_ACTUAL = 1;
+/**
+ * Fase actual del desarrollo. Lo de fases posteriores no se muestra (panel mínimo: nada de
+ * secciones "Pronto" que confunden). Fase 9 = "después, según la demanda" (ROADMAP §12).
+ */
+export const FASE_ACTUAL = 2;
 
 export function menuPara(rol: Rol): ItemMenu[] {
-  return MENU.filter((i) => i.roles.includes(rol));
+  return MENU.filter((i) => i.roles.includes(rol) && i.fase <= FASE_ACTUAL);
 }
 
 export const NOMBRE_ROL: Record<Rol, string> = {

@@ -268,20 +268,23 @@ mesas/{mesaId}
   pedidoActualId?, qrToken                     // qrToken rota al cerrar la mesa
 
 pedidos/{pedidoId}
-  numero: number                               // correlativo diario: #1, #2…
+  numero: number                               // correlativo por jornada: #1, #2…
+  jornada: "YYYY-MM-DD"                        // jornada del local (corte 06:00: la madrugada es del día anterior)
   tipo: "take_away"|"delivery"|"salon"
   origen: "web"|"qr_mesa"|"mozo"|"mostrador"|"telefono"
   estado: EstadoPedido                         // ver máquina de estados
-  cliente?: { nombre, telefono }
-  entrega?: { direccion, referencia?, zonaId, costo: $ }
+  cliente?: { nombre, telefono? }              // en mostrador puede no haber datos
+  entrega?: { direccion, referencia?, zonaId?, costo: $ }
+  pagoElegido: { medio: "efectivo"|"transferencia", pagaCon?: $ }   // lo que eligió el cliente
+  nota?
   mesaId?, mozoUid?, comensales?
   items: {
-    id, productoId, nombre, varianteNombre?, extras: {nombre, precio}[],
+    id, tipo: "producto"|"promo", productoId (o promoId), nombre, varianteNombre?, extras: {nombre, precio}[],
     precioUnitario: $, cantidad, nota?, subtotal: $,
     estacion, ronda: number, estadoCocina: "pendiente"|"preparando"|"listo"
   }[]
   subtotal: $, descuento: $, costoEnvio: $, total: $
-  pagos: { medio: "efectivo"|"transferencia"|"mercadopago"|"tarjeta", monto: $, estado: "pendiente"|"aprobado"|"rechazado", mpPaymentId?, pagaCon?: $ }[]
+  pagos: { medio: "efectivo"|"transferencia"|"mercadopago"|"tarjeta", monto: $, estado: "pendiente"|"aprobado"|"rechazado", mpPaymentId?, pagaCon?: $, porUid? }[]   // lo cobrado de verdad
   estadoPago: "pendiente"|"parcial"|"pagado"
   turnoCajaId?
   tiempoEstimadoMin?, motivoCancelacion?
@@ -290,10 +293,11 @@ pedidos/{pedidoId}
   historial: { estado, en: ts, porUid? }[]
   creadoEn: ts, actualizadoEn: ts
 
-seguimiento/{token}                            // espejo PÚBLICO mínimo (get sí, list no)
-  numero, estado, tipo, tiempoEstimadoMin, actualizadoEn, localNombre
+seguimiento/{token}                            // espejo PÚBLICO mínimo (get sí, list no); sin teléfono ni dirección
+  numero, estado, tipo, tiempoEstimadoMin, motivoCancelacion?, items: {nombre, cantidad}[], total: $,
+  medioPago, estadoPago, creadoEn, actualizadoEn, localNombre
 
-contadores/{YYYY-MM-DD}
+contadores/{jornada}                           // YYYY-MM-DD de la jornada (corte 06:00)
   ultimoNumero
 
 clientes/{telefono}
@@ -323,11 +327,14 @@ auditoria/{id}                                 // cambios sensibles (precios mas
 ### Máquina de estados del pedido
 
 ```
-web / qr / mostrador:
-  pendiente ──aceptar──▶ aceptado ──▶ en_preparacion ──▶ listo ──┬──▶ entregado   (take away / salón)
+web / qr:
+  pendiente ──aceptar──▶ (aceptado) ──▶ en_preparacion ──▶ listo ──┬──▶ entregado   (take away / salón)
       │                                                          └──▶ en_camino ──▶ entregado (delivery)
       └──rechazar──▶ rechazado
   (cualquier estado previo a entregado) ──cancelar(motivo)──▶ cancelado
+mostrador / teléfono (carga manual): arranca en en_preparacion.
+"Aceptar" en el panel lleva directo a en_preparacion; "aceptado" queda por compatibilidad.
+Transiciones y paso siguiente: packages/shared/src/pedidos.ts (puedePasar, siguienteEstado).
 
 salón (mozo): abierto ──(rondas a cocina)──▶ cuenta_pedida ──cobrar──▶ cerrado
 ```
@@ -410,9 +417,9 @@ service cloud.firestore {
 | `invitarMiembro` | callable | Solo el dueño. Crea o busca el usuario por email, crea `miembros` y devuelve un link para elegir contraseña (el dueño lo manda por WhatsApp) | 0 |
 | `revalidarWeb` | triggers `revalidarLocal`, `revalidarCategorias`, `revalidarProductos`, `revalidarPromos` | POST a `/api/revalidate` con secreto → `revalidateTag('carta', { expire: 0 })` | 1 |
 | `ajustarPrecios` | callable (dueño/encargado) | Actualización masiva con `planAjuste` (mismo cálculo que la vista previa), lotes de 500 y registro en `auditoria` | 1 |
-| `crearPedido` | callable (App Check) | Valida el esquema zod, local activo y abierto, disponibilidad, zona y mínimo; **recalcula precios** con `packages/shared/precios.ts`; número correlativo por transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`; si paga con MP, crea la preferencia y devuelve `init_point` | 2 |
-| `espejarSeguimiento` | trigger `pedidos` onUpdate | Actualiza `seguimiento/{token}` | 2 |
-| `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | 2 |
+| `crearPedido` | callable (App Check pendiente) | Web: valida el esquema zod, local activo, abierto y sin pausa, tipo y medio habilitados, promos vigentes, disponibilidad y mínimo; límite de 1 pedido por minuto por teléfono. Staff (`origen` mostrador/teléfono, rol dueño, encargado o mozo): sin esas reglas, puede registrar el pago. Siempre **recalcula precios** con `packages/shared/precios.ts`; número correlativo por jornada en transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`. (Con MP, más adelante: crea la preferencia y devuelve `init_point`) | 2 |
+| `espejarSeguimiento` | trigger `pedidos` onUpdate | Copia a `seguimiento/{token}` estado, demora, motivo y estado del pago | 2 |
+| `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | después |
 | `contabilizarPedido` | trigger `pedidos` onUpdate | Al cerrar o entregar y estar pagado: suma en `statsDiarias` y en el `turnosCaja` abierto (con `contabilizado` como candado) | 4 |
 | `revertirContabilizacion` | trigger `pedidos` onUpdate | Si un pedido contabilizado se cancela, resta | 4 |
 | `limpiezaDiaria` | scheduled | Rota los `qrToken` de mesas libres, archiva seguimientos viejos | 3 |
@@ -548,45 +555,55 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 ✅ **Listo cuando:** la web de Silverio corre en producción, el dueño cambió precios y marcó agotados solo, y Lighthouse móvil da ≥ 90 en rendimiento y SEO.
 
+> **Excepción (2026-09-29):** Silverio está en producción como **demo**. Los datos finales (carta y precios reales, dirección nueva, horarios confirmados, dominio) quedan pendientes y se avanzó a la Fase 2 por pedido explícito. Las casillas de arriba se cierran cuando el dueño valide la demo.
+
 ---
 
 ### Fase 2: Pedidos online (3–4 semanas), el corazón del producto
 
+**Alcance mínimo (1.8):** cobros **manuales**. El cliente elige efectivo o transferencia y el local marca "pagado" en el panel. Mercado Pago, zonas con costo, impresión, pausa de pedidos y lista de clientes pasan a "Después" (abajo), sin fecha, cuando algún local los pida.
+
 **Cliente**
 - [x] Modal de producto: variante, extras (respeta mín/máx), cantidad y nota. *(hecho en la Fase 1)*
 - [x] Carrito: drawer persistente, editar y quitar, subtotal en vivo con `precios.ts`. *(hecho en la Fase 1)*
-- [ ] Checkout: *(formulario hecho en la Fase 1 y enviado por WhatsApp; falta conectarlo a `crearPedido`, zonas con costo y Mercado Pago)*
-  - tipo (take away, delivery o salón según config), nombre y teléfono;
-  - delivery: dirección, referencia y selector de zona con costo;
+- [x] Checkout con `crearPedido`:
+  - tipo (take away, delivery o salón según config), nombre y **WhatsApp** (se normaliza a 549…);
+  - delivery: dirección y referencia (sin zonas: el envío se arregla con el local);
   - pedido mínimo;
-  - medio de pago: efectivo ("¿con cuánto pagás?"), transferencia (muestra alias y titular) o Mercado Pago.
-- [ ] Si el local está cerrado o pausado, no se puede confirmar y se explica por qué.
-- [ ] Confirmación con número de pedido, link de seguimiento y botón opcional "Avisar por WhatsApp" con el mensaje armado.
-- [ ] Seguimiento `/pedido/[token]`: estado en tiempo real, tiempo estimado y datos del local.
+  - medio de pago: efectivo ("¿con cuánto pagás?") o transferencia (muestra alias y titular).
+- [x] Si el local está cerrado, no se puede confirmar y se explica por qué (el servidor además valida pausa, pedidos habilitados, tipo y medio de pago).
+- [x] Confirmación con número de pedido, link de seguimiento y botón opcional "Avisar por WhatsApp" (o "Mandar comprobante" si paga por transferencia).
+- [x] Seguimiento `/pedido/[token]`: estado en tiempo real, demora estimada, ítems, total, cómo pagar y datos del local (`noindex`).
 
 **Backend**
-- [ ] App Check (reCAPTCHA Enterprise) registrado con el dominio de producción.
-- [ ] `crearPedido` (ver §8) con App Check obligatorio y límite de frecuencia por teléfono.
-- [ ] `espejarSeguimiento`.
-- [ ] Mercado Pago con las credenciales del local (Secret Manager): preferencia de Checkout Pro, `mpWebhookPedidos` con validación de firma, y conciliación del estado del pago.
+- [x] `crearPedido` (ver §8): valida, recalcula precios, número correlativo **por jornada** (corte 06:00), `seguimiento` y `clientes`; límite de 1 pedido por minuto por teléfono. También lo usa el panel para la carga manual.
+- [x] `espejarSeguimiento`.
+- [ ] App Check (reCAPTCHA Enterprise) registrado con el dominio de producción, y `enforceAppCheck` en `crearPedido`.
 
 **Panel de pedidos**
-- [ ] Tablero kanban (Nuevos · En preparación · Listos · En camino) y lista del día con filtros.
-- [ ] **Sonido y notificación del navegador** al entrar un pedido (con botón para activar sonido, que el navegador exige, y aviso si está silenciado).
-- [ ] Aceptar (con tiempo estimado), rechazar o cancelar con motivo, avanzar de estado.
-- [ ] Detalle con los ítems, extras y notas bien visibles, datos del cliente, links a WhatsApp y Maps.
-- [ ] Mensajes rápidos por WhatsApp según el estado ("Tu pedido #12 está listo 🙌").
-- [ ] Marcar transferencia verificada y registrar el pago en efectivo.
-- [ ] **Carga manual** de pedidos (mostrador o teléfono) con la misma UI de carta, pensada para usar rápido.
-- [ ] Pausar pedidos (15, 30 o 60 min), abrir y cerrar manualmente, ajustar el tiempo de espera.
-- [ ] Imprimir ticket y comanda desde el navegador (CSS `@media print` para 58 y 80 mm).
-- [ ] Zonas de delivery: alta, baja, modificación.
-- [ ] Clientes: lista con historial básico (se completa sola con los pedidos).
+- [x] Tablero (Nuevos · En preparación · Listos/en camino) de la jornada, en columnas en PC y pestañas en el celular; terminados plegados.
+- [x] **Sonido** al entrar un pedido (botón para activarlo, que el navegador exige) y contador en la pestaña.
+- [x] Aceptar (va directo a preparación), avanzar de estado, rechazar o cancelar con motivo (lo ve el cliente), ajustar la demora.
+- [x] Detalle con ítems, extras y notas bien visibles, datos del cliente, links a WhatsApp y Maps.
+- [x] Mensajes rápidos por WhatsApp según el estado ("Tu pedido #12 está listo para retirar 🙌").
+- [x] **Cobrar**: efectivo (con vuelto) o transferencia, pagos parciales y "deshacer cobro". Totales del día: efectivo, transferencias y por cobrar.
+- [x] **Carga manual** de pedidos (mostrador o teléfono): carta con buscador, variantes y extras, "ya pagó". Entra directo a preparación.
+- [x] El menú del panel muestra solo lo que ya existe (nada de secciones "Pronto").
 
 **Calidad**
-- [ ] Tests e2e con Playwright: pedido take away en efectivo, delivery con zona, y pago con MP en sandbox.
+- [x] Tests de `pedidos.ts` (estados, pagos, jornada) y del esquema de `crearPedido`.
+- [x] Prueba punta a punta en los emuladores: pedido web → panel → cobro → seguimiento.
 
-✅ **Listo cuando:** Silverio toma **todos sus pedidos de un fin de semana** por la web sin perder ninguno, y cobra al menos uno con Mercado Pago.
+**Después (cuando un local lo pida)**
+- [ ] Mercado Pago con las credenciales del local (Secret Manager): Checkout Pro, `mpWebhookPedidos` con validación de firma y conciliación.
+- [ ] Zonas de delivery con costo (alta, baja, modificación) y selector en el checkout.
+- [ ] Pausar pedidos (15, 30 o 60 min) y abrir o cerrar a mano desde el panel.
+- [ ] Imprimir ticket y comanda (CSS `@media print` para 58 y 80 mm).
+- [ ] Clientes: lista con historial básico (los datos ya se guardan en `clientes`).
+- [ ] Notificación del navegador con la pestaña en segundo plano.
+- [ ] Tests e2e con Playwright.
+
+✅ **Listo cuando:** Silverio toma **todos sus pedidos de un fin de semana** por la web y el mostrador sin perder ninguno, y cierra el día sabiendo cuánto entró en efectivo y cuánto por transferencia.
 
 ---
 
@@ -786,3 +803,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
 - **1.5 (2026-09-29):** la web pública pasa a ser una **experiencia de app de pedidos** (portada compacta, promos en mosaico, carta con "+", hoja de producto, carrito). El **carrito se adelanta de la Fase 2 a la Fase 1**, con el pedido enviado por WhatsApp como paso intermedio hasta `crearPedido`. Se suma `zustand` (ya previsto en §2).
 - **1.6 (2026-09-29):** panel de **carta** (productos, categorías, aumento masivo con vista previa), **promos** y **configuración** (local, horarios, marca con contraste, web, pedidos y pagos). Functions `ajustarPrecios` y `revalidarWeb`: los cambios del panel se ven en la web en segundos. `pedidos.habilitados` apagado = web en modo carta (sin carrito). Se suman `browser-image-compression` y `@dnd-kit` (ya previstos en §2).
 - **1.7 (2026-09-29):** **panel mínimo**. Configuración reducida a contacto, redes y horarios; salen del panel marca, textos de la web, pedidos y pagos, y la página Equipo. Se suma el **banner de fecha especial** (PC y celular, con fechas). Todas las imágenes a WebP. En productos, lo avanzado queda plegado en "Más opciones"; el QR queda con menos opciones. También: página 404, robots, sitemap, imagen para compartir generada y mensaje de WhatsApp configurable por datos.
+- **1.8 (2026-09-29):** **Fase 2 mínima con cobros manuales**. Silverio queda en producción como demo (excepción a la Fase 1). El checkout crea el pedido con `crearPedido` (WhatsApp pasa a ser un aviso opcional), hay seguimiento en vivo en `/pedido/[token]` y el panel suma **Pedidos**: tablero de la jornada, sonido, estados, cobro en efectivo o transferencia con totales del día y carga manual de mostrador o teléfono. La numeración y los totales van por **jornada** (corte 06:00). Mercado Pago, zonas con costo, pausa, impresión y clientes pasan a "Después". El menú del panel oculta lo que todavía no existe.

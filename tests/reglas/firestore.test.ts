@@ -5,6 +5,7 @@ import {
 } from '@firebase/rules-unit-testing';
 import {
   addDoc,
+  arrayUnion,
   collection,
   deleteDoc,
   doc,
@@ -42,6 +43,7 @@ const pedido = {
   descuento: 0,
   costoEnvio: 0,
   total: 9000,
+  pagoElegido: { medio: 'efectivo' },
   pagos: [],
   estadoPago: 'pendiente',
   seguimientoToken: 'tok123',
@@ -66,6 +68,12 @@ beforeEach(async () => {
     await setDoc(doc(f, 'categorias', 'c1'), { nombre: 'Hamburguesas', orden: 1, visible: true });
     await setDoc(doc(f, 'pedidos', 'ped1'), pedido);
     await setDoc(doc(f, 'pedidos', 'salon1'), { ...pedido, tipo: 'salon', estado: 'abierto' });
+    await setDoc(doc(f, 'pedidos', 'mostrador1'), {
+      ...pedido,
+      origen: 'mostrador',
+      estado: 'en_preparacion',
+      mozoUid: 'mozo',
+    });
     await setDoc(doc(f, 'seguimiento', 'tok123'), { numero: 1, estado: 'pendiente' });
     await setDoc(doc(f, 'privado', 'mercadopago'), { accessToken: 'secreto' });
     await setDoc(doc(f, 'statsDiarias', '2026-10-02'), { ventas: 100 });
@@ -298,10 +306,33 @@ describe('pedidos', () => {
     await assertFails(updateDoc(ref, { estado: 'inventado' }));
   });
 
-  it('el mozo gestiona salón pero no pedidos web ajenos', async () => {
+  it('el panel registra cambios de estado con historial y cobros manuales', async () => {
+    const ref = doc(db('dueno'), 'pedidos', 'ped1');
+    await assertSucceeds(
+      updateDoc(ref, {
+        estado: 'en_preparacion',
+        historial: arrayUnion({ estado: 'en_preparacion', en: new Date(), porUid: 'dueno' }),
+        actualizadoEn: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(
+      updateDoc(ref, {
+        pagos: [{ medio: 'transferencia', monto: 9000, estado: 'aprobado', porUid: 'dueno' }],
+        estadoPago: 'pagado',
+        actualizadoEn: serverTimestamp(),
+      }),
+    );
+    await assertSucceeds(updateDoc(ref, { estado: 'cancelado', motivoCancelacion: 'Sin stock' }));
+    // Lo que eligió el cliente y los datos del pedido no se reescriben desde el panel.
+    await assertFails(updateDoc(ref, { pagoElegido: { medio: 'transferencia' } }));
+    await assertFails(updateDoc(ref, { cliente: { nombre: 'Otro' } }));
+  });
+
+  it('el mozo gestiona salón y los pedidos que cargó él, pero no pedidos web ajenos', async () => {
     await assertSucceeds(
       updateDoc(doc(db('mozo'), 'pedidos', 'salon1'), { estado: 'cuenta_pedida' }),
     );
+    await assertSucceeds(updateDoc(doc(db('mozo'), 'pedidos', 'mostrador1'), { estado: 'listo' }));
     await assertFails(updateDoc(doc(db('mozo'), 'pedidos', 'ped1'), { estado: 'aceptado' }));
   });
 

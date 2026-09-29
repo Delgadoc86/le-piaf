@@ -81,3 +81,18 @@ describe('mensajePedidoWhatsApp', () => {
     expect(m).not.toContain('pago con');
   });
 });
+
+describe('mensajePedidoWhatsApp con pedido creado', () => {
+  it('lleva el número y el link de seguimiento', () => {
+    const m = mensajePedidoWhatsApp('Silverio', totales, {
+      nombre: 'Juan',
+      tipo: 'take_away',
+      pago: 'transferencia',
+      numero: 12,
+      linkSeguimiento: 'https://x.test/pedido/abc',
+    });
+    expect(m).toContain('Te hice el pedido *#12* por la web');
+    expect(m).toContain('Pago: Transferencia');
+    expect(m.trim().endsWith('Seguimiento: https://x.test/pedido/abc')).toBe(true);
+  });
+});

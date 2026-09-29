@@ -274,7 +274,7 @@ async function seedLocal(): Promise<void> {
       ga4Id: 'G-8CN2SBDQ5R',
     },
     pedidos: {
-      habilitados: true, // carrito + pedido por WhatsApp (el dueño lo puede apagar desde el panel)
+      habilitados: true, // carrito + pedido con crearPedido (sale en el panel → Pedidos)
       tipos: { takeAway: true, delivery: false, salon: false },
       tiempoEstimadoMin: 30,
       pedidoMinimo: 0,
@@ -282,7 +282,10 @@ async function seedLocal(): Promise<void> {
     },
     pagos: {
       efectivo: true,
-      transferencia: { habilitado: false, alias: '', titular: '' }, // pendiente de confirmar
+      // Alias real pendiente de confirmar con el dueño; en los emuladores, uno de prueba.
+      transferencia: usaEmuladores
+        ? { habilitado: true, alias: 'silverio.demo', titular: 'Silverio (prueba)' }
+        : { habilitado: false, alias: '', titular: '' },
       mercadoPago: { habilitado: false },
     },
   };

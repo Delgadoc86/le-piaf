@@ -8,7 +8,8 @@ import {
   ETIQUETAS_PRODUCTO,
   ESTADOS_MESA,
   FUENTES,
-  MEDIOS_PAGO,
+  MEDIOS_PAGO_MANUALES,
+  ORIGENES_MANUALES,
   ROLES,
   SECCIONES_WEB,
   TIPOS_PEDIDO,
@@ -323,28 +324,61 @@ export const seleccionItemSchema = z.discriminatedUnion('tipo', [
   }),
 ]);
 
+/**
+ * Input de crearPedido. Lo usan la web (origen "web": nombre y teléfono obligatorios) y el panel
+ * (origen "mostrador" o "telefono": cliente opcional y se puede registrar el pago en el momento).
+ * Nunca lleva precios: el servidor los recalcula desde la base.
+ */
 export const crearPedidoInputSchema = z
   .object({
+    origen: z.enum(['web', ...ORIGENES_MANUALES]).default('web'),
     tipo: z.enum(TIPOS_PEDIDO),
-    cliente: z.object({ nombre: z.string().trim().min(2).max(60), telefono: telefonoSchema }),
+    cliente: z
+      .object({
+        nombre: z.string().trim().max(60),
+        telefono: telefonoSchema.optional(),
+      })
+      .optional(),
     entrega: z
       .object({
         direccion: z.string().trim().min(3).max(200),
         referencia: z.string().trim().max(200).optional(),
-        zonaId: idSchema,
+        /** Opcional mientras no haya zonas con costo: el envío se arregla con el local. */
+        zonaId: idSchema.optional(),
       })
       .optional(),
     mesa: z.object({ mesaId: idSchema, qrToken: z.string().min(8).max(64) }).optional(),
     items: z.array(seleccionItemSchema).min(1).max(ITEMS_MAXIMOS_PEDIDO),
     pago: z.object({
-      medio: z.enum(MEDIOS_PAGO).exclude(['tarjeta']),
+      medio: z.enum(MEDIOS_PAGO_MANUALES),
       pagaCon: pesosSchema.optional(),
     }),
+    nota: z.string().trim().max(200).optional(),
+    /** Solo staff: el cliente ya pagó (se registra el cobro por el total). */
+    pagado: z.boolean().optional(),
+  })
+  .refine((p) => p.origen !== 'web' || (p.cliente?.nombre.length ?? 0) >= 2, {
+    message: 'Falta tu nombre',
+    path: ['cliente', 'nombre'],
+  })
+  .refine((p) => p.origen !== 'web' || p.cliente?.telefono !== undefined, {
+    message: 'Falta tu teléfono',
+    path: ['cliente', 'telefono'],
+  })
+  .refine((p) => p.origen !== 'web' || !p.pagado, {
+    message: 'Solo el local registra pagos',
+    path: ['pagado'],
   })
   .refine((p) => p.tipo !== 'delivery' || p.entrega !== undefined, {
     message: 'Falta la dirección de entrega',
     path: ['entrega'],
   });
+
+/** Cobro manual que registra el staff desde el panel. */
+export const cobroSchema = z.object({
+  medio: z.enum(MEDIOS_PAGO_MANUALES),
+  monto: pesosSchema.min(1),
+});
 
 // ─── Tipos inferidos ─────────────────────────────────────────────────────────
 
@@ -368,4 +402,8 @@ export type ZonaDeliveryDatos = z.infer<typeof zonaDeliverySchema>;
 export type MesaDatos = z.infer<typeof mesaSchema>;
 export type InvitarMiembroInput = z.infer<typeof invitarMiembroInputSchema>;
 export type SeleccionItem = z.infer<typeof seleccionItemSchema>;
-export type CrearPedidoInput = z.infer<typeof crearPedidoInputSchema>;
+/** Lo que se manda a crearPedido (origen y extras con default). */
+export type CrearPedidoInput = z.input<typeof crearPedidoInputSchema>;
+/** Lo que queda después de validar. */
+export type CrearPedidoDatos = z.infer<typeof crearPedidoInputSchema>;
+export type Cobro = z.infer<typeof cobroSchema>;

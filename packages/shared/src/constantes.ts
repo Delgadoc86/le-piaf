@@ -58,8 +58,25 @@ export const ESTADOS_PEDIDO_FINALES: readonly EstadoPedido[] = [
 export const MEDIOS_PAGO = ['efectivo', 'transferencia', 'mercadopago', 'tarjeta'] as const;
 export type MedioPago = (typeof MEDIOS_PAGO)[number];
 
+/**
+ * Medios con los que se cobra hoy: manuales (el local marca "pagado" en el panel).
+ * Mercado Pago y tarjeta quedan para más adelante (ROADMAP §12, Fase 2).
+ */
+export const MEDIOS_PAGO_MANUALES = ['efectivo', 'transferencia'] as const;
+export type MedioPagoManual = (typeof MEDIOS_PAGO_MANUALES)[number];
+
 export const ESTADOS_PAGO = ['pendiente', 'aprobado', 'rechazado'] as const;
 export type EstadoPago = (typeof ESTADOS_PAGO)[number];
+
+/** Orígenes de un pedido cargado a mano por el staff desde el panel. */
+export const ORIGENES_MANUALES = ['mostrador', 'telefono'] as const;
+export type OrigenManual = (typeof ORIGENES_MANUALES)[number];
+
+/**
+ * Hora local en la que empieza la jornada. Un turno que cruza la medianoche sigue siendo la misma
+ * jornada: la numeración de pedidos, la lista del panel y los totales del día se cortan acá.
+ */
+export const HORA_CORTE_JORNADA = 6;
 
 export const ESTADOS_PAGO_PEDIDO = ['pendiente', 'parcial', 'pagado'] as const;
 export type EstadoPagoPedido = (typeof ESTADOS_PAGO_PEDIDO)[number];

@@ -7,7 +7,7 @@ import type { Rol } from '@app/shared';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { NOMBRE_LOCAL } from '@/lib/local';
-import { FASE_ACTUAL, menuPara, NOMBRE_ROL } from '@/features/panel/menu';
+import { menuPara, NOMBRE_ROL } from '@/features/panel/menu';
 
 interface Props {
   rol: Rol;
@@ -45,37 +45,20 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
         {menuPara(rol).map((item) => {
           const href = item.ruta ? `/panel/${item.ruta}` : '/panel';
           const activo = pathname === href;
-          const disponible = item.fase <= FASE_ACTUAL;
           const Icono = item.icono;
-          const contenido = (
-            <>
-              <Icono className="size-4 shrink-0" aria-hidden />
-              <span className="whitespace-nowrap">{item.titulo}</span>
-              {!disponible && (
-                <span className="ml-auto hidden text-xs text-muted-foreground md:inline">
-                  Pronto
-                </span>
-              )}
-            </>
-          );
-          const clases = 'flex items-center gap-2 rounded-md px-3 py-2 text-sm';
-          return disponible ? (
+          return (
             <Link
               key={item.ruta}
               href={href}
               aria-current={activo ? 'page' : undefined}
-              className={cn(clases, 'hover:bg-muted', activo && 'bg-muted font-medium')}
+              className={cn(
+                'flex items-center gap-2 rounded-md px-3 py-2 text-sm hover:bg-muted',
+                activo && 'bg-muted font-medium',
+              )}
             >
-              {contenido}
+              <Icono className="size-4 shrink-0" aria-hidden />
+              <span className="whitespace-nowrap">{item.titulo}</span>
             </Link>
-          ) : (
-            <span
-              key={item.ruta}
-              aria-disabled
-              className={cn(clases, 'cursor-not-allowed opacity-50')}
-            >
-              {contenido}
-            </span>
           );
         })}
       </nav>

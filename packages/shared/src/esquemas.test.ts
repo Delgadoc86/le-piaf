@@ -48,10 +48,35 @@ describe('crearPedidoInputSchema', () => {
     expect(crearPedidoInputSchema.safeParse({ ...pedido, tipo: 'delivery' }).success).toBe(false);
   });
 
-  it('no acepta pago con tarjeta desde la web', () => {
+  it('solo acepta efectivo o transferencia', () => {
+    for (const medio of ['tarjeta', 'mercadopago']) {
+      expect(crearPedidoInputSchema.safeParse({ ...pedido, pago: { medio } }).success).toBe(false);
+    }
     expect(
-      crearPedidoInputSchema.safeParse({ ...pedido, pago: { medio: 'tarjeta' } }).success,
+      crearPedidoInputSchema.safeParse({ ...pedido, pago: { medio: 'transferencia' } }).success,
+    ).toBe(true);
+  });
+
+  it('desde la web el origen es "web" y exige nombre y teléfono', () => {
+    expect(crearPedidoInputSchema.parse(pedido).origen).toBe('web');
+    expect(
+      crearPedidoInputSchema.safeParse({ ...pedido, cliente: { nombre: 'Juan' } }).success,
     ).toBe(false);
+    expect(crearPedidoInputSchema.safeParse({ ...pedido, cliente: undefined }).success).toBe(false);
+  });
+
+  it('la web no puede marcar el pedido como pagado', () => {
+    expect(crearPedidoInputSchema.safeParse({ ...pedido, pagado: true }).success).toBe(false);
+  });
+
+  it('en mostrador el cliente es opcional y se puede registrar el pago', () => {
+    const r = crearPedidoInputSchema.safeParse({
+      ...pedido,
+      origen: 'mostrador',
+      cliente: undefined,
+      pagado: true,
+    });
+    expect(r.success).toBe(true);
   });
 
   it('descarta campos desconocidos, como precios mandados por el cliente', () => {

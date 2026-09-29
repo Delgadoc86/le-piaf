@@ -1,12 +1,12 @@
 /**
- * Mensaje de WhatsApp con el pedido armado en el carrito (paso intermedio hasta que la Fase 2
- * cree el pedido real con crearPedido). Los importes salen de calcularPedido, igual que en el servidor.
+ * Mensaje de WhatsApp con el pedido. Después de crearPedido es un aviso opcional al local (lleva el
+ * número y el link de seguimiento). Los importes salen de calcularPedido, igual que en el servidor.
  */
-import type { TipoPedido } from './constantes.js';
+import type { MedioPagoManual, TipoPedido } from './constantes.js';
 import { formatARS } from './dinero.js';
 import type { TotalesPedido } from './precios.js';
 
-export type MedioPagoWeb = 'efectivo' | 'transferencia' | 'mercadopago';
+export type MedioPagoWeb = MedioPagoManual;
 
 export interface DatosPedidoWhatsApp {
   nombre: string;
@@ -16,6 +16,9 @@ export interface DatosPedidoWhatsApp {
   pago: MedioPagoWeb;
   pagaCon?: number | undefined;
   nota?: string | undefined;
+  /** Número de pedido ya creado (#12) y link de seguimiento. */
+  numero?: number | undefined;
+  linkSeguimiento?: string | undefined;
 }
 
 const TIPO: Record<TipoPedido, string> = {
@@ -27,7 +30,6 @@ const TIPO: Record<TipoPedido, string> = {
 const PAGO: Record<MedioPagoWeb, string> = {
   efectivo: 'Efectivo',
   transferencia: 'Transferencia',
-  mercadopago: 'Mercado Pago',
 };
 
 export function mensajePedidoWhatsApp(
@@ -35,7 +37,12 @@ export function mensajePedidoWhatsApp(
   totales: TotalesPedido,
   datos: DatosPedidoWhatsApp,
 ): string {
-  const lineas: string[] = [`¡Hola ${nombreLocal}! Quiero hacer este pedido:`, ''];
+  const lineas: string[] = [
+    datos.numero
+      ? `¡Hola ${nombreLocal}! Te hice el pedido *#${datos.numero}* por la web:`
+      : `¡Hola ${nombreLocal}! Quiero hacer este pedido:`,
+    '',
+  ];
 
   for (const item of totales.items) {
     const variante = item.varianteNombre ? ` (${item.varianteNombre})` : '';
@@ -64,6 +71,7 @@ export function mensajePedidoWhatsApp(
   lineas.push(`💵 Pago: ${PAGO[datos.pago]}${pagaCon}`);
   lineas.push(`👤 ${datos.nombre.trim()}`);
   if (datos.nota?.trim()) lineas.push(`📝 ${datos.nota.trim()}`);
+  if (datos.linkSeguimiento) lineas.push('', `Seguimiento: ${datos.linkSeguimiento}`);
 
   return lineas.join('\n');
 }

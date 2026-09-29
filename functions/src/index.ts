@@ -9,3 +9,5 @@ export {
   revalidarProductos,
   revalidarPromos,
 } from './cache/revalidarWeb.js';
+export { crearPedido } from './pedidos/crearPedido.js';
+export { espejarSeguimiento } from './pedidos/espejarSeguimiento.js';

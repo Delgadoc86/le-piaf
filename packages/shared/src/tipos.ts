@@ -10,6 +10,7 @@ import type {
   EstadoPagoPedido,
   EstadoPedido,
   MedioPago,
+  MedioPagoManual,
   OrigenPedido,
   Rol,
   TipoPedido,
@@ -94,6 +95,8 @@ export interface ExtraItem {
 
 export interface ItemPedido {
   id: string;
+  tipo: 'producto' | 'promo';
+  /** productoId o promoId según el tipo. */
   productoId: string;
   nombre: string;
   varianteNombre?: string;
@@ -113,15 +116,22 @@ export interface PagoPedido {
   estado: EstadoPago;
   mpPaymentId?: string;
   pagaCon?: number;
+  /** Quién registró el cobro (cobros manuales desde el panel). */
+  porUid?: string;
 }
 
 export interface Pedido {
   numero: number;
+  /** Jornada del local (YYYY-MM-DD, corta a HORA_CORTE_JORNADA) a la que pertenece el número. */
+  jornada: string;
   tipo: TipoPedido;
   origen: OrigenPedido;
   estado: EstadoPedido;
-  cliente?: { nombre: string; telefono: string };
-  entrega?: { direccion: string; referencia?: string; zonaId: string; costo: number };
+  cliente?: { nombre: string; telefono?: string };
+  entrega?: { direccion: string; referencia?: string; zonaId?: string; costo: number };
+  /** Cómo dijo el cliente que va a pagar. Lo cobrado de verdad está en `pagos`. */
+  pagoElegido: { medio: MedioPagoManual; pagaCon?: number };
+  nota?: string;
   mesaId?: string;
   mozoUid?: string;
   comensales?: number;
@@ -142,12 +152,21 @@ export interface Pedido {
   actualizadoEn: Timestamp;
 }
 
-/** Espejo público mínimo del pedido. */
+/**
+ * Espejo público mínimo del pedido (/pedido/[token]). Sin teléfono ni dirección: el token viaja
+ * en un link que el cliente puede reenviar.
+ */
 export interface Seguimiento {
   numero: number;
   estado: EstadoPedido;
   tipo: TipoPedido;
   tiempoEstimadoMin?: number;
+  motivoCancelacion?: string;
+  items: { nombre: string; cantidad: number }[];
+  total: number;
+  medioPago: MedioPagoManual;
+  estadoPago: EstadoPagoPedido;
+  creadoEn: Timestamp;
   actualizadoEn: Timestamp;
   localNombre: string;
 }
