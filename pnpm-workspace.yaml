@@ -14,3 +14,5 @@ allowBuilds:
   sharp: false
   # Fallback de napi-postinstall; usa binarios precompilados.
   unrs-resolver: false
+  # Opcional de superstatic (emulador de Firebase Hosting, que no usamos); compila código nativo en Linux.
+  re2: false
