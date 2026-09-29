@@ -36,7 +36,7 @@ export function FormularioSeccion<S extends z.ZodType>({
       }}
     >
       {children(f)}
-      <div className="sticky bottom-0 -mx-4 flex items-center justify-end gap-3 border-t bg-background/95 px-4 py-3 backdrop-blur md:-mx-8 md:px-8">
+      <div className="flex items-center justify-end gap-3">
         {hayErrores && <span className="text-sm text-destructive">Hay campos para revisar.</span>}
         <IndicadorGuardado estado={estado} />
         <Button type="submit" disabled={guardando}>

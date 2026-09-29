@@ -35,14 +35,14 @@ export function BotonCarrito() {
 
 export function BarraPedido() {
   const { cantidad, total } = useLineasCarrito();
-  const { whatsapp } = useTienda();
+  const { whatsapp, mensajeWhatsApp } = useTienda();
   const pulso = useTiendaUI((e) => e.pulso);
   const abrir = useTiendaUI((e) => e.abrirCarrito);
 
   if (cantidad === 0) {
     return (
       <a
-        href={linkWhatsApp(whatsapp, 'Hola, quiero hacer un pedido.')}
+        href={linkWhatsApp(whatsapp, mensajeWhatsApp)}
         target="_blank"
         rel="noopener noreferrer"
         aria-label="Escribinos por WhatsApp"

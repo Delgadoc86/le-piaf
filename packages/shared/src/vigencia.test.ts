@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { promoVigente, resumirDias, resumirHorarios } from './vigencia.js';
+import { bannerVigente, promoVigente, resumirDias, resumirHorarios } from './vigencia.js';
 
 const ZONA = 'America/Argentina/Mendoza';
 const mza = (fechaHora: string) => new Date(`${fechaHora}:00-03:00`);
@@ -56,5 +56,34 @@ describe('resumirHorarios', () => {
       { dias: 'Lun a Vie', horas: '11:00 – 02:00' },
       { dias: 'Sáb y Dom', horas: '11:00 – 03:00' },
     ]);
+  });
+});
+
+describe('bannerVigente', () => {
+  const banner = {
+    activo: true,
+    imagenPcUrl: 'pc.webp',
+    imagenMovilUrl: 'movil.webp',
+    alt: 'Día del Padre',
+  };
+
+  it('activo y sin fechas: siempre', () => {
+    expect(bannerVigente(banner, mza('2026-10-05T12:00'), ZONA)).toBe(true);
+  });
+
+  it('respeta el rango de fechas (inclusive) en la zona del local', () => {
+    const b = { ...banner, desde: '2026-10-03', hasta: '2026-10-05' };
+    expect(bannerVigente(b, mza('2026-10-02T23:59'), ZONA)).toBe(false);
+    expect(bannerVigente(b, mza('2026-10-03T00:00'), ZONA)).toBe(true);
+    expect(bannerVigente(b, mza('2026-10-05T23:59'), ZONA)).toBe(true);
+    expect(bannerVigente(b, mza('2026-10-06T00:00'), ZONA)).toBe(false);
+  });
+
+  it('inactivo, sin imágenes o sin banner: no se muestra', () => {
+    expect(bannerVigente({ ...banner, activo: false }, mza('2026-10-05T12:00'), ZONA)).toBe(false);
+    expect(bannerVigente({ ...banner, imagenMovilUrl: '' }, mza('2026-10-05T12:00'), ZONA)).toBe(
+      false,
+    );
+    expect(bannerVigente(undefined, mza('2026-10-05T12:00'), ZONA)).toBe(false);
   });
 });

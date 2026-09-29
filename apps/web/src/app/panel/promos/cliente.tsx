@@ -3,7 +3,14 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { ImageOff, Pencil, Plus, Trash2 } from 'lucide-react';
-import { formatARS, resumirDias, type ProductoDatos, type PromoDatos } from '@app/shared';
+import {
+  DOC_LOCAL,
+  formatARS,
+  resumirDias,
+  type LocalEditable,
+  type ProductoDatos,
+  type PromoDatos,
+} from '@app/shared';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -33,7 +40,9 @@ import {
   reordenar,
   siguienteOrden,
 } from '@/features/panel/carta';
-import { useColeccion } from '@/features/panel/firestore';
+import { EditorBanner } from '@/components/panel/editor-banner';
+import { useSesion } from '@/features/auth/sesion';
+import { useColeccion, useDocumento } from '@/features/panel/firestore';
 
 function textoVigencia(p: PromoDatos): string {
   const v = p.vigencia;
@@ -50,9 +59,12 @@ export default function PromosPage() {
   const [editando, setEditando] = useState<PromoEditable | null>(null);
   const [borrando, setBorrando] = useState<(PromoDatos & { id: string }) | null>(null);
   const { estado, guardar } = useGuardado();
+  const sesion = useSesion();
+  const local = useDocumento<LocalEditable>(DOC_LOCAL);
+  const esDueno = sesion.estado === 'lista' && sesion.rol === 'dueno';
 
   return (
-    <div className="max-w-4xl">
+    <div className="max-w-4xl space-y-8">
       <EncabezadoPagina
         titulo="Promos"
         descripcion="La primera activa sale destacada en la web. Arrastrá para cambiar el orden."
@@ -65,6 +77,8 @@ export default function PromosPage() {
           </>
         }
       />
+      {/* El banner vive en local/datos: lo edita el dueño. */}
+      {esDueno && local.datos && <EditorBanner banner={local.datos.banner} />}
       {promos.cargando ? (
         <p className="text-muted-foreground">Cargando…</p>
       ) : promos.datos.length === 0 ? (

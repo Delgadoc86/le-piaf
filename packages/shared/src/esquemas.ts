@@ -120,6 +120,8 @@ export const webSchema = z.object({
   }),
   galeria: z.array(z.object({ fotoUrl: z.string(), titulo: z.string().max(60) })).max(24),
   notaCarta: z.string().max(400).optional(),
+  /** Mensaje con el que se abre WhatsApp desde el botón flotante. */
+  mensajeWhatsApp: z.string().trim().max(200).optional(),
   seo: z.object({
     titulo: z.string().max(120),
     descripcion: z.string().max(300),
@@ -154,7 +156,30 @@ export const configPagosSchema = z.object({
   mercadoPago: z.object({ habilitado: z.boolean() }),
 });
 
-/** Datos del local (documento local/datos). Los edita el dueño desde el panel. */
+/**
+ * Banner de fecha especial (Día del Padre, Mundial, aniversario…): va debajo de la portada,
+ * con una imagen para computadora y otra para celular, y solo se ve entre "desde" y "hasta".
+ */
+export const bannerSchema = z
+  .object({
+    activo: z.boolean(),
+    imagenPcUrl: z.string(),
+    imagenMovilUrl: z.string(),
+    /** Texto alternativo (accesibilidad y SEO): qué dice el banner. */
+    alt: z.string().trim().max(160),
+    desde: fechaDiaSchema.optional(),
+    hasta: fechaDiaSchema.optional(),
+  })
+  .refine((b) => !b.activo || (b.imagenPcUrl && b.imagenMovilUrl), {
+    message: 'Subí las dos imágenes (computadora y celular)',
+    path: ['imagenPcUrl'],
+  })
+  .refine((b) => !b.desde || !b.hasta || b.desde <= b.hasta, {
+    message: 'La fecha de fin tiene que ser igual o posterior a la de inicio',
+    path: ['hasta'],
+  });
+
+/** Datos del local (documento local/datos). */
 export const localEditableSchema = z.object({
   nombre: textoCorto,
   nombreCorto: z.string().trim().min(1).max(30),
@@ -170,6 +195,7 @@ export const localEditableSchema = z.object({
   web: webSchema,
   pedidos: configPedidosSchema,
   pagos: configPagosSchema,
+  banner: bannerSchema.optional(),
 });
 
 // ─── Carta ───────────────────────────────────────────────────────────────────
@@ -328,6 +354,7 @@ export type Contacto = z.infer<typeof contactoSchema>;
 export type Direccion = z.infer<typeof direccionSchema>;
 export type Marca = z.infer<typeof marcaSchema>;
 export type ContenidoWeb = z.infer<typeof webSchema>;
+export type Banner = z.infer<typeof bannerSchema>;
 export type ConfigPedidos = z.infer<typeof configPedidosSchema>;
 export type ConfigPagos = z.infer<typeof configPagosSchema>;
 export type LocalEditable = z.infer<typeof localEditableSchema>;

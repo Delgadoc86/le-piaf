@@ -3,6 +3,7 @@ import { datosEstructurados } from '@/features/sitio/json-ld';
 import { ProveedorTienda } from '@/features/carrito/tienda';
 import { Pie } from '@/components/publico/pie';
 import { BarraPedido } from '@/components/publico/tienda/accesos-carrito';
+import { BannerFecha } from '@/components/publico/tienda/banner-fecha';
 import { Cabecera } from '@/components/publico/tienda/cabecera';
 import { Hojas } from '@/components/publico/tienda/hojas';
 import { InfoLocal } from '@/components/publico/tienda/info-local';
@@ -43,6 +44,7 @@ export default async function Inicio() {
       datos={{
         nombreLocal: local.nombreCorto,
         whatsapp: local.contacto.whatsapp,
+        mensajeWhatsApp: local.web.mensajeWhatsApp || 'Hola, quiero hacer un pedido.',
         horario,
         pedidos: local.pedidos,
         pagos: local.pagos,
@@ -83,6 +85,8 @@ export default async function Inicio() {
           horario={horario}
           pedidos={local.pedidos}
         />
+
+        <BannerFecha banner={local.banner} zonaHoraria={local.zonaHoraria} />
 
         {visible('promos') && promos.length > 0 && (
           <section aria-labelledby="titulo-promos" className="px-4 pt-12 md:px-6 md:pt-16">

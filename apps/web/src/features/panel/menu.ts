@@ -8,9 +8,9 @@ import {
   LayoutGrid,
   MapPin,
   Percent,
+  QrCode,
   Settings,
   UtensilsCrossed,
-  Users,
   UserSquare,
   Wallet,
   Armchair,
@@ -48,12 +48,12 @@ export const MENU: readonly ItemMenu[] = [
   { ruta: 'caja', titulo: 'Caja', icono: Wallet, roles: GESTORES, fase: 4 },
   { ruta: 'carta', titulo: 'Carta', icono: UtensilsCrossed, roles: GESTORES, fase: 1 },
   { ruta: 'promos', titulo: 'Promos', icono: Percent, roles: GESTORES, fase: 1 },
+  { ruta: 'qr', titulo: 'QR de la carta', icono: QrCode, roles: GESTORES, fase: 1 },
   { ruta: 'mesas', titulo: 'Mesas', icono: LayoutGrid, roles: GESTORES, fase: 3 },
   { ruta: 'zonas', titulo: 'Zonas de delivery', icono: MapPin, roles: GESTORES, fase: 2 },
   { ruta: 'reportes', titulo: 'Reportes', icono: BarChart3, roles: GESTORES, fase: 4 },
   { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 2 },
   { ruta: 'configuracion', titulo: 'Configuración', icono: Settings, roles: ['dueno'], fase: 1 },
-  { ruta: 'equipo', titulo: 'Equipo', icono: Users, roles: ['dueno'], fase: 0 },
 ];
 
 /** Fase actual del desarrollo: lo de fases posteriores aparece como "Pronto". */

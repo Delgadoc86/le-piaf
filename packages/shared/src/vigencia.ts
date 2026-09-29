@@ -1,5 +1,5 @@
 /** Vigencia de promos y resumen de horarios para mostrar en la web. */
-import type { Horario, PromoDatos } from './esquemas.js';
+import type { Banner, Horario, PromoDatos } from './esquemas.js';
 import { horaAMinutos, NOMBRES_DIAS, partesEnZona } from './horarios.js';
 
 /**
@@ -74,4 +74,17 @@ export function resumirHorarios(horarios: readonly Horario[]): { dias: string; h
 
 export function nombreDia(dia: number): string {
   return NOMBRES_DIAS[dia] ?? '';
+}
+
+/** ¿El banner se muestra hoy? Activo, con sus dos imágenes y dentro del rango de fechas (inclusive). */
+export function bannerVigente(
+  banner: Banner | undefined,
+  instante: Date,
+  zonaHoraria: string,
+): boolean {
+  if (!banner?.activo || !banner.imagenPcUrl || !banner.imagenMovilUrl) return false;
+  const hoy = partesEnZona(instante, zonaHoraria).fecha;
+  if (banner.desde && hoy < banner.desde) return false;
+  if (banner.hasta && hoy > banner.hasta) return false;
+  return true;
 }

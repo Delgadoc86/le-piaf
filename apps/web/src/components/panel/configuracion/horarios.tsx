@@ -24,7 +24,7 @@ const DIAS = [
   [0, 'Dom'],
 ] as const;
 
-export function TabHorarios({ local }: { local: LocalEditable }) {
+export function Horarios({ local }: { local: LocalEditable }) {
   return (
     <FormularioSeccion
       esquema={esquema}

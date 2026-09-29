@@ -20,6 +20,7 @@ import { useCarrito, type LineaCarrito } from './store';
 export interface DatosTienda {
   nombreLocal: string;
   whatsapp: string;
+  mensajeWhatsApp: string;
   horario: DatosHorario;
   pedidos: ConfigPedidos;
   pagos: ConfigPagos;

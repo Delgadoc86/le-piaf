@@ -22,6 +22,7 @@ Este repo es también la **base que se copia** para cada local nuevo (un repo, u
 - **Consultar antes de:** crear o modificar algo en Firebase real (fuera de emuladores), instalar dependencias que no figuren en el roadmap, hacer deploy y hacer commits (proponer el mensaje).
 - Modelo **un repo por local**. Firestore aplanado: `local/datos` + colecciones en la raíz; claim `{ rol }`. Nada de `locales/{id}`, slugs ni multi-local.
 - Lo **genérico** (panel, Functions, reglas, `packages/shared`) se escribe pensando en que lo usen todas las copias; lo **propio de Silverio** (kit `silverio/`, `components/publico/`, estilos, `.env`) queda separado (ROADMAP §11).
+- **Panel mínimo:** el dueño de un local chico solo ve carta/precios/agotados, promos, banner de fecha especial, QR, contacto, redes y horarios. Diseño, marca, textos y configuración avanzada los maneja DelgadoDev en código/datos (ROADMAP §11). Todas las imágenes se guardan en WebP.
 - Explicar en criollo y corto; ante opciones, recomendar una y decir por qué.
 
 ## Comandos

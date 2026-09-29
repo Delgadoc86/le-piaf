@@ -190,7 +190,7 @@ async function seedLocal(): Promise<void> {
       fuenteTexto: 'Roboto',
       logoUrl: foto(s.marca.logo),
       faviconUrl: foto(s.marca.logoSvg),
-      ogImageUrl: foto(s.marca.ogImage),
+      ogImageUrl: '', // se genera sola (opengraph-image.tsx); el logo no tiene la proporción 1200×630
       heroDesktopUrl: foto(s.marca.heroDesktop),
       heroMovilUrl: foto(s.marca.heroMovil),
     },
@@ -243,6 +243,7 @@ async function seedLocal(): Promise<void> {
         { fotoUrl: foto('assets/fotos/plato.webp'), titulo: 'Comidas al Plato' },
         { fotoUrl: foto('assets/fotos/lomo.webp'), titulo: 'Nuestros Lomos' },
       ],
+      mensajeWhatsApp: 'Hola, quiero hacer un pedido.',
       notaCarta:
         '*Consultar por delivery, según zona y disponibilidad. Los precios están sujetos a disponibilidad.',
       seo: {

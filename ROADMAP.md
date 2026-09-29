@@ -4,7 +4,7 @@
 > **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
 > **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.6, del 2026-09-29.
+Versión del documento: 1.7, del 2026-09-29.
 
 ---
 
@@ -202,6 +202,7 @@ local/datos                              // documento único (DOC_LOCAL en packa
     nosotros: { titulo, parrafos: string[], fotoUrl, frase, tarjetas: {icono,titulo,texto}[], cierre }
     galeria: { fotoUrl, titulo }[]
     notaCarta?: string
+    mensajeWhatsApp?: string               // texto del botón flotante de WhatsApp
     seo: { titulo, descripcion, keywords: string[] }
     ga4Id?: string
   }
@@ -461,6 +462,7 @@ Firestore cobra por lectura. Estas reglas mantienen la factura baja y la app rá
 - **Diseño por local:** cada copia del repo es libre de cambiar su diseño en `components/publico/`. Para no perder los arreglos de la base (ver §16):
   - lo **genérico** (panel, Functions, reglas, `packages/shared`, componentes reutilizables) se cambia **primero en la base** y se trae a las copias con git;
   - lo **propio del local** (kit, `.env`, `.firebaserc`, `components/publico/`, estilos) vive solo en su copia.
+- **Panel mínimo (locales chicos):** el panel tiene solo lo que el dueño usa seguido: carta y precios (con agotados), promos y banner de fecha especial, QR, contacto, redes y horarios. Marca, colores, tipografías, textos, SEO, equipo y configuraciones avanzadas **no** van al panel: las maneja DelgadoDev en el código y los datos. Antes de sumar algo al panel: ¿el dueño lo usaría cada semana?
 - **Diseño de la web pública:** experiencia de **app de pedidos**, mobile first: portada compacta tipo ficha del local, la carta como protagonista, "+" en cada plato, hoja de producto (bottom sheet), barra de pedido fija y carrito lateral. La marca manda (colores y tipografía de `local/datos.marca`). Sin fotos de stock: donde falta la foto real va la ilustración de la categoría.
 - **Movimiento:** solo se animan `transform`, `opacity` y `filter` (compositor, sin repintar ni mover layout); lo ligado al scroll usa `animation-timeline` nativo (sin JS) y degrada a "sin animación"; todo respeta `prefers-reduced-motion`. Nada que retrase el LCP: la foto del hero no se anima en opacidad y carga con `fetchPriority="high"`. Nada de librerías de animación.
 - **Peso:** la web pública no carga Firebase cliente ni zod; lo que se usa al interactuar (hojas de producto y carrito) se carga en diferido y lo pesado (Google Maps) va detrás de un "facade" que carga al tocar.
@@ -494,7 +496,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] Login con email/contraseña y Google; recuperación de contraseña.
 - [x] Functions `sincronizarClaims` e `invitarMiembro`.
 - [x] Hook `useSesion()` con usuario y rol.
-- [x] Panel base: layout con barra lateral según rol, página "resumen" vacía y página Equipo para invitar.
+- [x] Panel base: layout con barra lateral según rol y página "resumen" vacía. *(La página Equipo se sacó del panel en 1.7: los usuarios del local los da de alta DelgadoDev; `invitarMiembro` queda en el backend.)*
 - [x] `firestore.rules` y `storage.rules` v1 con tests por rol (incluido "con cuenta pero sin rol").
 
 **Datos**
@@ -508,15 +510,15 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 ### Fase 1: Carta y web pública (2–3 semanas) → 🚀 Silverio sale a producción
 
 **Panel: configuración del local**
-- [x] Datos, contacto, dirección (con link de Maps) y horarios (editor por día, con cierres especiales).
-- [x] Marca: colores (con vista previa en vivo y aviso de contraste), fuentes (lista curada), logo, favicon, hero para escritorio y móvil.
-- [x] Contenido web: hero, nosotros (párrafos, tarjetas, frase, cierre), galería, nota de la carta, secciones visibles, SEO e ID de GA4. *(el orden de las secciones lo fija el diseño tipo app)*
-- [x] Pedidos y pagos: pedidos por la web encendidos/apagados (sin carrito = modo carta), formas de entrega, tiempo estimado, pedido mínimo, efectivo y transferencia.
+- [x] **Configuración mínima:** contacto (WhatsApp, teléfono), links de redes y horarios (editor por día, con cierres especiales). Nada más.
+- *Marca, tipografías, textos de la web, SEO, pedidos y pagos **no van en el panel**: los ajusta DelgadoDev en el código (`components/publico/`) y en los datos del local (seed / consola). Ver §11 "Panel mínimo".*
 
 **Panel: carta**
 - [x] Categorías: alta, baja, modificación, ordenar con arrastrar, visible/oculta.
-- [x] Productos: alta, baja, modificación con foto (comprimida), variantes, grupos de extras (mín/máx), etiquetas, estación, días disponibles, visible, **agotado con un toque** desde la lista.
+- [x] Productos: alta, baja, modificación con foto (comprimida), **agotado con un toque** desde la lista. Variantes, extras (mín/máx), etiquetas, estación, días y visible quedan plegados en "Más opciones".
 - [x] Promos: alta, baja, modificación con foto, ítems incluidos y vigencia por días y horario.
+- [x] **Banner de fecha especial** debajo de la portada: imagen para computadora y para celular, texto y rango de fechas (se edita en Promos).
+- [x] Todas las imágenes que sube el dueño se comprimen a **WebP** en el navegador antes de guardarse.
 - [x] **Actualización masiva de precios:** alcance (todo, categorías, productos seleccionados), % o monto fijo, redondeo (a 10, 50, 100 o 500), **vista previa antes/después**, aplicación con `writeBatch` en lotes de 500 y registro en `auditoria`.
 - [x] Duplicar producto y buscador en la lista.
 
@@ -528,14 +530,14 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] Carta: buscador y chips de categoría fijos que siguen el scroll; filas con miniatura (foto o ilustración de la categoría) y botón "+"; "Agotado" y etiquetas.
 - [x] **Carrito adelantado de la Fase 2** (hoja de producto, carrito persistente, datos de entrega y pago) con **envío del pedido por WhatsApp** como paso intermedio. Precios recalculados con `calcularPedido`.
 - [x] Info del local compacta al final (historia, horarios, ubicación con mapa diferido, galería) y footer con redes y horarios.
-- [ ] Botón flotante de WhatsApp con mensaje configurable. *(botón hecho; el mensaje se vuelve configurable con el panel de configuración)*
-- [ ] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica. *(hechos metadata y JSON-LD; faltan sitemap, robots y OG dinámica)*
+- [x] Botón flotante de WhatsApp con mensaje configurable (`local/datos.web.mensajeWhatsApp`, lo ajusta DelgadoDev).
+- [x] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica (tarjeta generada con la marca del local).
 - [x] GA4 con el ID del local. *(carga diferida, no afecta PageSpeed)*
-- [ ] Página 404 y local inactivo → "Volvemos pronto". *("Volvemos pronto" hecho; falta la 404)*
+- [x] Página 404 y local inactivo → "Volvemos pronto".
 
 **Infra**
 - [x] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
-- [ ] **Generador de QR:** carta general, PNG y PDF listos para imprimir con el logo del local.
+- [x] **Generador de QR:** QR con el logo, PNG y PDF listos para imprimir (PDF desde el diálogo de impresión; 1 grande o 4 por hoja).
 - [ ] Empaquetar las Functions para el deploy (Firebase no resuelve dependencias `workspace:*`): proponer `esbuild` u otra alternativa antes de instalar.
 
 **Silverio en producción**
@@ -776,3 +778,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
 - **1.4 (2026-09-28):** **un solo proyecto de Firebase por local** (`silverio-club`, producción); las pruebas se hacen en los emuladores y un `-dev` se agrega solo si hace falta. App Check pasa de la Fase 0 a la Fase 2 (necesita el dominio de producción).
 - **1.5 (2026-09-29):** la web pública pasa a ser una **experiencia de app de pedidos** (portada compacta, promos en mosaico, carta con "+", hoja de producto, carrito). El **carrito se adelanta de la Fase 2 a la Fase 1**, con el pedido enviado por WhatsApp como paso intermedio hasta `crearPedido`. Se suma `zustand` (ya previsto en §2).
 - **1.6 (2026-09-29):** panel de **carta** (productos, categorías, aumento masivo con vista previa), **promos** y **configuración** (local, horarios, marca con contraste, web, pedidos y pagos). Functions `ajustarPrecios` y `revalidarWeb`: los cambios del panel se ven en la web en segundos. `pedidos.habilitados` apagado = web en modo carta (sin carrito). Se suman `browser-image-compression` y `@dnd-kit` (ya previstos en §2).
+- **1.7 (2026-09-29):** **panel mínimo**. Configuración reducida a contacto, redes y horarios; salen del panel marca, textos de la web, pedidos y pagos, y la página Equipo. Se suma el **banner de fecha especial** (PC y celular, con fechas). Todas las imágenes a WebP. En productos, lo avanzado queda plegado en "Más opciones"; el QR queda con menos opciones. También: página 404, robots, sitemap, imagen para compartir generada y mensaje de WhatsApp configurable por datos.
