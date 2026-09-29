@@ -5,6 +5,7 @@ import {
   ChefHat,
   ClipboardList,
   Home,
+  KeyRound,
   LayoutGrid,
   MapPin,
   Percent,
@@ -54,6 +55,13 @@ export const MENU: readonly ItemMenu[] = [
   { ruta: 'ventas', titulo: 'Ventas', icono: BarChart3, roles: GESTORES, fase: 4 },
   { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 9 },
   { ruta: 'configuracion', titulo: 'Configuración', icono: Settings, roles: ['dueno'], fase: 1 },
+  {
+    ruta: 'cuenta',
+    titulo: 'Mi cuenta',
+    icono: KeyRound,
+    roles: ['dueno', 'encargado', 'mozo', 'cocina'],
+    fase: 0,
+  },
 ];
 
 /**

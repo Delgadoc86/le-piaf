@@ -115,9 +115,10 @@ Extraído del proyecto viejo (React + Vite + Firebase, repo `Silverio-FoodTruck`
 | WhatsApp | +54 9 261 636-7525 (`5492616367525`) |
 | Instagram | https://www.instagram.com/silveriofoodtruckbeer/ |
 | Facebook | https://www.facebook.com/profile.php?id=61567065565366 |
-| Dirección (food truck) | Juan Isidro Maza 826, Rodeo del Medio, Maipú, Mendoza (CP M5519) |
-| Google Maps | https://maps.app.goo.gl/AMiSEvthqArNnmB58 |
-| Coordenadas | -32.9876, -68.7672 |
+| Dirección (local nuevo) | Sarmiento 119, Barrio Don Bosco, Rodeo del Medio, Maipú, Mendoza (CP M5529) |
+| Google Maps | https://maps.app.goo.gl/1uZXpRn4AbtLRx4u7 (ficha "Silverio club") |
+| Coordenadas | -32.992325, -68.6892759 |
+| Dirección anterior (food truck) | Juan Isidro Maza 826, Rodeo del Medio (CP M5519): ya no se usa |
 | Horarios (footer) | Lunes a Viernes 11:00–02:00 · Sábados y Domingos 11:00–03:00 |
 
 ## 5. SEO y analítica

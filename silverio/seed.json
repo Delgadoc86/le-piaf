@@ -14,15 +14,15 @@
       "facebook": "https://www.facebook.com/profile.php?id=61567065565366"
     },
     "direccion": {
-      "calle": "Juan Isidro Maza 826",
+      "calle": "Sarmiento 119",
       "localidad": "Rodeo del Medio",
       "departamento": "Maipú",
       "provincia": "Mendoza",
-      "codigoPostal": "M5519",
+      "codigoPostal": "M5529",
       "pais": "AR",
-      "googleMapsUrl": "https://maps.app.goo.gl/AMiSEvthqArNnmB58",
-      "geo": { "lat": -32.9876, "lng": -68.7672 },
-      "_confirmar": "Es la dirección del food truck. Reemplazar por la del LOCAL FÍSICO nuevo."
+      "googleMapsUrl": "https://maps.app.goo.gl/1uZXpRn4AbtLRx4u7",
+      "geo": { "lat": -32.992325, "lng": -68.6892759 },
+      "_confirmar": "Local físico nuevo (2026-09-29, ficha 'Silverio club' en Google Maps). Sarmiento 119."
     },
     "horarios": [
       { "dias": [1, 2, 3, 4, 5], "desde": "11:00", "hasta": "02:00" },
