@@ -4,7 +4,7 @@
 > **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
 > **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.5, del 2026-09-29.
+Versión del documento: 1.6, del 2026-09-29.
 
 ---
 
@@ -407,7 +407,8 @@ service cloud.firestore {
 |---|---|---|---|
 | `sincronizarClaims` | trigger `miembros/{uid}` onWrite | Recalcula el claim `rol` y sube `usuarios/{uid}.claimsVersion` | 0 |
 | `invitarMiembro` | callable | Solo el dueño. Crea o busca el usuario por email, crea `miembros` y devuelve un link para elegir contraseña (el dueño lo manda por WhatsApp) | 0 |
-| `revalidarWeb` | trigger en `local`, `categorias`, `productos`, `promos` | POST a `/api/revalidate` con secreto → `revalidateTag('carta')` | 1 |
+| `revalidarWeb` | triggers `revalidarLocal`, `revalidarCategorias`, `revalidarProductos`, `revalidarPromos` | POST a `/api/revalidate` con secreto → `revalidateTag('carta', { expire: 0 })` | 1 |
+| `ajustarPrecios` | callable (dueño/encargado) | Actualización masiva con `planAjuste` (mismo cálculo que la vista previa), lotes de 500 y registro en `auditoria` | 1 |
 | `crearPedido` | callable (App Check) | Valida el esquema zod, local activo y abierto, disponibilidad, zona y mínimo; **recalcula precios** con `packages/shared/precios.ts`; número correlativo por transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`; si paga con MP, crea la preferencia y devuelve `init_point` | 2 |
 | `espejarSeguimiento` | trigger `pedidos` onUpdate | Actualiza `seguimiento/{token}` | 2 |
 | `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | 2 |
@@ -507,16 +508,17 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 ### Fase 1: Carta y web pública (2–3 semanas) → 🚀 Silverio sale a producción
 
 **Panel: configuración del local**
-- [ ] Datos, contacto, dirección (con link de Maps) y horarios (editor por día, con cierres especiales).
-- [ ] Marca: colores (con vista previa en vivo y aviso de contraste), fuentes (lista curada), logo, favicon, hero para escritorio y móvil.
-- [ ] Contenido web: hero, nosotros (párrafos, tarjetas, frase, cierre), galería, nota de la carta, secciones visibles y su orden, SEO e ID de GA4.
+- [x] Datos, contacto, dirección (con link de Maps) y horarios (editor por día, con cierres especiales).
+- [x] Marca: colores (con vista previa en vivo y aviso de contraste), fuentes (lista curada), logo, favicon, hero para escritorio y móvil.
+- [x] Contenido web: hero, nosotros (párrafos, tarjetas, frase, cierre), galería, nota de la carta, secciones visibles, SEO e ID de GA4. *(el orden de las secciones lo fija el diseño tipo app)*
+- [x] Pedidos y pagos: pedidos por la web encendidos/apagados (sin carrito = modo carta), formas de entrega, tiempo estimado, pedido mínimo, efectivo y transferencia.
 
 **Panel: carta**
-- [ ] Categorías: alta, baja, modificación, ordenar con arrastrar, visible/oculta.
-- [ ] Productos: alta, baja, modificación con foto (comprimida), variantes, grupos de extras (mín/máx), etiquetas, estación, días disponibles, visible, **agotado con un toque** desde la lista.
-- [ ] Promos: alta, baja, modificación con foto, ítems incluidos y vigencia por días y horario.
-- [ ] **Actualización masiva de precios:** alcance (todo, categorías, productos seleccionados), % o monto fijo, redondeo (a 10, 50, 100 o 500), **vista previa antes/después**, aplicación con `writeBatch` en lotes de 500 y registro en `auditoria`.
-- [ ] Duplicar producto y buscador en la lista.
+- [x] Categorías: alta, baja, modificación, ordenar con arrastrar, visible/oculta.
+- [x] Productos: alta, baja, modificación con foto (comprimida), variantes, grupos de extras (mín/máx), etiquetas, estación, días disponibles, visible, **agotado con un toque** desde la lista.
+- [x] Promos: alta, baja, modificación con foto, ítems incluidos y vigencia por días y horario.
+- [x] **Actualización masiva de precios:** alcance (todo, categorías, productos seleccionados), % o monto fijo, redondeo (a 10, 50, 100 o 500), **vista previa antes/después**, aplicación con `writeBatch` en lotes de 500 y registro en `auditoria`.
+- [x] Duplicar producto y buscador en la lista.
 
 **Web pública `/`** — experiencia de **app de pedidos** con la marca del local (ver §11 "Diseño de la web pública")
 - [x] Layout con la marca del local (variables CSS y fuentes).
@@ -528,11 +530,11 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] Info del local compacta al final (historia, horarios, ubicación con mapa diferido, galería) y footer con redes y horarios.
 - [ ] Botón flotante de WhatsApp con mensaje configurable. *(botón hecho; el mensaje se vuelve configurable con el panel de configuración)*
 - [ ] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica. *(hechos metadata y JSON-LD; faltan sitemap, robots y OG dinámica)*
-- [ ] GA4 con el ID del local.
+- [x] GA4 con el ID del local. *(carga diferida, no afecta PageSpeed)*
 - [ ] Página 404 y local inactivo → "Volvemos pronto". *("Volvemos pronto" hecho; falta la 404)*
 
 **Infra**
-- [ ] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
+- [x] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
 - [ ] **Generador de QR:** carta general, PNG y PDF listos para imprimir con el logo del local.
 - [ ] Empaquetar las Functions para el deploy (Firebase no resuelve dependencias `workspace:*`): proponer `esbuild` u otra alternativa antes de instalar.
 
@@ -730,7 +732,7 @@ REVALIDATE_SECRET=
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
-**Secretos de Functions** (`firebase functions:secrets:set`): `REVALIDATE_SECRET`, `MP_ACCESS_TOKEN` (del local), `MP_WEBHOOK_SECRET`, `RESEND_API_KEY`.
+**Secretos de Functions** (`firebase functions:secrets:set`; en el emulador salen de `functions/.secret.local`, que `pnpm dev` crea desde `.secret.local.example`): `REVALIDATE_SECRET`, `MP_ACCESS_TOKEN` (del local), `MP_WEBHOOK_SECRET`, `RESEND_API_KEY`.
 
 **Deploy**
 - Web: push a `main` → Vercel Production. Los PR generan Preview.
@@ -773,3 +775,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
   - La Fase 5 pasa a ser "Plantilla replicable y venta".
 - **1.4 (2026-09-28):** **un solo proyecto de Firebase por local** (`silverio-club`, producción); las pruebas se hacen en los emuladores y un `-dev` se agrega solo si hace falta. App Check pasa de la Fase 0 a la Fase 2 (necesita el dominio de producción).
 - **1.5 (2026-09-29):** la web pública pasa a ser una **experiencia de app de pedidos** (portada compacta, promos en mosaico, carta con "+", hoja de producto, carrito). El **carrito se adelanta de la Fase 2 a la Fase 1**, con el pedido enviado por WhatsApp como paso intermedio hasta `crearPedido`. Se suma `zustand` (ya previsto en §2).
+- **1.6 (2026-09-29):** panel de **carta** (productos, categorías, aumento masivo con vista previa), **promos** y **configuración** (local, horarios, marca con contraste, web, pedidos y pagos). Functions `ajustarPrecios` y `revalidarWeb`: los cambios del panel se ven en la web en segundos. `pedidos.habilitados` apagado = web en modo carta (sin carrito). Se suman `browser-image-compression` y `@dnd-kit` (ya previstos en §2).

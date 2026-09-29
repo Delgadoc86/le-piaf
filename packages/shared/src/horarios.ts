@@ -122,7 +122,10 @@ export interface ProximaApertura {
  * Próxima apertura a partir del instante dado (busca hasta 14 días).
  * Sirve para "Cerrado · abre a las 20:00". Devuelve null si no hay horarios.
  */
-export function proximaApertura(local: DatosHorario, instante: Date = new Date()): ProximaApertura | null {
+export function proximaApertura(
+  local: DatosHorario,
+  instante: Date = new Date(),
+): ProximaApertura | null {
   const ahora = partesEnZona(instante, local.zonaHoraria);
   for (let enDias = 0; enDias <= 14; enDias++) {
     const { fecha, dia } = sumarDias(ahora.fecha, enDias);
@@ -138,4 +141,12 @@ export function proximaApertura(local: DatosHorario, instante: Date = new Date()
   return null;
 }
 
-export const NOMBRES_DIAS = ['domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'] as const;
+export const NOMBRES_DIAS = [
+  'domingo',
+  'lunes',
+  'martes',
+  'miércoles',
+  'jueves',
+  'viernes',
+  'sábado',
+] as const;

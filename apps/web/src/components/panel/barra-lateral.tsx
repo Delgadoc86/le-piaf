@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { LogOut } from 'lucide-react';
+import { ExternalLink, LogOut } from 'lucide-react';
 import type { Rol } from '@app/shared';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
@@ -51,7 +51,11 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
             <>
               <Icono className="size-4 shrink-0" aria-hidden />
               <span className="whitespace-nowrap">{item.titulo}</span>
-              {!disponible && <span className="ml-auto hidden text-xs text-muted-foreground md:inline">Pronto</span>}
+              {!disponible && (
+                <span className="ml-auto hidden text-xs text-muted-foreground md:inline">
+                  Pronto
+                </span>
+              )}
             </>
           );
           const clases = 'flex items-center gap-2 rounded-md px-3 py-2 text-sm';
@@ -65,7 +69,11 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
               {contenido}
             </Link>
           ) : (
-            <span key={item.ruta} aria-disabled className={cn(clases, 'cursor-not-allowed opacity-50')}>
+            <span
+              key={item.ruta}
+              aria-disabled
+              className={cn(clases, 'cursor-not-allowed opacity-50')}
+            >
               {contenido}
             </span>
           );
@@ -73,6 +81,14 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
       </nav>
 
       <div className="hidden border-t p-4 md:block">
+        <a
+          href="/"
+          target="_blank"
+          rel="noopener"
+          className="mb-3 flex items-center gap-2 text-sm font-medium hover:underline"
+        >
+          <ExternalLink className="size-4" aria-hidden /> Ver la web
+        </a>
         <p className="truncate text-xs text-muted-foreground">{email}</p>
         <button
           type="button"

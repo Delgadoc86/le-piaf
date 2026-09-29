@@ -33,7 +33,8 @@ export function MarcoPanel({ children }: { children: ReactNode }) {
       <main className="flex min-h-dvh flex-col items-center justify-center gap-4 p-4 text-center">
         <h1 className="text-xl font-semibold">Todavía no sos parte del equipo</h1>
         <p className="max-w-sm text-muted-foreground">
-          Entraste como {sesion.usuario.email}. Pedile al dueño que te invite desde Equipo y volvé a entrar.
+          Entraste como {sesion.usuario.email}. Pedile al dueño que te invite desde Equipo y volvé a
+          entrar.
         </p>
         <Button variant="outline" onClick={() => void sesion.cerrarSesion()}>
           Cerrar sesión

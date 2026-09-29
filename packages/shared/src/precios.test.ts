@@ -70,14 +70,21 @@ function codigo(fn: () => unknown): string | null {
 }
 
 type Extra = { grupoId: string; opcionId: string };
-const mila = (extras: Extra[], varianteId = 'napo') => () =>
-  calcularItem(milanesa, { varianteId, extras, cantidad: 1 });
+const mila =
+  (extras: Extra[], varianteId = 'napo') =>
+  () =>
+    calcularItem(milanesa, { varianteId, extras, cantidad: 1 });
 const papas: Extra = { grupoId: 'guarnicion', opcionId: 'papas' };
 
 describe('calcularItem', () => {
   it('producto simple', () => {
     const l = calcularItem(base, { extras: [], cantidad: 2 });
-    expect(l).toMatchObject({ precioUnitario: 9000, subtotal: 18000, estacion: 'cocina', extras: [] });
+    expect(l).toMatchObject({
+      precioUnitario: 9000,
+      subtotal: 18000,
+      estacion: 'cocina',
+      extras: [],
+    });
   });
 
   it('variante + extras', () => {
@@ -97,7 +104,9 @@ describe('calcularItem', () => {
   });
 
   it('valida la variante', () => {
-    expect(codigo(() => calcularItem(milanesa, { extras: [papas], cantidad: 1 }))).toBe('variante_requerida');
+    expect(codigo(() => calcularItem(milanesa, { extras: [papas], cantidad: 1 }))).toBe(
+      'variante_requerida',
+    );
     expect(codigo(mila([papas], 'x'))).toBe('variante_inexistente');
     expect(codigo(() => calcularItem(base, { varianteId: 'napo', extras: [], cantidad: 1 }))).toBe(
       'variante_inexistente',
@@ -106,7 +115,9 @@ describe('calcularItem', () => {
 
   it('respeta mínimo y máximo de extras', () => {
     expect(codigo(mila([]))).toBe('extras_minimo');
-    expect(codigo(mila([papas, { grupoId: 'guarnicion', opcionId: 'pure' }]))).toBe('extras_maximo');
+    expect(codigo(mila([papas, { grupoId: 'guarnicion', opcionId: 'pure' }]))).toBe(
+      'extras_maximo',
+    );
     expect(
       codigo(
         mila([
@@ -122,21 +133,31 @@ describe('calcularItem', () => {
   it('valida las opciones elegidas', () => {
     const huevo: Extra = { grupoId: 'agregados', opcionId: 'huevo' };
     expect(codigo(mila([papas, huevo, huevo]))).toBe('opcion_repetida');
-    expect(codigo(mila([{ grupoId: 'guarnicion', opcionId: 'ensalada' }]))).toBe('opcion_no_disponible');
+    expect(codigo(mila([{ grupoId: 'guarnicion', opcionId: 'ensalada' }]))).toBe(
+      'opcion_no_disponible',
+    );
     expect(codigo(mila([{ grupoId: 'guarnicion', opcionId: 'nada' }]))).toBe('opcion_inexistente');
     expect(codigo(mila([{ grupoId: 'nada', opcionId: 'papas' }]))).toBe('grupo_inexistente');
   });
 
   it('rechaza agotados, ocultos y cantidades inválidas', () => {
     const agotado = { ...base, disponible: false };
-    expect(codigo(() => calcularItem(agotado, { extras: [], cantidad: 1 }))).toBe('producto_no_disponible');
-    expect(codigo(() => calcularItem({ ...base, visible: false }, { extras: [], cantidad: 1 }))).toBe(
+    expect(codigo(() => calcularItem(agotado, { extras: [], cantidad: 1 }))).toBe(
       'producto_no_disponible',
     );
-    const sinValidar = calcularItem(agotado, { extras: [], cantidad: 1 }, { validarDisponibilidad: false });
+    expect(
+      codigo(() => calcularItem({ ...base, visible: false }, { extras: [], cantidad: 1 })),
+    ).toBe('producto_no_disponible');
+    const sinValidar = calcularItem(
+      agotado,
+      { extras: [], cantidad: 1 },
+      { validarDisponibilidad: false },
+    );
     expect(sinValidar.subtotal).toBe(9000);
     expect(codigo(() => calcularItem(base, { extras: [], cantidad: 0 }))).toBe('cantidad_invalida');
-    expect(codigo(() => calcularItem(base, { extras: [], cantidad: 1.5 }))).toBe('cantidad_invalida');
+    expect(codigo(() => calcularItem(base, { extras: [], cantidad: 1.5 }))).toBe(
+      'cantidad_invalida',
+    );
   });
 });
 
@@ -148,7 +169,9 @@ describe('calcularPedido', () => {
     ]),
     promos: new Map([[promo.id, promo]]),
   };
-  const unaHamburguesa = [{ tipo: 'producto' as const, productoId: 'hamburguesa', extras: [], cantidad: 1 }];
+  const unaHamburguesa = [
+    { tipo: 'producto' as const, productoId: 'hamburguesa', extras: [], cantidad: 1 },
+  ];
 
   it('suma ítems, envío y descuento', () => {
     const r = calcularPedido(
@@ -172,20 +195,33 @@ describe('calcularPedido', () => {
 
   it('errores de catálogo', () => {
     expect(
-      codigo(() => calcularPedido([{ tipo: 'producto', productoId: 'x', extras: [], cantidad: 1 }], catalogo)),
+      codigo(() =>
+        calcularPedido([{ tipo: 'producto', productoId: 'x', extras: [], cantidad: 1 }], catalogo),
+      ),
     ).toBe('producto_inexistente');
-    expect(codigo(() => calcularPedido([{ tipo: 'promo', promoId: 'x', cantidad: 1 }], catalogo))).toBe(
-      'promo_inexistente',
-    );
-    const promoInactiva: Catalogo = { ...catalogo, promos: new Map([[promo.id, { ...promo, activa: false }]]) };
-    expect(codigo(() => calcularPedido([{ tipo: 'promo', promoId: promo.id, cantidad: 1 }], promoInactiva))).toBe(
-      'promo_no_disponible',
-    );
+    expect(
+      codigo(() => calcularPedido([{ tipo: 'promo', promoId: 'x', cantidad: 1 }], catalogo)),
+    ).toBe('promo_inexistente');
+    const promoInactiva: Catalogo = {
+      ...catalogo,
+      promos: new Map([[promo.id, { ...promo, activa: false }]]),
+    };
+    expect(
+      codigo(() =>
+        calcularPedido([{ tipo: 'promo', promoId: promo.id, cantidad: 1 }], promoInactiva),
+      ),
+    ).toBe('promo_no_disponible');
   });
 
   it('errores de montos', () => {
-    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { descuento: 9001 }))).toBe('descuento_invalido');
-    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { costoEnvio: -1 }))).toBe('envio_invalido');
-    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { costoEnvio: 10.5 }))).toBe('envio_invalido');
+    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { descuento: 9001 }))).toBe(
+      'descuento_invalido',
+    );
+    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { costoEnvio: -1 }))).toBe(
+      'envio_invalido',
+    );
+    expect(codigo(() => calcularPedido(unaHamburguesa, catalogo, { costoEnvio: 10.5 }))).toBe(
+      'envio_invalido',
+    );
   });
 });

@@ -97,14 +97,24 @@ export const webSchema = z.object({
   secciones: z.array(
     z.object({ tipo: z.enum(SECCIONES_WEB), visible: z.boolean(), orden: z.number().int() }),
   ),
-  hero: z.object({ bajada: z.string().max(80), titulo: z.string().max(80), textoBoton: z.string().max(40) }),
+  hero: z.object({
+    bajada: z.string().max(80),
+    titulo: z.string().max(80),
+    textoBoton: z.string().max(40),
+  }),
   nosotros: z.object({
     titulo: z.string().max(80),
     parrafos: z.array(textoLargo).max(10),
     fotoUrl: z.string(),
     frase: z.string().max(200),
     tarjetas: z
-      .array(z.object({ icono: z.string().max(40), titulo: z.string().max(60), texto: z.string().max(200) }))
+      .array(
+        z.object({
+          icono: z.string().max(40),
+          titulo: z.string().max(60),
+          texto: z.string().max(200),
+        }),
+      )
       .max(8),
     cierre: z.string().max(400),
   }),
@@ -135,7 +145,10 @@ export const configPagosSchema = z.object({
   transferencia: z.object({
     habilitado: z.boolean(),
     alias: z.string().max(40),
-    cbu: z.string().regex(/^\d{22}$/).optional(),
+    cbu: z
+      .string()
+      .regex(/^\d{22}$/)
+      .optional(),
     titular: z.string().max(80),
   }),
   mercadoPago: z.object({ habilitado: z.boolean() }),
@@ -190,7 +203,10 @@ export const grupoExtrasSchema = z
     max: z.number().int().min(1),
     opciones: z.array(opcionExtraSchema).min(1),
   })
-  .refine((g) => g.min <= g.max, { message: 'El mínimo no puede superar al máximo', path: ['min'] });
+  .refine((g) => g.min <= g.max, {
+    message: 'El mínimo no puede superar al máximo',
+    path: ['min'],
+  });
 
 export const productoSchema = z.object({
   categoriaId: idSchema,
@@ -218,7 +234,13 @@ export const promoSchema = z.object({
   orden: z.number().int(),
   activa: z.boolean(),
   items: z
-    .array(z.object({ productoId: idSchema, varianteId: idSchema.optional(), cantidad: z.number().int().min(1) }))
+    .array(
+      z.object({
+        productoId: idSchema,
+        varianteId: idSchema.optional(),
+        cantidad: z.number().int().min(1),
+      }),
+    )
     .optional(),
   vigencia: z
     .object({
@@ -260,7 +282,10 @@ export const seleccionItemSchema = z.discriminatedUnion('tipo', [
     tipo: z.literal('producto'),
     productoId: idSchema,
     varianteId: idSchema.optional(),
-    extras: z.array(z.object({ grupoId: idSchema, opcionId: idSchema })).max(30).default([]),
+    extras: z
+      .array(z.object({ grupoId: idSchema, opcionId: idSchema }))
+      .max(30)
+      .default([]),
     cantidad: z.number().int().min(1).max(CANTIDAD_MAXIMA_ITEM),
     nota: z.string().trim().max(200).optional(),
   }),

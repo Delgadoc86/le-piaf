@@ -11,7 +11,8 @@ import { auth, db } from '../util/admin.js';
  */
 export const sincronizarClaims = onDocumentWritten('miembros/{uid}', async (event) => {
   const { uid } = event.params;
-  const despues = event.data?.after.data() as { rol?: Rol; activo?: boolean; email?: string; nombre?: string } | undefined;
+  const despues = event.data?.after.data() as
+    { rol?: Rol; activo?: boolean; email?: string; nombre?: string } | undefined;
 
   const usuario = await auth.getUser(uid).catch(() => null);
   if (!usuario) {
@@ -20,7 +21,10 @@ export const sincronizarClaims = onDocumentWritten('miembros/{uid}', async (even
   }
 
   const actual = (usuario.customClaims ?? {}) as ClaimsLocal;
-  const rolNuevo = despues?.activo !== false && despues?.rol && ROLES.includes(despues.rol) ? despues.rol : undefined;
+  const rolNuevo =
+    despues?.activo !== false && despues?.rol && ROLES.includes(despues.rol)
+      ? despues.rol
+      : undefined;
   if (actual.rol === rolNuevo) return; // sin cambios (evita refrescos innecesarios)
 
   const { rol: _rolViejo, ...resto } = actual;

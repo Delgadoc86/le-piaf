@@ -26,7 +26,10 @@ export default async function Inicio() {
     cierresEspeciales: local.cierresEspeciales ?? [],
   };
   const grupos: GrupoCarta[] = categorias
-    .map((categoria) => ({ categoria, productos: productos.filter((p) => p.categoriaId === categoria.id) }))
+    .map((categoria) => ({
+      categoria,
+      productos: productos.filter((p) => p.categoriaId === categoria.id),
+    }))
     .filter((g) => g.productos.length > 0);
 
   const anclas = [
@@ -50,7 +53,9 @@ export default async function Inicio() {
     >
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(datosEstructurados(local, grupos)).replace(/</g, '\\u003c') }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(datosEstructurados(local, grupos)).replace(/</g, '\\u003c'),
+        }}
       />
       <a
         href="#carta"
@@ -59,7 +64,13 @@ export default async function Inicio() {
         Saltar a la carta
       </a>
 
-      <Cabecera nombre={local.nombre} logoUrl={local.marca.logoUrl} horario={horario} anclas={anclas} />
+      <Cabecera
+        nombre={local.nombre}
+        logoUrl={local.marca.logoUrl}
+        horario={horario}
+        anclas={anclas}
+        conCarrito={local.pedidos.habilitados}
+      />
 
       <main>
         <Portada
@@ -80,7 +91,9 @@ export default async function Inicio() {
                 <h2 id="titulo-promos" className="font-titulos text-3xl md:text-4xl">
                   Promos del día
                 </h2>
-                <span className="text-xs font-semibold tracking-[0.25em] text-marca uppercase">Ofertas</span>
+                <span className="text-xs font-semibold tracking-[0.25em] text-marca uppercase">
+                  Ofertas
+                </span>
               </div>
               <PromosBento promos={promos} zonaHoraria={local.zonaHoraria} />
             </div>

@@ -1,4 +1,8 @@
-import { assertFails, assertSucceeds, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
+import {
+  assertFails,
+  assertSucceeds,
+  type RulesTestEnvironment,
+} from '@firebase/rules-unit-testing';
 import {
   addDoc,
   collection,
@@ -77,9 +81,23 @@ beforeEach(async () => {
     await setDoc(doc(f, 'clientes', '5492611234567'), { nombre: 'Juan' });
     await setDoc(doc(f, 'auditoria', 'a1'), { accion: 'x' });
     await setDoc(doc(f, 'contadores', '2026-10-02'), { ultimoNumero: 1 });
-    await setDoc(doc(f, 'miembros', 'dueno'), { rol: 'dueno', nombre: 'D', email: 'd@x', activo: true });
-    await setDoc(doc(f, 'miembros', 'mozo'), { rol: 'mozo', nombre: 'M', email: 'm@x', activo: true });
-    await setDoc(doc(f, 'usuarios', 'mozo'), { email: 'mozo@test.com', nombre: 'Mozo', claimsVersion: 1 });
+    await setDoc(doc(f, 'miembros', 'dueno'), {
+      rol: 'dueno',
+      nombre: 'D',
+      email: 'd@x',
+      activo: true,
+    });
+    await setDoc(doc(f, 'miembros', 'mozo'), {
+      rol: 'mozo',
+      nombre: 'M',
+      email: 'm@x',
+      activo: true,
+    });
+    await setDoc(doc(f, 'usuarios', 'mozo'), {
+      email: 'mozo@test.com',
+      nombre: 'Mozo',
+      claimsVersion: 1,
+    });
   });
 });
 
@@ -100,7 +118,9 @@ describe('usuarios sin rol (cualquiera que entre con Google) y anónimos', () =>
       await assertFails(updateDoc(doc(d, 'local', 'datos'), { nombre: 'Hackeado' }));
       await assertFails(updateDoc(doc(d, 'productos', 'p1'), { precio: 1 }));
       await assertFails(updateDoc(doc(d, 'productos', 'p1'), { disponible: false }));
-      await assertFails(setDoc(doc(d, 'categorias', 'nueva'), { nombre: 'X', orden: 1, visible: true }));
+      await assertFails(
+        setDoc(doc(d, 'categorias', 'nueva'), { nombre: 'X', orden: 1, visible: true }),
+      );
       await assertFails(updateDoc(doc(d, 'pedidos', 'ped1'), { estado: 'cancelado' }));
     });
   }
@@ -120,7 +140,9 @@ describe('local/datos', () => {
   });
 
   it('solo el dueño lo edita; nadie lo crea ni lo borra', async () => {
-    await assertSucceeds(updateDoc(doc(db('dueno'), 'local', 'datos'), { nombre: 'Silverio Club' }));
+    await assertSucceeds(
+      updateDoc(doc(db('dueno'), 'local', 'datos'), { nombre: 'Silverio Club' }),
+    );
     await assertFails(updateDoc(doc(db('encargado'), 'local', 'datos'), { nombre: 'X' }));
     await assertFails(updateDoc(doc(db('dueno'), 'local', 'datos'), { nombre: '' }));
     await assertFails(setDoc(doc(db('dueno'), 'local', 'otro'), { nombre: 'X', activo: true }));
@@ -200,11 +222,21 @@ describe('carta', () => {
 
   it('categorías, promos y zonas: solo gestores, con validación', async () => {
     const d = db('dueno');
-    await assertSucceeds(setDoc(doc(d, 'categorias', 'c2'), { nombre: 'Pizzas', orden: 2, visible: true }));
-    await assertFails(setDoc(doc(db('mozo'), 'categorias', 'c3'), { nombre: 'X', orden: 3, visible: true }));
+    await assertSucceeds(
+      setDoc(doc(d, 'categorias', 'c2'), { nombre: 'Pizzas', orden: 2, visible: true }),
+    );
+    await assertFails(
+      setDoc(doc(db('mozo'), 'categorias', 'c3'), { nombre: 'X', orden: 3, visible: true }),
+    );
     await assertFails(setDoc(doc(d, 'categorias', 'c4'), { nombre: '', orden: 1, visible: true }));
 
-    const promo = { titulo: 'Lomo + papas', descripcion: '', precio: 14000, orden: 1, activa: true };
+    const promo = {
+      titulo: 'Lomo + papas',
+      descripcion: '',
+      precio: 14000,
+      orden: 1,
+      activa: true,
+    };
     await assertSucceeds(setDoc(doc(d, 'promos', 'pr1'), promo));
     await assertFails(setDoc(doc(d, 'promos', 'pr2'), { ...promo, precio: 1.5 }));
     await assertFails(setDoc(doc(db('cocina'), 'promos', 'pr3'), promo));
@@ -251,7 +283,13 @@ describe('pedidos', () => {
 
   it('los gestores avanzan el estado pero no tocan precios ni número', async () => {
     const ref = doc(db('encargado'), 'pedidos', 'ped1');
-    await assertSucceeds(updateDoc(ref, { estado: 'aceptado', tiempoEstimadoMin: 30, actualizadoEn: serverTimestamp() }));
+    await assertSucceeds(
+      updateDoc(ref, {
+        estado: 'aceptado',
+        tiempoEstimadoMin: 30,
+        actualizadoEn: serverTimestamp(),
+      }),
+    );
     await assertFails(updateDoc(ref, { total: 1 }));
     await assertFails(updateDoc(ref, { subtotal: 1 }));
     await assertFails(updateDoc(ref, { numero: 99 }));
@@ -261,7 +299,9 @@ describe('pedidos', () => {
   });
 
   it('el mozo gestiona salón pero no pedidos web ajenos', async () => {
-    await assertSucceeds(updateDoc(doc(db('mozo'), 'pedidos', 'salon1'), { estado: 'cuenta_pedida' }));
+    await assertSucceeds(
+      updateDoc(doc(db('mozo'), 'pedidos', 'salon1'), { estado: 'cuenta_pedida' }),
+    );
     await assertFails(updateDoc(doc(db('mozo'), 'pedidos', 'ped1'), { estado: 'aceptado' }));
   });
 
@@ -269,7 +309,9 @@ describe('pedidos', () => {
     const ref = doc(db('cocina'), 'pedidos', 'ped1');
     await assertSucceeds(updateDoc(ref, { items: [], actualizadoEn: serverTimestamp() }));
     await assertFails(updateDoc(ref, { estado: 'entregado' }));
-    await assertFails(updateDoc(ref, { pagos: [{ medio: 'efectivo', monto: 9000, estado: 'aprobado' }] }));
+    await assertFails(
+      updateDoc(ref, { pagos: [{ medio: 'efectivo', monto: 9000, estado: 'aprobado' }] }),
+    );
   });
 });
 

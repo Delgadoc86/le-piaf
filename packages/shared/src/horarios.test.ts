@@ -1,5 +1,11 @@
 import { describe, expect, it } from 'vitest';
-import { claveDia, estaAbierto, partesEnZona, proximaApertura, type DatosHorario } from './horarios.js';
+import {
+  claveDia,
+  estaAbierto,
+  partesEnZona,
+  proximaApertura,
+  type DatosHorario,
+} from './horarios.js';
 
 /** Instante a partir de una hora local de Mendoza (UTC-3, sin horario de verano). */
 const mza = (fechaHora: string) => new Date(`${fechaHora}:00-03:00`);
@@ -44,7 +50,10 @@ describe('estaAbierto', () => {
   });
 
   it('un cierre especial cierra el turno que abre ese día, incluida su madrugada', () => {
-    const conCierre = { ...silverio, cierresEspeciales: [{ fecha: '2026-10-03', motivo: 'Evento privado' }] };
+    const conCierre = {
+      ...silverio,
+      cierresEspeciales: [{ fecha: '2026-10-03', motivo: 'Evento privado' }],
+    };
     expect(estaAbierto(conCierre, mza('2026-10-03T01:30'))).toBe(true); // turno del viernes
     expect(estaAbierto(conCierre, mza('2026-10-03T12:00'))).toBe(false);
     expect(estaAbierto(conCierre, mza('2026-10-04T02:00'))).toBe(false); // madrugada del turno del sábado
@@ -52,7 +61,10 @@ describe('estaAbierto', () => {
   });
 
   it('desde == hasta es un turno de 24 h', () => {
-    const siempre = { ...silverio, horarios: [{ dias: [0, 1, 2, 3, 4, 5, 6], desde: '00:00', hasta: '00:00' }] };
+    const siempre = {
+      ...silverio,
+      horarios: [{ dias: [0, 1, 2, 3, 4, 5, 6], desde: '00:00', hasta: '00:00' }],
+    };
     expect(estaAbierto(siempre, mza('2026-10-05T04:00'))).toBe(true);
   });
 
@@ -73,7 +85,10 @@ describe('proximaApertura', () => {
 
   it('saltea los cierres especiales', () => {
     const conCierre = { ...silverio, cierresEspeciales: [{ fecha: '2026-10-03', motivo: '' }] };
-    expect(proximaApertura(conCierre, mza('2026-10-03T02:30'))).toMatchObject({ fecha: '2026-10-04', enDias: 1 });
+    expect(proximaApertura(conCierre, mza('2026-10-03T02:30'))).toMatchObject({
+      fecha: '2026-10-04',
+      enDias: 1,
+    });
   });
 
   it('null si no hay horarios', () => {

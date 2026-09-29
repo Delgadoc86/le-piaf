@@ -23,7 +23,11 @@ async function AnioActual() {
 export function Pie({ nombre, descripcion, logoUrl, contacto, horarios, anclas }: Props) {
   const redes = [
     { href: linkWhatsApp(contacto.whatsapp), etiqueta: 'WhatsApp', Icono: IconoWhatsApp },
-    contacto.instagram && { href: contacto.instagram, etiqueta: 'Instagram', Icono: IconoInstagram },
+    contacto.instagram && {
+      href: contacto.instagram,
+      etiqueta: 'Instagram',
+      Icono: IconoInstagram,
+    },
     contacto.facebook && { href: contacto.facebook, etiqueta: 'Facebook', Icono: IconoFacebook },
     contacto.tiktok && { href: contacto.tiktok, etiqueta: 'TikTok', Icono: IconoTikTok },
   ].filter((r): r is { href: string; etiqueta: string; Icono: typeof IconoWhatsApp } => Boolean(r));
@@ -33,7 +37,9 @@ export function Pie({ nombre, descripcion, logoUrl, contacto, horarios, anclas }
       <div className="linea-marca" aria-hidden />
       <div className="mx-auto grid max-w-6xl gap-10 px-5 py-14 md:grid-cols-[1.4fr_1fr_1fr] md:px-6">
         <div>
-          {logoUrl && <Image src={logoUrl} alt={nombre} width={300} height={200} className="h-16 w-auto" />}
+          {logoUrl && (
+            <Image src={logoUrl} alt={nombre} width={300} height={200} className="h-16 w-auto" />
+          )}
           <p className="mt-4 max-w-xs text-sm text-tinta-2">{descripcion}</p>
           <ul className="mt-5 flex gap-2">
             {redes.map(({ href, etiqueta, Icono }) => (
@@ -53,7 +59,9 @@ export function Pie({ nombre, descripcion, logoUrl, contacto, horarios, anclas }
         </div>
 
         <nav aria-label="Enlaces del pie">
-          <p className="mb-4 text-xs font-semibold tracking-[0.25em] text-marca uppercase">Enlaces</p>
+          <p className="mb-4 text-xs font-semibold tracking-[0.25em] text-marca uppercase">
+            Enlaces
+          </p>
           <ul className="space-y-2.5 text-sm">
             {anclas.map((a) => (
               <li key={a.href}>
@@ -66,7 +74,9 @@ export function Pie({ nombre, descripcion, logoUrl, contacto, horarios, anclas }
         </nav>
 
         <div>
-          <p className="mb-4 text-xs font-semibold tracking-[0.25em] text-marca uppercase">Horarios</p>
+          <p className="mb-4 text-xs font-semibold tracking-[0.25em] text-marca uppercase">
+            Horarios
+          </p>
           <dl className="space-y-2.5 text-sm">
             {resumirHorarios(horarios).map((h) => (
               <div key={h.dias} className="flex justify-between gap-4">

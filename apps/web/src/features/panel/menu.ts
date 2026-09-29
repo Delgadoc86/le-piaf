@@ -29,8 +29,20 @@ export interface ItemMenu {
 const GESTORES = ['dueno', 'encargado'] as const;
 
 export const MENU: readonly ItemMenu[] = [
-  { ruta: '', titulo: 'Resumen', icono: Home, roles: ['dueno', 'encargado', 'mozo', 'cocina'], fase: 0 },
-  { ruta: 'pedidos', titulo: 'Pedidos', icono: ClipboardList, roles: [...GESTORES, 'mozo'], fase: 2 },
+  {
+    ruta: '',
+    titulo: 'Resumen',
+    icono: Home,
+    roles: ['dueno', 'encargado', 'mozo', 'cocina'],
+    fase: 0,
+  },
+  {
+    ruta: 'pedidos',
+    titulo: 'Pedidos',
+    icono: ClipboardList,
+    roles: [...GESTORES, 'mozo'],
+    fase: 2,
+  },
   { ruta: 'cocina', titulo: 'Cocina', icono: ChefHat, roles: [...GESTORES, 'cocina'], fase: 3 },
   { ruta: 'salon', titulo: 'Salón', icono: Armchair, roles: [...GESTORES, 'mozo'], fase: 3 },
   { ruta: 'caja', titulo: 'Caja', icono: Wallet, roles: GESTORES, fase: 4 },
@@ -45,7 +57,7 @@ export const MENU: readonly ItemMenu[] = [
 ];
 
 /** Fase actual del desarrollo: lo de fases posteriores aparece como "Pronto". */
-export const FASE_ACTUAL = 0;
+export const FASE_ACTUAL = 1;
 
 export function menuPara(rol: Rol): ItemMenu[] {
   return MENU.filter((i) => i.roles.includes(rol));

@@ -40,7 +40,9 @@ export function mensajePedidoWhatsApp(
   for (const item of totales.items) {
     const variante = item.varianteNombre ? ` (${item.varianteNombre})` : '';
     const prefijo = item.tipo === 'promo' ? 'Promo ' : '';
-    lineas.push(`• ${item.cantidad}× ${prefijo}${item.nombre}${variante} — ${formatARS(item.subtotal)}`);
+    lineas.push(
+      `• ${item.cantidad}× ${prefijo}${item.nombre}${variante} — ${formatARS(item.subtotal)}`,
+    );
     for (const extra of item.extras) lineas.push(`   + ${extra.nombre}`);
     if (item.nota) lineas.push(`   Nota: ${item.nota}`);
   }

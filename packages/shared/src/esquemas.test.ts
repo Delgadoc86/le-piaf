@@ -20,7 +20,13 @@ describe('productoSchema', () => {
   });
 
   it('grupo de extras con min > max es inválido', () => {
-    const g = { id: 'g', nombre: 'G', min: 3, max: 1, opciones: [{ id: 'o', nombre: 'O', precio: 0, disponible: true }] };
+    const g = {
+      id: 'g',
+      nombre: 'G',
+      min: 3,
+      max: 1,
+      opciones: [{ id: 'o', nombre: 'O', precio: 0, disponible: true }],
+    };
     expect(grupoExtrasSchema.safeParse(g).success).toBe(false);
   });
 });
@@ -43,11 +49,17 @@ describe('crearPedidoInputSchema', () => {
   });
 
   it('no acepta pago con tarjeta desde la web', () => {
-    expect(crearPedidoInputSchema.safeParse({ ...pedido, pago: { medio: 'tarjeta' } }).success).toBe(false);
+    expect(
+      crearPedidoInputSchema.safeParse({ ...pedido, pago: { medio: 'tarjeta' } }).success,
+    ).toBe(false);
   });
 
   it('descarta campos desconocidos, como precios mandados por el cliente', () => {
-    const r = crearPedidoInputSchema.parse({ ...pedido, total: 1, items: [{ ...pedido.items[0], precio: 1 }] });
+    const r = crearPedidoInputSchema.parse({
+      ...pedido,
+      total: 1,
+      items: [{ ...pedido.items[0], precio: 1 }],
+    });
     expect(r).not.toHaveProperty('total');
     expect(r.items[0]).not.toHaveProperty('precio');
   });

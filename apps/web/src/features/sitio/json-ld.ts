@@ -6,14 +6,18 @@ const DIAS_SCHEMA = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Fr
 
 export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
   const url = process.env.NEXT_PUBLIC_APP_URL;
-  const redes = [local.contacto.instagram, local.contacto.facebook, local.contacto.tiktok].filter(Boolean);
+  const redes = [local.contacto.instagram, local.contacto.facebook, local.contacto.tiktok].filter(
+    Boolean,
+  );
   return {
     '@context': 'https://schema.org',
     '@type': 'Restaurant',
     name: local.nombre,
     description: local.web.seo.descripcion || local.descripcionCorta,
     ...(url ? { url, menu: `${url}/#carta` } : {}),
-    ...(local.marca.logoUrl ? { logo: local.marca.logoUrl, image: local.marca.ogImageUrl || local.marca.logoUrl } : {}),
+    ...(local.marca.logoUrl
+      ? { logo: local.marca.logoUrl, image: local.marca.ogImageUrl || local.marca.logoUrl }
+      : {}),
     telephone: `+${local.contacto.whatsapp}`,
     servesCuisine: grupos.map((g) => g.categoria.nombre),
     priceRange: '$$',
@@ -27,7 +31,11 @@ export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
       postalCode: local.direccion.cp,
       addressCountry: local.direccion.pais,
     },
-    geo: { '@type': 'GeoCoordinates', latitude: local.direccion.geo.lat, longitude: local.direccion.geo.lng },
+    geo: {
+      '@type': 'GeoCoordinates',
+      latitude: local.direccion.geo.lat,
+      longitude: local.direccion.geo.lng,
+    },
     openingHoursSpecification: local.horarios.map((h) => ({
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: h.dias.map((d) => DIAS_SCHEMA[d]),

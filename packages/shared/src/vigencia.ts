@@ -47,7 +47,11 @@ export function resumirDias(dias: readonly number[]): string {
     const ultimo = tramos.at(-1);
     const indice = ORDEN_SEMANA.indexOf(d as (typeof ORDEN_SEMANA)[number]);
     const previo = ultimo?.at(-1);
-    if (ultimo && previo !== undefined && ORDEN_SEMANA.indexOf(previo as (typeof ORDEN_SEMANA)[number]) === indice - 1) {
+    if (
+      ultimo &&
+      previo !== undefined &&
+      ORDEN_SEMANA.indexOf(previo as (typeof ORDEN_SEMANA)[number]) === indice - 1
+    ) {
       ultimo.push(d);
     } else {
       tramos.push([d]);

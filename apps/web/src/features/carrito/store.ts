@@ -17,7 +17,10 @@ export interface LineaCarrito {
 /** Misma elección (sin contar la cantidad) = misma línea: se suman las cantidades. */
 function claveDe(s: SeleccionItem): string {
   if (s.tipo === 'promo') return `promo:${s.promoId}:${s.nota ?? ''}`;
-  const extras = [...s.extras].map((e) => `${e.grupoId}.${e.opcionId}`).sort().join(',');
+  const extras = [...s.extras]
+    .map((e) => `${e.grupoId}.${e.opcionId}`)
+    .sort()
+    .join(',');
   return `prod:${s.productoId}:${s.varianteId ?? ''}:${extras}:${s.nota ?? ''}`;
 }
 
@@ -41,7 +44,13 @@ export const useCarrito = create<EstadoCarrito>()(
           return {
             lineas: e.lineas.map((l) =>
               l.clave === clave
-                ? { ...l, seleccion: { ...l.seleccion, cantidad: Math.min(99, l.seleccion.cantidad + s.cantidad) } }
+                ? {
+                    ...l,
+                    seleccion: {
+                      ...l.seleccion,
+                      cantidad: Math.min(99, l.seleccion.cantidad + s.cantidad),
+                    },
+                  }
                 : l,
             ),
           };
@@ -52,7 +61,9 @@ export const useCarrito = create<EstadoCarrito>()(
             cantidad <= 0
               ? e.lineas.filter((l) => l.clave !== clave)
               : e.lineas.map((l) =>
-                  l.clave === clave ? { ...l, seleccion: { ...l.seleccion, cantidad: Math.min(99, cantidad) } } : l,
+                  l.clave === clave
+                    ? { ...l, seleccion: { ...l.seleccion, cantidad: Math.min(99, cantidad) } }
+                    : l,
                 ),
         })),
       quitar: (clave) => set((e) => ({ lineas: e.lineas.filter((l) => l.clave !== clave) })),

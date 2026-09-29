@@ -19,7 +19,13 @@ import type { SVGProps } from 'react';
 import { cn } from '@/lib/utils';
 
 type P = SVGProps<SVGSVGElement>;
-const trazo = { fill: 'none', stroke: 'currentColor', strokeWidth: 2, strokeLinecap: 'round', strokeLinejoin: 'round' } as const;
+const trazo = {
+  fill: 'none',
+  stroke: 'currentColor',
+  strokeWidth: 2,
+  strokeLinecap: 'round',
+  strokeLinejoin: 'round',
+} as const;
 
 /** Pancho (lucide no trae). Mismo trazo que los íconos de lucide. */
 function Pancho(props: P) {
@@ -68,7 +74,28 @@ const POR_ICONO: Record<string, Icono> = {
   'set-meal': CookingPot,
 };
 
-export function IconoCategoria({ icono, className }: { icono?: string | undefined; className?: string }) {
+/** Íconos disponibles para elegir en el panel (clave guardada en categorias.icono). */
+export const ICONOS_CATEGORIA: { clave: string; nombre: string }[] = [
+  { clave: 'burger', nombre: 'Hamburguesa' },
+  { clave: 'sandwich', nombre: 'Sándwich' },
+  { clave: 'pizza', nombre: 'Pizza' },
+  { clave: 'empanada', nombre: 'Empanada' },
+  { clave: 'chicken', nombre: 'Pollo' },
+  { clave: 'sausage', nombre: 'Parrilla' },
+  { clave: 'hotdog', nombre: 'Pancho' },
+  { clave: 'fries', nombre: 'Papas' },
+  { clave: 'set-meal', nombre: 'Viandas' },
+  { clave: 'drink', nombre: 'Bebida' },
+  { clave: 'beer', nombre: 'Cerveza' },
+];
+
+export function IconoCategoria({
+  icono,
+  className,
+}: {
+  icono?: string | undefined;
+  className?: string;
+}) {
   const Componente = (icono && POR_ICONO[icono]) || UtensilsCrossed;
   return <Componente className={className} aria-hidden />;
 }
@@ -84,14 +111,28 @@ interface MiniaturaProps {
 }
 
 /** Foto del producto o, si no hay, la ilustración de su categoría sobre un degradé de la marca. */
-export function Miniatura({ fotoUrl, alt, icono, sizes, className, iconoClassName = 'size-9' }: MiniaturaProps) {
+export function Miniatura({
+  fotoUrl,
+  alt,
+  icono,
+  sizes,
+  className,
+  iconoClassName = 'size-9',
+}: MiniaturaProps) {
   return (
     <div className={cn('relative overflow-hidden bg-superficie-2', className)}>
       {fotoUrl ? (
         <Image src={fotoUrl} alt={alt} fill sizes={sizes} className="zoom object-cover" />
       ) : (
-        <div className="ilustracion absolute inset-0 flex items-center justify-center text-marca" role="img" aria-label={alt}>
-          <IconoCategoria icono={icono} className={cn('zoom drop-shadow-[0_6px_14px_rgb(0_0_0/0.45)]', iconoClassName)} />
+        <div
+          className="ilustracion absolute inset-0 flex items-center justify-center text-marca"
+          role="img"
+          aria-label={alt}
+        >
+          <IconoCategoria
+            icono={icono}
+            className={cn('zoom drop-shadow-[0_6px_14px_rgb(0_0_0/0.45)]', iconoClassName)}
+          />
         </div>
       )}
     </div>

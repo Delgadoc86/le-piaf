@@ -9,8 +9,16 @@ import {
   signInWithPopup,
 } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
+import { Eye, EyeOff } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSesion } from '@/features/auth/sesion';
@@ -40,6 +48,7 @@ export default function LoginPage() {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
+  const [verContrasena, setVerContrasena] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [aviso, setAviso] = useState<string | null>(null);
   const [enviando, setEnviando] = useState(false);
@@ -66,7 +75,8 @@ export default function LoginPage() {
     void ejecutar(() => signInWithEmailAndPassword(firebase().auth, email.trim(), contrasena));
   };
 
-  const entrarConGoogle = () => void ejecutar(() => signInWithPopup(firebase().auth, new GoogleAuthProvider()));
+  const entrarConGoogle = () =>
+    void ejecutar(() => signInWithPopup(firebase().auth, new GoogleAuthProvider()));
 
   const recuperar = () => {
     if (!email.trim()) {
@@ -104,14 +114,30 @@ export default function LoginPage() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="contrasena">Contraseña</Label>
-            <Input
-              id="contrasena"
-              type="password"
-              autoComplete="current-password"
-              required
-              value={contrasena}
-              onChange={(e) => setContrasena(e.target.value)}
-            />
+            <div className="relative">
+              <Input
+                id="contrasena"
+                type={verContrasena ? 'text' : 'password'}
+                autoComplete="current-password"
+                required
+                value={contrasena}
+                onChange={(e) => setContrasena(e.target.value)}
+                className="pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setVerContrasena((v) => !v)}
+                aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                aria-pressed={verContrasena}
+                className="absolute top-1/2 right-1 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+              >
+                {verContrasena ? (
+                  <EyeOff className="size-4" aria-hidden />
+                ) : (
+                  <Eye className="size-4" aria-hidden />
+                )}
+              </button>
+            </div>
           </div>
           {error && (
             <p role="alert" className="text-sm text-destructive">
@@ -140,9 +166,26 @@ export default function LoginPage() {
           ¿Olvidaste tu contraseña?
         </button>
         {usaEmuladores && (
-          <p className="text-center text-xs text-muted-foreground">
-            Emuladores: dueno@local.test, encargado@…, mozo@…, cocina@… · contraseña local123
-          </p>
+          <div className="w-full rounded-md border border-dashed p-3 text-center text-xs text-muted-foreground">
+            <p className="mb-2">
+              Usuarios de prueba (contraseña <strong>local123</strong>):
+            </p>
+            <div className="flex flex-wrap justify-center gap-1.5">
+              {['dueno', 'encargado', 'mozo', 'cocina'].map((u) => (
+                <button
+                  key={u}
+                  type="button"
+                  onClick={() => {
+                    setEmail(`${u}@local.test`);
+                    setContrasena('local123');
+                  }}
+                  className="rounded-full border px-2.5 py-1 hover:bg-muted"
+                >
+                  {u}@local.test
+                </button>
+              ))}
+            </div>
+          </div>
         )}
       </CardFooter>
     </Card>

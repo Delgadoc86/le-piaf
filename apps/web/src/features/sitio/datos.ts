@@ -61,6 +61,8 @@ export async function obtenerSitio(): Promise<DatosSitio | null> {
     productos: productos.docs
       .map((d) => ({ ...limpiar<ProductoDatos>(d.data()), id: d.id }))
       .filter((p) => p.visible),
-    promos: promos.docs.map((d) => ({ ...limpiar<PromoDatos>(d.data()), id: d.id })).filter((p) => p.activa),
+    promos: promos.docs
+      .map((d) => ({ ...limpiar<PromoDatos>(d.data()), id: d.id }))
+      .filter((p) => p.activa),
   };
 }

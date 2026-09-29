@@ -19,7 +19,9 @@ export const usaEmuladores = projectId.startsWith('demo-');
 
 if (!usaEmuladores) {
   if (!flag('si-estoy-seguro')) {
-    console.error(`✋ "${projectId}" es un proyecto REAL (producción). Si es lo que querés, repetí con --si-estoy-seguro.`);
+    console.error(
+      `✋ "${projectId}" es un proyecto REAL (producción). Si es lo que querés, repetí con --si-estoy-seguro.`,
+    );
     process.exit(1);
   }
 } else {
@@ -30,7 +32,8 @@ if (!usaEmuladores) {
 
 // Emuladores: <proyecto>.appspot.com (igual que .env.example). Proyectos reales nuevos: <proyecto>.firebasestorage.app.
 export const bucketName =
-  arg('bucket') ?? (usaEmuladores ? `${projectId}.appspot.com` : `${projectId}.firebasestorage.app`);
+  arg('bucket') ??
+  (usaEmuladores ? `${projectId}.appspot.com` : `${projectId}.firebasestorage.app`);
 
 if (getApps().length === 0) initializeApp({ projectId, storageBucket: bucketName });
 

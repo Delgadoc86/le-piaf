@@ -9,6 +9,7 @@ import { Check, Plus, Search, X } from 'lucide-react';
 import { formatARS, type EtiquetaProducto } from '@app/shared';
 import type { CategoriaPublica, ProductoPublico } from '@/features/sitio/datos';
 import { useCarrito, useTiendaUI } from '@/features/carrito/store';
+import { useTienda } from '@/features/carrito/tienda';
 import { cn } from '@/lib/utils';
 import { IconoCategoria, Miniatura } from './ilustracion';
 
@@ -25,11 +26,7 @@ const ETIQUETAS: Record<EtiquetaProducto, string> = {
   recomendado: 'Recomendado',
 };
 
-const normalizar = (s: string) =>
-  s
-    .normalize('NFD')
-    .replace(/[̀-ͯ]/g, '')
-    .toLowerCase();
+const normalizar = (s: string) => s.normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase();
 
 function precioVisible(p: ProductoPublico): string {
   const variantes = p.variantes ?? [];
@@ -43,7 +40,9 @@ function precioVisible(p: ProductoPublico): string {
 
 /** ¿Se puede agregar con un toque? (sin variantes ni extras obligatorios) */
 const agregadoDirecto = (p: ProductoPublico) =>
-  (p.variantes ?? []).length === 0 && (p.gruposExtras ?? []).every((g) => g.min === 0) && p.precio > 0;
+  (p.variantes ?? []).length === 0 &&
+  (p.gruposExtras ?? []).every((g) => g.min === 0) &&
+  p.precio > 0;
 
 export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | undefined }) {
   const [busqueda, setBusqueda] = useState('');
@@ -59,7 +58,12 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
         ...g,
         productos: g.productos.filter((p) =>
           normalizar(
-            [p.nombre, p.descripcion, g.categoria.nombre, ...(p.variantes ?? []).map((v) => v.nombre)].join(' '),
+            [
+              p.nombre,
+              p.descripcion,
+              g.categoria.nombre,
+              ...(p.variantes ?? []).map((v) => v.nombre),
+            ].join(' '),
           ).includes(q),
         ),
       }))
@@ -93,22 +97,33 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
   useEffect(() => {
     const f = fila.current;
     const chip = f?.querySelector<HTMLElement>(`[data-cat="${CSS.escape(activa)}"]`);
-    if (f && chip) f.scrollTo({ left: chip.offsetLeft - f.clientWidth / 2 + chip.clientWidth / 2, behavior: 'smooth' });
+    if (f && chip)
+      f.scrollTo({
+        left: chip.offsetLeft - f.clientWidth / 2 + chip.clientWidth / 2,
+        behavior: 'smooth',
+      });
   }, [activa]);
 
   function irA(id: string) {
     setActiva(id);
     const reducir = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    document.getElementById(`cat-${id}`)?.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' });
+    document
+      .getElementById(`cat-${id}`)
+      ?.scrollIntoView({ behavior: reducir ? 'auto' : 'smooth', block: 'start' });
   }
 
   return (
     <div>
-      <div ref={barra}
-        className="sticky top-[4.25rem] z-30 -mx-4 border-b border-borde bg-fondo/92 px-4 pt-3 pb-3 backdrop-blur-xl md:top-[4.75rem] md:-mx-6 md:px-6">
+      <div
+        ref={barra}
+        className="sticky top-[4.25rem] z-30 -mx-4 border-b border-borde bg-fondo/92 px-4 pt-3 pb-3 backdrop-blur-xl md:top-[4.75rem] md:-mx-6 md:px-6"
+      >
         <label className="relative block">
           <span className="sr-only">Buscar en la carta</span>
-          <Search className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-tinta-2" aria-hidden />
+          <Search
+            className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-tinta-2"
+            aria-hidden
+          />
           <input
             type="search"
             value={busqueda}
@@ -140,7 +155,9 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
                   aria-current={on ? 'true' : undefined}
                   className={cn(
                     'inline-flex shrink-0 items-center gap-2 rounded-full border py-1.5 pr-4 pl-1.5 text-sm font-medium transition-[background-color,color,border-color] duration-300',
-                    on ? 'border-marca bg-marca text-black' : 'border-borde bg-superficie text-tinta-2 hover:text-tinta',
+                    on
+                      ? 'border-marca bg-marca text-black'
+                      : 'border-borde bg-superficie text-tinta-2 hover:text-tinta',
                   )}
                 >
                   <span
@@ -160,11 +177,18 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
       </div>
 
       {visibles.length === 0 && (
-        <p className="py-16 text-center text-tinta-2">No encontramos &ldquo;{busqueda}&rdquo;. Probá con otra palabra.</p>
+        <p className="py-16 text-center text-tinta-2">
+          No encontramos &ldquo;{busqueda}&rdquo;. Probá con otra palabra.
+        </p>
       )}
 
       {visibles.map((g) => (
-        <section key={g.categoria.id} id={`cat-${g.categoria.id}`} aria-labelledby={`t-${g.categoria.id}`} className="scroll-mt-[13rem] pt-8 md:scroll-mt-[14rem]">
+        <section
+          key={g.categoria.id}
+          id={`cat-${g.categoria.id}`}
+          aria-labelledby={`t-${g.categoria.id}`}
+          className="scroll-mt-[13rem] pt-8 md:scroll-mt-[14rem]"
+        >
           <h3 id={`t-${g.categoria.id}`} className="mb-3 font-titulos text-2xl md:text-3xl">
             {g.categoria.nombre}
           </h3>
@@ -182,13 +206,20 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
   );
 }
 
-function FilaProducto({ producto: p, icono }: { producto: ProductoPublico; icono?: string | undefined }) {
+function FilaProducto({
+  producto: p,
+  icono,
+}: {
+  producto: ProductoPublico;
+  icono?: string | undefined;
+}) {
   const abrir = useTiendaUI((e) => e.abrirProducto);
   const avisar = useTiendaUI((e) => e.avisarAgregado);
   const agregar = useCarrito((e) => e.agregar);
   const [listo, setListo] = useState(false);
   const agotado = !p.disponible;
   const directo = agregadoDirecto(p);
+  const conCarrito = useTienda().pedidos.habilitados;
 
   function mas(e: MouseEvent) {
     e.stopPropagation();
@@ -207,7 +238,12 @@ function FilaProducto({ producto: p, icono }: { producto: ProductoPublico; icono
       )}
     >
       {/* Toda la fila abre la hoja de producto; el "+" agrega directo. */}
-      <button type="button" onClick={() => abrir(p.id)} className="absolute inset-0 z-0 rounded-3xl" aria-label={`Ver ${p.nombre}`} />
+      <button
+        type="button"
+        onClick={() => abrir(p.id)}
+        className="absolute inset-0 z-0 rounded-3xl"
+        aria-label={`Ver ${p.nombre}`}
+      />
       <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col py-1">
         <h4 className="font-semibold text-pretty">{p.nombre}</h4>
         {p.descripcion && p.descripcion.replace(/\.$/, '') !== p.nombre && (
@@ -216,7 +252,9 @@ function FilaProducto({ producto: p, icono }: { producto: ProductoPublico; icono
         <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-3">
           <span className="font-bold text-marca tabular-nums">{precioVisible(p)}</span>
           {agotado && (
-            <span className="rounded-full bg-white/12 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase">Agotado</span>
+            <span className="rounded-full bg-white/12 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase">
+              Agotado
+            </span>
           )}
           {p.etiquetas?.map((e) => (
             <span
@@ -242,7 +280,7 @@ function FilaProducto({ producto: p, icono }: { producto: ProductoPublico; icono
           sizes="112px"
           className="pointer-events-none size-24 rounded-2xl md:size-28"
         />
-        {!agotado && (
+        {!agotado && conCarrito && (
           <button
             type="button"
             onClick={mas}
@@ -252,7 +290,11 @@ function FilaProducto({ producto: p, icono }: { producto: ProductoPublico; icono
               listo ? 'bg-emerald-400' : 'bg-marca hover:bg-marca-hover',
             )}
           >
-            {listo ? <Check key="ok" className="tilde size-5" aria-hidden /> : <Plus className="size-5" aria-hidden />}
+            {listo ? (
+              <Check key="ok" className="tilde size-5" aria-hidden />
+            ) : (
+              <Plus className="size-5" aria-hidden />
+            )}
           </button>
         )}
       </div>

@@ -50,6 +50,8 @@ export function firebase(): Clientes {
     ? getFirestore(app)
     : initializeFirestore(app, {
         localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }),
+        // Los formularios dejan campos opcionales en undefined: se omiten en vez de fallar.
+        ignoreUndefinedProperties: true,
       });
   const auth = getAuth(app);
   const storage = getStorage(app);

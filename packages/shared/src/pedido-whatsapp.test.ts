@@ -37,7 +37,13 @@ const limpiar = (s: string) => s.replace(/\s/g, ' ');
 
 describe('mensajePedidoWhatsApp', () => {
   it('arma el detalle con variantes, extras, notas y total', () => {
-    const m = limpiar(mensajePedidoWhatsApp('Silverio', totales, { nombre: 'Juan', tipo: 'take_away', pago: 'efectivo' }));
+    const m = limpiar(
+      mensajePedidoWhatsApp('Silverio', totales, {
+        nombre: 'Juan',
+        tipo: 'take_away',
+        pago: 'efectivo',
+      }),
+    );
     expect(m).toContain('¡Hola Silverio!');
     expect(m).toContain('• 2× Milanesa al plato (Napolitana) — $ 25.600');
     expect(m).toContain('+ Huevo extra');
@@ -66,7 +72,12 @@ describe('mensajePedidoWhatsApp', () => {
   });
 
   it('no menciona el vuelto si no hace falta', () => {
-    const m = mensajePedidoWhatsApp('Silverio', totales, { nombre: 'A', tipo: 'take_away', pago: 'efectivo', pagaCon: 1000 });
+    const m = mensajePedidoWhatsApp('Silverio', totales, {
+      nombre: 'A',
+      tipo: 'take_away',
+      pago: 'efectivo',
+      pagaCon: 1000,
+    });
     expect(m).not.toContain('pago con');
   });
 });

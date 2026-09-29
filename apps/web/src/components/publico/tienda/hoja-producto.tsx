@@ -11,6 +11,8 @@ import { calcularItem, ErrorPrecio, formatARS, resumirDias, type GrupoExtras } f
 import { useCarrito, useTiendaUI } from '@/features/carrito/store';
 import { useTienda } from '@/features/carrito/tienda';
 import { cn } from '@/lib/utils';
+import { linkWhatsApp } from '@/lib/whatsapp';
+import { IconoWhatsApp } from '../iconos-marca';
 import { Miniatura } from './ilustracion';
 
 export function HojaProducto() {
@@ -35,7 +37,7 @@ export function HojaProducto() {
 }
 
 function Contenido({ productoId }: { productoId: string }) {
-  const { producto, categoria } = useTienda();
+  const { producto, categoria, pedidos, whatsapp, nombreLocal } = useTienda();
   const p = producto(productoId)!;
   const agregar = useCarrito((e) => e.agregar);
   const { abrirProducto, avisarAgregado } = useTiendaUI();
@@ -56,10 +58,18 @@ function Contenido({ productoId }: { productoId: string }) {
     try {
       return {
         ok: true as const,
-        linea: calcularItem(p, { varianteId, extras: seleccionExtras, cantidad, nota: nota.trim() || undefined }),
+        linea: calcularItem(p, {
+          varianteId,
+          extras: seleccionExtras,
+          cantidad,
+          nota: nota.trim() || undefined,
+        }),
       };
     } catch (e) {
-      return { ok: false as const, error: e instanceof ErrorPrecio ? e.message : 'Revisá las opciones' };
+      return {
+        ok: false as const,
+        error: e instanceof ErrorPrecio ? e.message : 'Revisá las opciones',
+      };
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps -- seleccionExtras se deriva de extras
   }, [p, varianteId, extras, cantidad, nota]);
@@ -67,7 +77,8 @@ function Contenido({ productoId }: { productoId: string }) {
   function alternarExtra(g: GrupoExtras, opcionId: string) {
     setExtras((prev) => {
       const actuales = prev[g.id] ?? [];
-      if (actuales.includes(opcionId)) return { ...prev, [g.id]: actuales.filter((o) => o !== opcionId) };
+      if (actuales.includes(opcionId))
+        return { ...prev, [g.id]: actuales.filter((o) => o !== opcionId) };
       // Grupo de una sola opción: se comporta como radio.
       if (g.max === 1) return { ...prev, [g.id]: [opcionId] };
       if (actuales.length >= g.max) return prev;
@@ -104,7 +115,10 @@ function Contenido({ productoId }: { productoId: string }) {
           className="aspect-[16/9] md:aspect-[2/1]"
           iconoClassName="size-20"
         />
-        <div className="absolute top-3 left-1/2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/40 md:hidden" aria-hidden />
+        <div
+          className="absolute top-3 left-1/2 h-1.5 w-12 -translate-x-1/2 rounded-full bg-white/40 md:hidden"
+          aria-hidden
+        />
         <Dialog.Close
           aria-label="Cerrar"
           className="absolute top-3 right-3 inline-flex size-10 items-center justify-center rounded-full bg-black/60 backdrop-blur-md transition-colors hover:bg-black/80"
@@ -126,7 +140,9 @@ function Contenido({ productoId }: { productoId: string }) {
           <fieldset>
             <legend className="mb-3 flex w-full items-center justify-between font-semibold">
               Elegí una opción
-              <span className="rounded-full bg-marca/15 px-2 py-0.5 text-[11px] font-semibold text-marca">Obligatorio</span>
+              <span className="rounded-full bg-marca/15 px-2 py-0.5 text-[11px] font-semibold text-marca">
+                Obligatorio
+              </span>
             </legend>
             <div className="space-y-2">
               {variantes.map((v) => (
@@ -151,7 +167,9 @@ function Contenido({ productoId }: { productoId: string }) {
               <legend className="mb-3 flex w-full items-center justify-between font-semibold">
                 {g.nombre}
                 <span className="text-xs font-normal text-tinta-2">
-                  {g.min > 0 ? `Elegí ${g.min === g.max ? g.min : `${g.min} a ${g.max}`}` : `Hasta ${g.max}`}
+                  {g.min > 0
+                    ? `Elegí ${g.min === g.max ? g.min : `${g.min} a ${g.max}`}`
+                    : `Hasta ${g.max}`}
                 </span>
               </legend>
               <div className="space-y-2">
@@ -161,10 +179,19 @@ function Contenido({ productoId }: { productoId: string }) {
                     tipo={g.max === 1 ? 'radio' : 'checkbox'}
                     nombre={`grupo-${g.id}`}
                     marcada={elegidas.includes(o.id)}
-                    deshabilitada={!o.disponible || (!elegidas.includes(o.id) && g.max > 1 && elegidas.length >= g.max)}
+                    deshabilitada={
+                      !o.disponible ||
+                      (!elegidas.includes(o.id) && g.max > 1 && elegidas.length >= g.max)
+                    }
                     onCambio={() => alternarExtra(g, o.id)}
                     etiqueta={o.nombre}
-                    precio={!o.disponible ? 'Agotado' : o.precio > 0 ? `+ ${formatARS(o.precio)}` : 'Sin cargo'}
+                    precio={
+                      !o.disponible
+                        ? 'Agotado'
+                        : o.precio > 0
+                          ? `+ ${formatARS(o.precio)}`
+                          : 'Sin cargo'
+                    }
                   />
                 ))}
               </div>
@@ -186,30 +213,46 @@ function Contenido({ productoId }: { productoId: string }) {
         </label>
       </div>
 
-      <div className="flex shrink-0 items-center gap-3 border-t border-borde bg-superficie px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-7">
-        <Contador valor={cantidad} onCambio={setCantidad} />
-        <button
-          type="button"
-          onClick={confirmar}
-          disabled={agotado || !calculo.ok || agregado}
-          className="brillo relative inline-flex h-13 flex-1 items-center justify-between gap-3 rounded-full bg-marca px-6 font-semibold text-black transition-[background-color,opacity] hover:bg-marca-hover disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {agregado ? (
-            <span className="tilde mx-auto inline-flex items-center gap-2">
-              <Check className="size-5" aria-hidden /> Agregado
-            </span>
-          ) : agotado ? (
-            <span className="mx-auto">Agotado</span>
-          ) : !calculo.ok ? (
-            <span className="mx-auto truncate text-sm">{calculo.error}</span>
-          ) : (
-            <>
-              <span>Agregar</span>
-              <span className="tabular-nums">{formatARS(calculo.linea.subtotal)}</span>
-            </>
-          )}
-        </button>
-      </div>
+      {!pedidos.habilitados ? (
+        <div className="shrink-0 border-t border-borde bg-superficie px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-7">
+          <a
+            href={linkWhatsApp(
+              whatsapp,
+              `¡Hola ${nombreLocal}! Quería consultar por "${p.nombre}".`,
+            )}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] font-semibold text-white"
+          >
+            <IconoWhatsApp className="size-5" /> Consultar por WhatsApp
+          </a>
+        </div>
+      ) : (
+        <div className="flex shrink-0 items-center gap-3 border-t border-borde bg-superficie px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))] md:px-7">
+          <Contador valor={cantidad} onCambio={setCantidad} />
+          <button
+            type="button"
+            onClick={confirmar}
+            disabled={agotado || !calculo.ok || agregado}
+            className="brillo relative inline-flex h-13 flex-1 items-center justify-between gap-3 rounded-full bg-marca px-6 font-semibold text-black transition-[background-color,opacity] hover:bg-marca-hover disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {agregado ? (
+              <span className="tilde mx-auto inline-flex items-center gap-2">
+                <Check className="size-5" aria-hidden /> Agregado
+              </span>
+            ) : agotado ? (
+              <span className="mx-auto">Agotado</span>
+            ) : !calculo.ok ? (
+              <span className="mx-auto truncate text-sm">{calculo.error}</span>
+            ) : (
+              <>
+                <span>Agregar</span>
+                <span className="tabular-nums">{formatARS(calculo.linea.subtotal)}</span>
+              </>
+            )}
+          </button>
+        </div>
+      )}
     </>
   );
 }
@@ -261,14 +304,34 @@ export function Contador({
     chico ? 'size-8' : 'size-11',
   );
   return (
-    <div className={cn('inline-flex items-center rounded-full border border-borde', chico ? 'h-9' : 'h-13')}>
-      <button type="button" aria-label="Menos" className={boton} disabled={valor <= min} onClick={() => onCambio(valor - 1)}>
+    <div
+      className={cn(
+        'inline-flex items-center rounded-full border border-borde',
+        chico ? 'h-9' : 'h-13',
+      )}
+    >
+      <button
+        type="button"
+        aria-label="Menos"
+        className={boton}
+        disabled={valor <= min}
+        onClick={() => onCambio(valor - 1)}
+      >
         <Minus className="size-4" aria-hidden />
       </button>
-      <span className={cn('text-center font-semibold tabular-nums', chico ? 'w-6 text-sm' : 'w-8')} aria-live="polite">
+      <span
+        className={cn('text-center font-semibold tabular-nums', chico ? 'w-6 text-sm' : 'w-8')}
+        aria-live="polite"
+      >
         {valor}
       </span>
-      <button type="button" aria-label="Más" className={boton} disabled={valor >= 99} onClick={() => onCambio(valor + 1)}>
+      <button
+        type="button"
+        aria-label="Más"
+        className={boton}
+        disabled={valor >= 99}
+        onClick={() => onCambio(valor + 1)}
+      >
         <Plus className="size-4" aria-hidden />
       </button>
     </div>

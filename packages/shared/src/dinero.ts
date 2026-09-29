@@ -28,7 +28,11 @@ export function redondear(
 ): number {
   const cociente = monto / multiplo;
   const entero =
-    modo === 'arriba' ? Math.ceil(cociente) : modo === 'abajo' ? Math.floor(cociente) : Math.round(cociente);
+    modo === 'arriba'
+      ? Math.ceil(cociente)
+      : modo === 'abajo'
+        ? Math.floor(cociente)
+        : Math.round(cociente);
   // "+ 0" evita devolver -0.
   return entero * multiplo + 0;
 }
@@ -45,6 +49,7 @@ export function aplicarAjuste(
   multiplo: MultiploRedondeo = 1,
   modo: ModoRedondeo = 'cercano',
 ): number {
-  const nuevo = ajuste.tipo === 'porcentaje' ? precio * (1 + ajuste.valor / 100) : precio + ajuste.valor;
+  const nuevo =
+    ajuste.tipo === 'porcentaje' ? precio * (1 + ajuste.valor / 100) : precio + ajuste.valor;
   return Math.max(0, redondear(nuevo, multiplo, modo));
 }

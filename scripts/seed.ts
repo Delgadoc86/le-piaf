@@ -88,7 +88,13 @@ function validar<T>(esquema: { parse(d: unknown): T }, datos: unknown, que: stri
 async function usuario(email: string, nombre: string, claims: ClaimsLocal): Promise<string> {
   const existente = await auth.getUserByEmail(email).catch(() => null);
   const u =
-    existente ?? (await auth.createUser({ email, password: CONTRASENA, displayName: nombre, emailVerified: true }));
+    existente ??
+    (await auth.createUser({
+      email,
+      password: CONTRASENA,
+      displayName: nombre,
+      emailVerified: true,
+    }));
   // Se setean acá para no depender de que el emulador de Functions esté corriendo;
   // en la app real los mantiene sincronizarClaims.
   await auth.setCustomUserClaims(u.uid, claims);
@@ -96,13 +102,18 @@ async function usuario(email: string, nombre: string, claims: ClaimsLocal): Prom
   return u.uid;
 }
 
-async function guardarLocal(datos: LocalEditable, equipo: { email: string; nombre: string; rol: Rol }[]): Promise<void> {
+async function guardarLocal(
+  datos: LocalEditable,
+  equipo: { email: string; nombre: string; rol: Rol }[],
+): Promise<void> {
   const local = validar(localEditableSchema, datos, DOC_LOCAL);
   if (!equipo.some((m) => m.rol === 'dueno')) throw new Error('El local no tiene dueño');
   await db.doc(DOC_LOCAL).set({ ...local, actualizadoEn: ahora });
   for (const m of equipo) {
     const uid = await usuario(m.email, m.nombre, { rol: m.rol });
-    await db.doc(`miembros/${uid}`).set({ rol: m.rol, nombre: m.nombre, email: m.email, activo: true, creadoEn: ahora });
+    await db
+      .doc(`miembros/${uid}`)
+      .set({ rol: m.rol, nombre: m.nombre, email: m.email, activo: true, creadoEn: ahora });
   }
 }
 
@@ -203,10 +214,26 @@ async function seedLocal(): Promise<void> {
         fotoUrl: foto('assets/fotos/foodtruck.webp'),
         frase: 'Hoy somos "el food truck más completo para los fans de la comida"',
         tarjetas: [
-          { icono: 'beer', titulo: 'Cerveza Tirada', texto: 'Disfruta de nuestras cervezas artesanales tiradas a la temperatura perfecta.' },
-          { icono: 'utensils', titulo: 'Comidas al Plato', texto: 'Variedad de platos abundantes ideales para compartir con amigos.' },
-          { icono: 'heart', titulo: 'Sabor Único', texto: 'Cada plato mantiene nuestro toque casero y auténtico que nos distingue.' },
-          { icono: 'calendar', titulo: '4+ Años', texto: 'Más de cuatro años de experiencia sirviendo a nuestra comunidad.' },
+          {
+            icono: 'beer',
+            titulo: 'Cerveza Tirada',
+            texto: 'Disfruta de nuestras cervezas artesanales tiradas a la temperatura perfecta.',
+          },
+          {
+            icono: 'utensils',
+            titulo: 'Comidas al Plato',
+            texto: 'Variedad de platos abundantes ideales para compartir con amigos.',
+          },
+          {
+            icono: 'heart',
+            titulo: 'Sabor Único',
+            texto: 'Cada plato mantiene nuestro toque casero y auténtico que nos distingue.',
+          },
+          {
+            icono: 'calendar',
+            titulo: '4+ Años',
+            texto: 'Más de cuatro años de experiencia sirviendo a nuestra comunidad.',
+          },
         ],
         cierre:
           'Queremos seguir siendo parte de sus reuniones y noches especiales por muchos años más. ¡Nos vemos en Silverio Food Truck Beer para disfrutar juntos del buen sabor!',
@@ -219,7 +246,8 @@ async function seedLocal(): Promise<void> {
       notaCarta:
         '*Consultar por delivery, según zona y disponibilidad. Los precios están sujetos a disponibilidad.',
       seo: {
-        titulo: 'Silverio Food Truck Beer - Comida Casera y Cerveza Artesanal en Rodeo del Medio, Maipú',
+        titulo:
+          'Silverio Food Truck Beer - Comida Casera y Cerveza Artesanal en Rodeo del Medio, Maipú',
         descripcion:
           'Silverio Food Truck Beer: Más de cuatro años ofreciendo comida casera y cerveza artesanal en Rodeo del Medio, Maipú. Disfruta de nuestros platos únicos y cerveza tirada.',
         keywords: [
@@ -236,7 +264,7 @@ async function seedLocal(): Promise<void> {
       ga4Id: 'G-8CN2SBDQ5R',
     },
     pedidos: {
-      habilitados: false, // se habilitan en la Fase 2
+      habilitados: true, // carrito + pedido por WhatsApp (el dueño lo puede apagar desde el panel)
       tipos: { takeAway: true, delivery: false, salon: false },
       tiempoEstimadoMin: 30,
       pedidoMinimo: 0,
@@ -258,7 +286,11 @@ async function seedLocal(): Promise<void> {
   ]);
 
   const productos = seed.productos.map((p) => {
-    const variantes = p._variantesSugeridas?.map((nombre) => ({ id: idDe(nombre), nombre, precio: p.precio }));
+    const variantes = p._variantesSugeridas?.map((nombre) => ({
+      id: idDe(nombre),
+      nombre,
+      precio: p.precio,
+    }));
     return {
       id: idDe(p.nombre),
       categoriaId: p.categoriaId,
@@ -292,7 +324,9 @@ async function seedLocal(): Promise<void> {
   }));
 
   await cargarCarta(categorias, productos, promos);
-  console.log(`  ✓ ${s.nombre}: ${categorias.length} categorías, ${productos.length} productos, ${promos.length} promos`);
+  console.log(
+    `  ✓ ${s.nombre}: ${categorias.length} categorías, ${productos.length} productos, ${promos.length} promos`,
+  );
 }
 
 // ─── Main ─────────────────────────────────────────────────────────────────────

@@ -85,7 +85,12 @@ export function useLineasCarrito(): { lineas: LineaResuelta[]; total: number; ca
             : calcularItemPromo(ref as PromoPublica, s);
         return { clave: l.clave, ok: true, linea };
       } catch (e) {
-        return { clave: l.clave, ok: false, nombre, motivo: e instanceof Error ? e.message : 'No disponible' };
+        return {
+          clave: l.clave,
+          ok: false,
+          nombre,
+          motivo: e instanceof Error ? e.message : 'No disponible',
+        };
       }
     });
     const validas = resueltas.filter((r): r is Extract<LineaResuelta, { ok: true }> => r.ok);

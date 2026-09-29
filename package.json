@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build:shared": "pnpm --filter @app/shared build",
+    "predev": "node -e \"const f=require('fs');if(!f.existsSync('functions/.secret.local'))f.copyFileSync('functions/.secret.local.example','functions/.secret.local');if(!f.existsSync('apps/web/.env.local'))f.copyFileSync('apps/web/.env.example','apps/web/.env.local')\"",
     "dev": "pnpm build:shared && pnpm --filter @app/functions build && firebase emulators:exec --ui \"pnpm seed && pnpm -r --parallel --filter !@app/tests run dev\"",
     "emuladores": "firebase emulators:start",
     "seed": "node --experimental-strip-types --no-warnings=ExperimentalWarning scripts/seed.ts",

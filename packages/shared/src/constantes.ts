@@ -82,7 +82,14 @@ export type EtiquetaProducto = (typeof ETIQUETAS_PRODUCTO)[number];
 export const ESTADOS_MESA = ['libre', 'ocupada', 'cuenta'] as const;
 export type EstadoMesa = (typeof ESTADOS_MESA)[number];
 
-export const SECCIONES_WEB = ['hero', 'promos', 'carta', 'nosotros', 'galeria', 'ubicacion'] as const;
+export const SECCIONES_WEB = [
+  'hero',
+  'promos',
+  'carta',
+  'nosotros',
+  'galeria',
+  'ubicacion',
+] as const;
 export type SeccionWeb = (typeof SECCIONES_WEB)[number];
 
 /** Lista curada de fuentes (§11). Se precargan con next/font. */

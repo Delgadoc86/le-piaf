@@ -19,3 +19,6 @@ pubsub-debug.log*
 service-account*.json
 .vercel
 .DS_Store
+
+# Secretos locales del emulador de Functions
+.secret.local

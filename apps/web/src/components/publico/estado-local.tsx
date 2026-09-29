@@ -41,8 +41,15 @@ export function EstadoLocal({ local, className }: { local: DatosHorario; classNa
       )}
     >
       <span className="relative flex size-2" aria-hidden>
-        {estado?.abierto && <span className="latido absolute inset-0 rounded-full bg-emerald-400" />}
-        <span className={cn('relative size-2 rounded-full', estado?.abierto ? 'bg-emerald-400' : 'bg-tinta-2/60')} />
+        {estado?.abierto && (
+          <span className="latido absolute inset-0 rounded-full bg-emerald-400" />
+        )}
+        <span
+          className={cn(
+            'relative size-2 rounded-full',
+            estado?.abierto ? 'bg-emerald-400' : 'bg-tinta-2/60',
+          )}
+        />
       </span>
       {estado ? (estado.abierto ? 'Abierto ahora' : estado.texto) : ' '}
     </span>

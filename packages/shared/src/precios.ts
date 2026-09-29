@@ -103,12 +103,14 @@ export function calcularItem(
     const grupo = grupos.find((g) => g.id === e.grupoId);
     if (!grupo) throw new ErrorPrecio('grupo_inexistente', 'Un grupo de extras ya no existe');
     const opcion = grupo.opciones.find((o) => o.id === e.opcionId);
-    if (!opcion) throw new ErrorPrecio('opcion_inexistente', `Una opción de "${grupo.nombre}" ya no existe`);
+    if (!opcion)
+      throw new ErrorPrecio('opcion_inexistente', `Una opción de "${grupo.nombre}" ya no existe`);
     if (validarDisp && !opcion.disponible) {
       throw new ErrorPrecio('opcion_no_disponible', `"${opcion.nombre}" no está disponible`);
     }
     const clave = `${grupo.id}/${opcion.id}`;
-    if (vistas.has(clave)) throw new ErrorPrecio('opcion_repetida', `"${opcion.nombre}" está repetida`);
+    if (vistas.has(clave))
+      throw new ErrorPrecio('opcion_repetida', `"${opcion.nombre}" está repetida`);
     vistas.add(clave);
     cuentaPorGrupo.set(grupo.id, (cuentaPorGrupo.get(grupo.id) ?? 0) + 1);
     extras.push({ nombre: opcion.nombre, precio: opcion.precio });
@@ -116,8 +118,10 @@ export function calcularItem(
 
   for (const g of grupos) {
     const n = cuentaPorGrupo.get(g.id) ?? 0;
-    if (n < g.min) throw new ErrorPrecio('extras_minimo', `Elegí al menos ${g.min} en "${g.nombre}"`);
-    if (n > g.max) throw new ErrorPrecio('extras_maximo', `Podés elegir hasta ${g.max} en "${g.nombre}"`);
+    if (n < g.min)
+      throw new ErrorPrecio('extras_minimo', `Elegí al menos ${g.min} en "${g.nombre}"`);
+    if (n > g.max)
+      throw new ErrorPrecio('extras_maximo', `Podés elegir hasta ${g.max} en "${g.nombre}"`);
   }
 
   const precioUnitario = precioBase + extras.reduce((s, x) => s + x.precio, 0);
@@ -183,7 +187,8 @@ export function calcularPedido(
   const items = selecciones.map((sel) => {
     if (sel.tipo === 'producto') {
       const producto = catalogo.productos.get(sel.productoId);
-      if (!producto) throw new ErrorPrecio('producto_inexistente', 'Un producto del carrito ya no existe');
+      if (!producto)
+        throw new ErrorPrecio('producto_inexistente', 'Un producto del carrito ya no existe');
       return calcularItem(producto, sel, opciones);
     }
     const promo = catalogo.promos.get(sel.promoId);

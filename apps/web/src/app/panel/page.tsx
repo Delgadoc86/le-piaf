@@ -1,6 +1,9 @@
 import { Card, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { NOMBRE_LOCAL } from '@/lib/local';
 
+// Panel privado: se renderiza en el cliente después de validar la sesión (sin validación de navegación instantánea).
+export const instant = false;
+
 /** Resumen del día. Vacío hasta que haya pedidos y caja (Fases 2 y 4). */
 export default function ResumenPage() {
   return (

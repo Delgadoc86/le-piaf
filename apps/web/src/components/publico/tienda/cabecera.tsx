@@ -8,16 +8,27 @@ interface Props {
   logoUrl: string;
   horario: DatosHorario;
   anclas: { href: string; texto: string }[];
+  conCarrito: boolean;
 }
 
 /** Barra "isla": píldora flotante con desenfoque, separada de los bordes. */
-export function Cabecera({ nombre, logoUrl, horario, anclas }: Props) {
+export function Cabecera({ nombre, logoUrl, horario, anclas, conCarrito }: Props) {
   return (
     <header className="fixed inset-x-3 top-3 z-40 md:inset-x-6">
       <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 rounded-full border border-borde bg-fondo/70 pr-1.5 pl-4 shadow-[0_12px_30px_-18px_rgb(0_0_0/0.9)] backdrop-blur-xl md:h-16 md:pl-6">
-        <a href="#inicio" className="shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-marca focus-visible:outline-none">
+        <a
+          href="#inicio"
+          className="shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-marca focus-visible:outline-none"
+        >
           {logoUrl ? (
-            <Image src={logoUrl} alt={nombre} width={300} height={200} className="h-9 w-auto md:h-11" preload />
+            <Image
+              src={logoUrl}
+              alt={nombre}
+              width={300}
+              height={200}
+              className="h-9 w-auto md:h-11"
+              preload
+            />
           ) : (
             <span className="font-titulos text-xl">{nombre}</span>
           )}
@@ -34,8 +45,11 @@ export function Cabecera({ nombre, logoUrl, horario, anclas }: Props) {
           ))}
         </nav>
         <div className="ml-auto flex items-center gap-2">
-          <EstadoLocal local={horario} className="hidden border-transparent bg-white/5 sm:inline-flex" />
-          <BotonCarrito />
+          <EstadoLocal
+            local={horario}
+            className="hidden border-transparent bg-white/5 sm:inline-flex"
+          />
+          {conCarrito && <BotonCarrito />}
         </div>
       </div>
     </header>

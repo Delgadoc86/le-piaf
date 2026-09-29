@@ -23,13 +23,22 @@ import { IconoWhatsApp } from '../iconos-marca';
 import { Contador } from './hoja-producto';
 import { Miniatura } from './ilustracion';
 
-const ETIQUETA_TIPO: Record<TipoPedido, string> = { take_away: 'Retiro', delivery: 'Delivery', salon: 'En el local' };
+const ETIQUETA_TIPO: Record<TipoPedido, string> = {
+  take_away: 'Retiro',
+  delivery: 'Delivery',
+  salon: 'En el local',
+};
 const CLAVE_DATOS = 'datos-cliente-v1';
 
 /** Nombre y dirección se recuerdan en este navegador para la próxima vez (comodidad, no es crítico). */
 function leerDatosGuardados(): { nombre: string; direccion: string; referencia: string } {
   try {
-    return { nombre: '', direccion: '', referencia: '', ...JSON.parse(localStorage.getItem(CLAVE_DATOS) ?? '{}') };
+    return {
+      nombre: '',
+      direccion: '',
+      referencia: '',
+      ...JSON.parse(localStorage.getItem(CLAVE_DATOS) ?? '{}'),
+    };
   } catch {
     return { nombre: '', direccion: '', referencia: '' };
   }
@@ -93,7 +102,8 @@ function Contenido() {
   const validas = lineas.filter((l) => l.ok);
   const faltaMinimo = tienda.pedidos.pedidoMinimo > 0 && total < tienda.pedidos.pedidoMinimo;
   const faltaDireccion = tipo === 'delivery' && direccion.trim().length < 3;
-  const puedeEnviar = validas.length > 0 && nombre.trim().length >= 2 && !faltaDireccion && !faltaMinimo;
+  const puedeEnviar =
+    validas.length > 0 && nombre.trim().length >= 2 && !faltaDireccion && !faltaMinimo;
 
   function enviar() {
     if (!puedeEnviar) return;
@@ -130,7 +140,8 @@ function Contenido() {
         </span>
         <Dialog.Title className="text-2xl font-semibold">¡Listo! Mandalo en WhatsApp</Dialog.Title>
         <p className="max-w-xs text-tinta-2">
-          Se abrió WhatsApp con tu pedido armado. Tocá <strong>enviar</strong> y el local te confirma por ahí.
+          Se abrió WhatsApp con tu pedido armado. Tocá <strong>enviar</strong> y el local te
+          confirma por ahí.
         </p>
         <div className="mt-4 flex w-full flex-col gap-2">
           <button
@@ -143,7 +154,11 @@ function Contenido() {
           >
             Ya lo envié, vaciar carrito
           </button>
-          <button type="button" onClick={() => setEnviado(false)} className="h-12 rounded-full border border-borde font-medium">
+          <button
+            type="button"
+            onClick={() => setEnviado(false)}
+            className="h-12 rounded-full border border-borde font-medium"
+          >
             Volver al pedido
           </button>
         </div>
@@ -157,7 +172,10 @@ function Contenido() {
         <Dialog.Title className="text-xl font-semibold">
           Tu pedido {cantidad > 0 && <span className="text-tinta-2">· {cantidad}</span>}
         </Dialog.Title>
-        <Dialog.Close aria-label="Cerrar" className="inline-flex size-10 items-center justify-center rounded-full hover:bg-white/10">
+        <Dialog.Close
+          aria-label="Cerrar"
+          className="inline-flex size-10 items-center justify-center rounded-full hover:bg-white/10"
+        >
           <X className="size-5" aria-hidden />
         </Dialog.Close>
       </header>
@@ -169,7 +187,9 @@ function Contenido() {
           </span>
           <p className="font-semibold">Tu pedido está vacío</p>
           <p className="text-sm text-tinta-2">Elegí algo rico de la carta.</p>
-          <Dialog.Close className="mt-2 h-11 rounded-full bg-marca px-6 font-semibold text-black">Ver la carta</Dialog.Close>
+          <Dialog.Close className="mt-2 h-11 rounded-full bg-marca px-6 font-semibold text-black">
+            Ver la carta
+          </Dialog.Close>
         </div>
       ) : (
         <div className="flex-1 overflow-y-auto overscroll-contain">
@@ -179,7 +199,9 @@ function Contenido() {
                 <li key={l.clave} className="flex gap-3 py-4">
                   <Miniatura
                     fotoUrl={
-                      l.linea.tipo === 'producto' ? tienda.producto(l.linea.refId)?.fotoUrl : tienda.promo(l.linea.refId)?.fotoUrl
+                      l.linea.tipo === 'producto'
+                        ? tienda.producto(l.linea.refId)?.fotoUrl
+                        : tienda.promo(l.linea.refId)?.fotoUrl
                     }
                     alt=""
                     icono={
@@ -195,16 +217,29 @@ function Contenido() {
                     <div className="flex justify-between gap-2">
                       <div className="min-w-0">
                         <p className="font-medium">{l.linea.nombre}</p>
-                        {l.linea.varianteNombre && <p className="text-sm text-tinta-2">{l.linea.varianteNombre}</p>}
+                        {l.linea.varianteNombre && (
+                          <p className="text-sm text-tinta-2">{l.linea.varianteNombre}</p>
+                        )}
                       </div>
-                      <p className="shrink-0 font-semibold tabular-nums">{formatARS(l.linea.subtotal)}</p>
+                      <p className="shrink-0 font-semibold tabular-nums">
+                        {formatARS(l.linea.subtotal)}
+                      </p>
                     </div>
                     {l.linea.extras.length > 0 && (
-                      <p className="text-xs text-tinta-2">+ {l.linea.extras.map((e) => e.nombre).join(', ')}</p>
+                      <p className="text-xs text-tinta-2">
+                        + {l.linea.extras.map((e) => e.nombre).join(', ')}
+                      </p>
                     )}
-                    {l.linea.nota && <p className="text-xs text-tinta-2 italic">“{l.linea.nota}”</p>}
+                    {l.linea.nota && (
+                      <p className="text-xs text-tinta-2 italic">“{l.linea.nota}”</p>
+                    )}
                     <div className="mt-2 flex items-center justify-between">
-                      <Contador chico valor={l.linea.cantidad} min={1} onCambio={(n) => cambiarCantidad(l.clave, n)} />
+                      <Contador
+                        chico
+                        valor={l.linea.cantidad}
+                        min={1}
+                        onCambio={(n) => cambiarCantidad(l.clave, n)}
+                      />
                       <button
                         type="button"
                         onClick={() => quitar(l.clave)}
@@ -223,7 +258,11 @@ function Contenido() {
                     <p className="font-medium">{l.nombre}</p>
                     <p className="text-tinta-2">{l.motivo}</p>
                   </div>
-                  <button type="button" onClick={() => quitar(l.clave)} className="text-sm underline">
+                  <button
+                    type="button"
+                    onClick={() => quitar(l.clave)}
+                    className="text-sm underline"
+                  >
                     Quitar
                   </button>
                 </li>
@@ -241,14 +280,26 @@ function Contenido() {
               />
             )}
             {tipos.length === 1 && tipo === 'take_away' && (
-              <p className="rounded-2xl bg-fondo/50 px-4 py-3 text-sm text-tinta-2">🏪 Retirás en el local.</p>
+              <p className="rounded-2xl bg-fondo/50 px-4 py-3 text-sm text-tinta-2">
+                🏪 Retirás en el local.
+              </p>
             )}
 
             <Campo etiqueta="Tu nombre" valor={nombre} onCambio={setNombre} autoComplete="name" />
             {tipo === 'delivery' && (
               <>
-                <Campo etiqueta="Dirección" valor={direccion} onCambio={setDireccion} autoComplete="street-address" />
-                <Campo etiqueta="Referencia (opcional)" valor={referencia} onCambio={setReferencia} placeholder="Portón verde, timbre 2…" />
+                <Campo
+                  etiqueta="Dirección"
+                  valor={direccion}
+                  onCambio={setDireccion}
+                  autoComplete="street-address"
+                />
+                <Campo
+                  etiqueta="Referencia (opcional)"
+                  valor={referencia}
+                  onCambio={setReferencia}
+                  placeholder="Portón verde, timbre 2…"
+                />
               </>
             )}
 
@@ -257,7 +308,12 @@ function Contenido() {
                 etiqueta="¿Cómo pagás?"
                 opciones={pagos.map((p) => ({
                   valor: p,
-                  texto: p === 'efectivo' ? 'Efectivo' : p === 'transferencia' ? 'Transferencia' : 'Mercado Pago',
+                  texto:
+                    p === 'efectivo'
+                      ? 'Efectivo'
+                      : p === 'transferencia'
+                        ? 'Transferencia'
+                        : 'Mercado Pago',
                 }))}
                 valor={pago}
                 onCambio={(v) => setPago(v as MedioPagoWeb)}
@@ -275,10 +331,17 @@ function Contenido() {
             {pago === 'transferencia' && tienda.pagos.transferencia.alias && (
               <p className="rounded-2xl bg-fondo/50 px-4 py-3 text-sm">
                 Alias: <strong>{tienda.pagos.transferencia.alias}</strong>
-                {tienda.pagos.transferencia.titular && <span className="text-tinta-2"> · {tienda.pagos.transferencia.titular}</span>}
+                {tienda.pagos.transferencia.titular && (
+                  <span className="text-tinta-2"> · {tienda.pagos.transferencia.titular}</span>
+                )}
               </p>
             )}
-            <Campo etiqueta="Nota para el local (opcional)" valor={nota} onCambio={setNota} placeholder="Ej.: sin mayonesa" />
+            <Campo
+              etiqueta="Nota para el local (opcional)"
+              valor={nota}
+              onCambio={setNota}
+              placeholder="Ej.: sin mayonesa"
+            />
           </div>
         </div>
       )}
@@ -287,11 +350,14 @@ function Contenido() {
         <footer className="shrink-0 space-y-3 border-t border-borde bg-superficie px-5 pt-4 pb-[max(1rem,env(safe-area-inset-bottom))]">
           {!abiertoAhora && (
             <p className="flex items-center gap-2 rounded-xl bg-marca/10 px-3 py-2 text-xs text-marca">
-              <AlertTriangle className="size-4 shrink-0" aria-hidden /> Ahora estamos cerrados: te respondemos apenas abramos.
+              <AlertTriangle className="size-4 shrink-0" aria-hidden /> Ahora estamos cerrados: te
+              respondemos apenas abramos.
             </p>
           )}
           {faltaMinimo && (
-            <p className="text-xs text-marca">El pedido mínimo es {formatARS(tienda.pedidos.pedidoMinimo)}.</p>
+            <p className="text-xs text-marca">
+              El pedido mínimo es {formatARS(tienda.pedidos.pedidoMinimo)}.
+            </p>
           )}
           <div className="flex items-baseline justify-between">
             <span className="text-tinta-2">Total</span>
@@ -304,7 +370,11 @@ function Contenido() {
             className="brillo relative inline-flex h-13 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] font-semibold text-white transition-opacity hover:opacity-95 disabled:cursor-not-allowed disabled:opacity-45"
           >
             <IconoWhatsApp className="size-5" />
-            {nombre.trim().length < 2 ? 'Completá tu nombre' : faltaDireccion ? 'Completá la dirección' : 'Enviar pedido por WhatsApp'}
+            {nombre.trim().length < 2
+              ? 'Completá tu nombre'
+              : faltaDireccion
+                ? 'Completá la dirección'
+                : 'Enviar pedido por WhatsApp'}
           </button>
         </footer>
       )}

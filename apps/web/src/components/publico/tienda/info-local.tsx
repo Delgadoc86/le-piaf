@@ -40,12 +40,17 @@ export function InfoLocal(p: Props) {
                     sizes="(min-width: 768px) 740px, 100vw"
                     className="object-cover"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-superficie to-transparent" aria-hidden />
+                  <div
+                    className="absolute inset-0 bg-gradient-to-t from-superficie to-transparent"
+                    aria-hidden
+                  />
                 </div>
               )}
               <div className="-mt-10 space-y-4 p-6 md:p-8">
                 <h3 className="relative font-titulos text-3xl">{p.nosotros.titulo}</h3>
-                {p.nosotros.frase && <p className="text-lg font-medium text-marca text-balance">{p.nosotros.frase}</p>}
+                {p.nosotros.frase && (
+                  <p className="text-lg font-medium text-marca text-balance">{p.nosotros.frase}</p>
+                )}
                 {primero && <p className="text-tinta-2">{primero}</p>}
                 {resto.length > 0 && (
                   <details className="group">
@@ -64,7 +69,10 @@ export function InfoLocal(p: Props) {
                 {p.nosotros.tarjetas.length > 0 && (
                   <ul className="flex flex-wrap gap-2 pt-2">
                     {p.nosotros.tarjetas.map((t) => (
-                      <li key={t.titulo} className="rounded-full border border-borde bg-white/5 px-3 py-1.5 text-xs font-medium">
+                      <li
+                        key={t.titulo}
+                        className="rounded-full border border-borde bg-white/5 px-3 py-1.5 text-xs font-medium"
+                      >
                         {t.titulo}
                       </li>
                     ))}
@@ -80,7 +88,10 @@ export function InfoLocal(p: Props) {
             </h3>
             <dl className="space-y-3">
               {resumirHorarios(p.horarios).map((h) => (
-                <div key={h.dias} className="flex items-baseline justify-between gap-4 border-b border-borde pb-3 last:border-0 last:pb-0">
+                <div
+                  key={h.dias}
+                  className="flex items-baseline justify-between gap-4 border-b border-borde pb-3 last:border-0 last:pb-0"
+                >
                   <dt className="text-tinta-2">{h.dias}</dt>
                   <dd className="font-semibold tabular-nums">{h.horas}</dd>
                 </div>
@@ -99,7 +110,9 @@ export function InfoLocal(p: Props) {
                   <address className="not-italic">
                     <p className="font-semibold">{p.direccion.calle}</p>
                     <p className="text-sm text-tinta-2">
-                      {[p.direccion.localidad, p.direccion.departamento, p.direccion.provincia].filter(Boolean).join(', ')}
+                      {[p.direccion.localidad, p.direccion.departamento, p.direccion.provincia]
+                        .filter(Boolean)
+                        .join(', ')}
                     </p>
                   </address>
                 </div>
@@ -121,7 +134,13 @@ export function InfoLocal(p: Props) {
             {p.galeria.map((f) => (
               <li key={f.fotoUrl} className="w-[70%] shrink-0 md:w-auto">
                 <figure className="revelar elevar relative aspect-[4/3] overflow-hidden rounded-[24px] border border-borde">
-                  <Image src={f.fotoUrl} alt={f.titulo} fill sizes="(min-width: 768px) 370px, 70vw" className="zoom object-cover" />
+                  <Image
+                    src={f.fotoUrl}
+                    alt={f.titulo}
+                    fill
+                    sizes="(min-width: 768px) 370px, 70vw"
+                    className="zoom object-cover"
+                  />
                   <figcaption className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/85 to-transparent px-4 pt-10 pb-3 text-sm font-semibold">
                     {f.titulo}
                   </figcaption>

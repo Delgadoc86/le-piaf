@@ -62,7 +62,10 @@ export function BarraPedido() {
           'brillo relative flex h-15 w-full items-center gap-3 rounded-full bg-marca pr-6 pl-2 font-semibold text-black shadow-[0_18px_40px_-12px_rgb(0_0_0/0.8)] transition-colors hover:bg-marca-hover md:w-auto md:min-w-80',
         )}
       >
-        <span key={pulso} className="rebote inline-flex size-11 items-center justify-center rounded-full bg-black/85 text-sm font-bold text-marca tabular-nums">
+        <span
+          key={pulso}
+          className="rebote inline-flex size-11 items-center justify-center rounded-full bg-black/85 text-sm font-bold text-marca tabular-nums"
+        >
           {cantidad}
         </span>
         <span className="flex-1 text-left">Ver pedido</span>

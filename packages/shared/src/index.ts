@@ -6,3 +6,5 @@ export * from './horarios.js';
 export * from './precios.js';
 export * from './vigencia.js';
 export * from './pedido-whatsapp.js';
+export * from './ajuste-precios.js';
+export * from './contraste.js';

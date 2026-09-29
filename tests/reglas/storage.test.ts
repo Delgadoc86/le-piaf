@@ -1,4 +1,8 @@
-import { assertFails, assertSucceeds, type RulesTestEnvironment } from '@firebase/rules-unit-testing';
+import {
+  assertFails,
+  assertSucceeds,
+  type RulesTestEnvironment,
+} from '@firebase/rules-unit-testing';
 import { deleteObject, getBytes, ref, uploadBytes } from 'firebase/storage';
 import { afterAll, beforeAll, beforeEach, describe, it } from 'vitest';
 import { como, crearEntorno, type NombreUsuario } from './entorno.js';
@@ -30,7 +34,9 @@ describe('storage', () => {
   });
 
   it('dueño y encargado suben imágenes de hasta 2 MB', async () => {
-    await assertSucceeds(uploadBytes(ref(storage('dueno'), 'imagenes/productos/p1.webp'), bytes(1000), webp));
+    await assertSucceeds(
+      uploadBytes(ref(storage('dueno'), 'imagenes/productos/p1.webp'), bytes(1000), webp),
+    );
     await assertSucceeds(
       uploadBytes(ref(storage('encargado'), 'imagenes/productos/p2.jpg'), bytes(2 * 1024 * 1024), {
         contentType: 'image/jpeg',
@@ -41,7 +47,9 @@ describe('storage', () => {
   it('rechaza archivos grandes, no imágenes y SVG', async () => {
     const r = (nombre: string) => ref(storage('dueno'), `imagenes/productos/${nombre}`);
     await assertFails(uploadBytes(r('grande.webp'), bytes(2 * 1024 * 1024 + 1), webp));
-    await assertFails(uploadBytes(r('script.js'), bytes(10), { contentType: 'application/javascript' }));
+    await assertFails(
+      uploadBytes(r('script.js'), bytes(10), { contentType: 'application/javascript' }),
+    );
     await assertFails(uploadBytes(r('logo.svg'), bytes(10), { contentType: 'image/svg+xml' }));
   });
 
