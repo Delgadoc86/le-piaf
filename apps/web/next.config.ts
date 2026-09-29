@@ -1,7 +1,23 @@
-import type { NextConfig } from "next";
+import type { NextConfig } from 'next';
+
+const usaEmuladores = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  // La web pública se prerenderiza con "use cache" y se invalida por etiqueta (ROADMAP §10).
+  cacheComponents: true,
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    remotePatterns: [
+      // Fotos del local en Firebase Storage (producción).
+      { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/**' },
+      // Emulador de Storage (solo desarrollo).
+      ...(usaEmuladores
+        ? [{ protocol: 'http' as const, hostname: '127.0.0.1', port: '9199', pathname: '/v0/b/**' }]
+        : []),
+    ],
+    // El optimizador de imágenes bloquea IPs locales; con el emulador hay que permitirlas.
+    dangerouslyAllowLocalIP: usaEmuladores,
+  },
 };
 
 export default nextConfig;

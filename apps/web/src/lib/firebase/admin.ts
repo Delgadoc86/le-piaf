@@ -15,6 +15,8 @@ function iniciar(): App {
 
   const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
   if (usaEmuladores) {
+    // Sin esto, la librería de Google busca el servidor de metadatos de GCP y espera ~5 s a que falle.
+    process.env.METADATA_SERVER_DETECTION ??= 'none';
     process.env.FIRESTORE_EMULATOR_HOST ??= '127.0.0.1:8080';
     process.env.FIREBASE_AUTH_EMULATOR_HOST ??= '127.0.0.1:9099';
     return initializeApp({ projectId });

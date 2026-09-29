@@ -4,7 +4,7 @@
 > **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
 > **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.4, del 2026-09-28.
+Versión del documento: 1.5, del 2026-09-29.
 
 ---
 
@@ -460,6 +460,9 @@ Firestore cobra por lectura. Estas reglas mantienen la factura baja y la app rá
 - **Diseño por local:** cada copia del repo es libre de cambiar su diseño en `components/publico/`. Para no perder los arreglos de la base (ver §16):
   - lo **genérico** (panel, Functions, reglas, `packages/shared`, componentes reutilizables) se cambia **primero en la base** y se trae a las copias con git;
   - lo **propio del local** (kit, `.env`, `.firebaserc`, `components/publico/`, estilos) vive solo en su copia.
+- **Diseño de la web pública:** experiencia de **app de pedidos**, mobile first: portada compacta tipo ficha del local, la carta como protagonista, "+" en cada plato, hoja de producto (bottom sheet), barra de pedido fija y carrito lateral. La marca manda (colores y tipografía de `local/datos.marca`). Sin fotos de stock: donde falta la foto real va la ilustración de la categoría.
+- **Movimiento:** solo se animan `transform`, `opacity` y `filter` (compositor, sin repintar ni mover layout); lo ligado al scroll usa `animation-timeline` nativo (sin JS) y degrada a "sin animación"; todo respeta `prefers-reduced-motion`. Nada que retrase el LCP: la foto del hero no se anima en opacidad y carga con `fetchPriority="high"`. Nada de librerías de animación.
+- **Peso:** la web pública no carga Firebase cliente ni zod; lo que se usa al interactuar (hojas de producto y carrito) se carga en diferido y lo pesado (Google Maps) va detrás de un "facade" que carga al tocar.
 - **Accesibilidad:** contraste AA, foco visible, botones con `aria-label`, carta navegable por teclado.
 - **Commits:** Conventional Commits (`feat:`, `fix:`, `chore:`…). Una rama por tarea y PR a `main`.
 - **Nada de secretos en el repo.** Van en `.env.local` (git-ignored) y en Secret Manager.
@@ -476,10 +479,10 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] Monorepo pnpm: `apps/web`, `functions`, `packages/shared`.
 - [x] Next.js + TypeScript estricto + Tailwind + shadcn/ui inicializado.
 - [x] ESLint, Prettier y alias `@/`.
-- [ ] GitHub Actions: lint, typecheck, build y tests de reglas contra el emulador. *(workflow escrito y verificado localmente; falta la primera corrida en GitHub)*
+- [x] GitHub Actions: lint, typecheck, build y tests de reglas contra el emulador.
 
 **Firebase**
-- [ ] Proyecto `silverio-club` (producción), plan Blaze y alerta de presupuesto. Para probar se usan los emuladores; un proyecto `-dev` se agrega solo si hace falta (§15).
+- [x] Proyecto `silverio-club` (producción), plan Blaze y alerta de presupuesto. Para probar se usan los emuladores; un proyecto `-dev` se agrega solo si hace falta (§15).
 - [x] `firebase.json` con emuladores (Auth, Firestore, Storage, Functions) y `pnpm dev` que levante todo.
 - [x] Región de Functions `southamerica-east1`.
 
@@ -497,7 +500,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] `scripts/seed.ts`: crea el local desde `silverio/seed.json` y su equipo de prueba, en el emulador o el proyecto elegido.
 - [x] `scripts/subir-assets.ts`: sube `silverio/assets/**` a Storage y actualiza las URLs.
 
-✅ **Listo cuando:** con los emuladores corriendo, el dueño entra al panel con su menú completo, el mozo ve solo lo suyo, alguien sin rol no ve nada, y los tests de reglas pasan en CI.
+✅ **Listo cuando:** con los emuladores corriendo, el dueño entra al panel con su menú completo, el mozo ve solo lo suyo, alguien sin rol no ve nada, y los tests de reglas pasan en CI. **→ Cumplido el 2026-09-28.**
 
 ---
 
@@ -515,17 +518,18 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [ ] **Actualización masiva de precios:** alcance (todo, categorías, productos seleccionados), % o monto fijo, redondeo (a 10, 50, 100 o 500), **vista previa antes/después**, aplicación con `writeBatch` en lotes de 500 y registro en `auditoria`.
 - [ ] Duplicar producto y buscador en la lista.
 
-**Web pública `/`** (diseño de Silverio: [`silverio/SILVERIO.md` §1](silverio/SILVERIO.md#1-identidad-visual))
-- [ ] Layout con la marca del local (variables CSS y fuentes).
-- [ ] Navbar con logo, anclas y un indicador **Abierto / Cerrado · abre a las 20:00**.
-- [ ] Hero (fotos distintas para escritorio y móvil, que no tapen contenido en móvil).
-- [ ] Carrusel de promos táctil, con solo las promos vigentes ahora.
-- [ ] Carta: tabs de categoría fijas con scroll, buscador, fichas con foto, variantes y extras visibles, "Agotado" y etiquetas.
-- [ ] Nosotros, galería, ubicación (mapa embebido y "Cómo llegar"), footer con redes y horarios.
-- [ ] Botón flotante de WhatsApp con mensaje configurable.
-- [ ] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica.
+**Web pública `/`** — experiencia de **app de pedidos** con la marca del local (ver §11 "Diseño de la web pública")
+- [x] Layout con la marca del local (variables CSS y fuentes).
+- [x] Navbar con logo, anclas y un indicador **Abierto / Cerrado · abre a las 20:00**.
+- [x] Portada tipo "ficha del local" (ilustración/foto distinta en escritorio y móvil) con datos rápidos: abierto, cómo pedir, tiempo, zona.
+- [x] Promos en mosaico (bento) con la destacada grande, solo las vigentes ahora, y "Agregar" directo al carrito.
+- [x] Carta: buscador y chips de categoría fijos que siguen el scroll; filas con miniatura (foto o ilustración de la categoría) y botón "+"; "Agotado" y etiquetas.
+- [x] **Carrito adelantado de la Fase 2** (hoja de producto, carrito persistente, datos de entrega y pago) con **envío del pedido por WhatsApp** como paso intermedio. Precios recalculados con `calcularPedido`.
+- [x] Info del local compacta al final (historia, horarios, ubicación con mapa diferido, galería) y footer con redes y horarios.
+- [ ] Botón flotante de WhatsApp con mensaje configurable. *(botón hecho; el mensaje se vuelve configurable con el panel de configuración)*
+- [ ] SEO: `generateMetadata`, JSON-LD `Restaurant` generado desde los datos, `sitemap.ts`, `robots.ts`, `opengraph-image.tsx` dinámica. *(hechos metadata y JSON-LD; faltan sitemap, robots y OG dinámica)*
 - [ ] GA4 con el ID del local.
-- [ ] Página 404 y local inactivo → "Volvemos pronto".
+- [ ] Página 404 y local inactivo → "Volvemos pronto". *("Volvemos pronto" hecho; falta la 404)*
 
 **Infra**
 - [ ] `revalidarWeb` + `/api/revalidate`: un cambio en el panel se ve en la web en segundos.
@@ -545,9 +549,9 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 ### Fase 2: Pedidos online (3–4 semanas), el corazón del producto
 
 **Cliente**
-- [ ] Modal de producto: variante, extras (respeta mín/máx), cantidad y nota.
-- [ ] Carrito: drawer persistente, editar y quitar, subtotal en vivo con `precios.ts`.
-- [ ] Checkout:
+- [x] Modal de producto: variante, extras (respeta mín/máx), cantidad y nota. *(hecho en la Fase 1)*
+- [x] Carrito: drawer persistente, editar y quitar, subtotal en vivo con `precios.ts`. *(hecho en la Fase 1)*
+- [ ] Checkout: *(formulario hecho en la Fase 1 y enviado por WhatsApp; falta conectarlo a `crearPedido`, zonas con costo y Mercado Pago)*
   - tipo (take away, delivery o salón según config), nombre y teléfono;
   - delivery: dirección, referencia y selector de zona con costo;
   - pedido mínimo;
@@ -768,3 +772,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
   - Paquetes con nombres genéricos (`@app/*`) y emulador `demo-local`, para que copiar el repo no requiera renombrar.
   - La Fase 5 pasa a ser "Plantilla replicable y venta".
 - **1.4 (2026-09-28):** **un solo proyecto de Firebase por local** (`silverio-club`, producción); las pruebas se hacen en los emuladores y un `-dev` se agrega solo si hace falta. App Check pasa de la Fase 0 a la Fase 2 (necesita el dominio de producción).
+- **1.5 (2026-09-29):** la web pública pasa a ser una **experiencia de app de pedidos** (portada compacta, promos en mosaico, carta con "+", hoja de producto, carrito). El **carrito se adelanta de la Fase 2 a la Fase 1**, con el pedido enviado por WhatsApp como paso intermedio hasta `crearPedido`. Se suma `zustand` (ya previsto en §2).

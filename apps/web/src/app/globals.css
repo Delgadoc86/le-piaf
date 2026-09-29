@@ -127,3 +127,19 @@
     @apply font-sans;
     }
 }
+/* ─── Web pública: tokens de la marca del local ───────────────────────────────
+   Los valores los inyecta (sitio)/layout.tsx desde local/datos.marca.
+   Utilidades: bg-marca, text-marca, bg-fondo, bg-superficie, text-tinta, text-tinta-2,
+   border-borde, font-titulos, font-texto. */
+@theme inline {
+  --color-marca: var(--marca-primario);
+  --color-marca-hover: var(--marca-primario-hover);
+  --color-fondo: var(--marca-fondo);
+  --color-superficie: var(--marca-superficie);
+  --color-superficie-2: var(--marca-superficie-2);
+  --color-tinta: var(--marca-texto);
+  --color-tinta-2: var(--marca-texto-2);
+  --color-borde: var(--marca-borde);
+  --font-titulos: var(--fuente-titulos);
+  --font-texto: var(--fuente-texto);
+}

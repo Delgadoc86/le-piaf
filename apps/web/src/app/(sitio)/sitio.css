@@ -1,0 +1,376 @@
+/*
+ * Movimiento de la web pública.
+ * Reglas: solo se animan transform, opacity y filter (van por GPU, no repintan ni mueven el layout);
+ * lo que depende del scroll usa animation-timeline nativo (sin JS); todo se apaga con
+ * prefers-reduced-motion. Si el navegador no soporta algo, el contenido se ve igual, sin animar.
+ */
+
+.sitio {
+  background: var(--marca-fondo);
+  color: var(--marca-texto);
+  font-family: var(--fuente-texto), ui-sans-serif, system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+.sitio ::selection {
+  background: var(--marca-primario);
+  color: #000;
+}
+
+/* Ojo: este archivo no usa @layer, así que le gana a las utilidades de Tailwind. No fijar acá
+   propiedades que los componentes ajustan con clases (position, scroll-margin, background…). */
+
+/* Firma de la marca: línea degradada naranja. */
+.linea-marca {
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--marca-primario) 50%, transparent);
+  opacity: 0.8;
+}
+
+/* Barrita bajo los títulos de sección. */
+.barrita {
+  width: 3.5rem;
+  height: 3px;
+  border-radius: 999px;
+  background: var(--marca-primario);
+}
+
+/* Botón principal: brillo que cruza al pasar el mouse. */
+.brillo {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+}
+.brillo::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 35%, rgb(255 255 255 / 0.4) 50%, transparent 65%);
+  transform: translateX(-120%);
+  transition: transform 0.7s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+.brillo:hover::before {
+  transform: translateX(120%);
+}
+
+/* Tarjetas: se elevan con suavidad. */
+.elevar {
+  transition:
+    transform 0.35s cubic-bezier(0.2, 0.7, 0.2, 1),
+    border-color 0.35s;
+}
+@media (hover: hover) {
+  .elevar:hover {
+    transform: translateY(-4px);
+    border-color: color-mix(in oklab, var(--marca-primario) 55%, transparent);
+  }
+  .elevar:hover .zoom {
+    transform: scale(1.06);
+  }
+}
+.zoom {
+  transition: transform 0.8s cubic-bezier(0.2, 0.7, 0.2, 1);
+}
+
+/* Barra superior: empieza transparente sobre el hero y toma fondo al scrollear.
+   Fallback (sin scroll-timeline): fondo desde el inicio. */
+.barra {
+  background: color-mix(in oklab, var(--marca-fondo) 85%, transparent);
+  border-bottom: 1px solid var(--marca-borde);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+/* Carrusel con scroll táctil nativo; se desvanece en los bordes. */
+.carrusel {
+  scroll-snap-type: x mandatory;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior-x: contain;
+}
+.carrusel::-webkit-scrollbar {
+  display: none;
+}
+.carrusel > * {
+  scroll-snap-align: start;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* Entrada del hero, en cascada (--i = orden). */
+  @keyframes entrar {
+    from {
+      opacity: 0;
+      transform: translateY(18px);
+      filter: blur(8px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+      filter: none;
+    }
+  }
+  .entrar {
+    animation: entrar 0.9s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(var(--i, 0) * 110ms + 120ms);
+  }
+
+  /* La foto del hero se asienta lentamente (sensación de profundidad). */
+  @keyframes asentar {
+    from {
+      transform: scale(1.08);
+    }
+    to {
+      transform: scale(1);
+    }
+  }
+  .asentar {
+    animation: asentar 2.4s cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+
+  /* Pulso del botón de acción: un anillo que se expande (transform + opacity). */
+  @keyframes pulso {
+    0% {
+      transform: scale(1);
+      opacity: 0.45;
+    }
+    70%,
+    100% {
+      transform: scale(1.18, 1.5);
+      opacity: 0;
+    }
+  }
+  /* Requiere que el elemento esté posicionado (relative/fixed): no se fuerza acá para no pisar a Tailwind. */
+  .pulso {
+    isolation: isolate;
+  }
+  .pulso::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    border-radius: inherit;
+    background: var(--marca-primario);
+    animation: pulso 2.6s cubic-bezier(0.2, 0.7, 0.2, 1) infinite;
+  }
+
+  /* Indicador "Abierto": punto que late. */
+  @keyframes latido {
+    0%,
+    100% {
+      transform: scale(1);
+      opacity: 0.7;
+    }
+    50% {
+      transform: scale(2.2);
+      opacity: 0;
+    }
+  }
+  .latido {
+    animation: latido 2s ease-out infinite;
+  }
+
+  @supports (animation-timeline: view()) {
+    /* Los bloques aparecen a medida que entran en pantalla. */
+    @keyframes revelar {
+      from {
+        opacity: 0;
+        transform: translateY(28px) scale(0.98);
+      }
+      to {
+        opacity: 1;
+        transform: none;
+      }
+    }
+    .revelar {
+      animation: revelar linear both;
+      animation-timeline: view();
+      animation-range: entry 0% entry 55%;
+    }
+
+    /* La foto del hero se aleja un poco al scrollear (parallax sin JS). */
+    @keyframes alejar {
+      to {
+        transform: translateY(12%) scale(1.04);
+        opacity: 0.55;
+      }
+    }
+    .parallax {
+      animation: alejar linear both;
+      animation-timeline: scroll();
+      animation-range: 0 100vh;
+    }
+  }
+
+  @supports (animation-timeline: scroll()) {
+    /* La barra superior toma fondo recién al scrollear. */
+    @keyframes barra-fondo {
+      from {
+        background: transparent;
+        border-bottom-color: transparent;
+        backdrop-filter: none;
+      }
+    }
+    .barra {
+      animation: barra-fondo linear both;
+      animation-timeline: scroll();
+      animation-range: 0 140px;
+    }
+  }
+}
+
+/* ─── Tienda (estilo app) ─────────────────────────────────────────────────── */
+
+/* Fondo de las ilustraciones: brillo de la marca + trama de puntos (CSS puro, sin imágenes). */
+.ilustracion {
+  background:
+    radial-gradient(circle at 50% 38%, color-mix(in oklab, var(--marca-primario) 28%, transparent), transparent 62%),
+    radial-gradient(color-mix(in oklab, var(--marca-texto) 9%, transparent) 1px, transparent 1.2px) 0 0 / 10px 10px,
+    var(--marca-superficie-2);
+}
+
+/* Resplandor de la marca detrás del contenido superior (un solo gradiente fijo: no repinta al scrollear). */
+.resplandor {
+  background:
+    radial-gradient(60rem 28rem at 15% -8rem, color-mix(in oklab, var(--marca-primario) 22%, transparent), transparent 70%),
+    radial-gradient(40rem 22rem at 95% 4rem, color-mix(in oklab, var(--marca-primario) 10%, transparent), transparent 70%);
+}
+
+/* Borde con brillo sutil para tarjetas destacadas. */
+.borde-brillo {
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 20px 40px -24px rgb(0 0 0 / 0.8);
+}
+
+/* Hojas (Radix Dialog): suben desde abajo en celular, aparecen en el centro/derecha en escritorio. */
+.hoja[data-state='open'],
+.velo[data-state='open'] {
+  animation-duration: 0.42s;
+  animation-timing-function: cubic-bezier(0.2, 0.8, 0.2, 1);
+  animation-fill-mode: both;
+}
+.hoja[data-state='closed'],
+.velo[data-state='closed'] {
+  animation-duration: 0.25s;
+  animation-timing-function: cubic-bezier(0.4, 0, 1, 1);
+  animation-fill-mode: both;
+}
+.velo[data-state='open'] {
+  animation-name: velo-entra;
+}
+.velo[data-state='closed'] {
+  animation-name: velo-sale;
+}
+.hoja[data-state='open'] {
+  animation-name: hoja-sube;
+}
+.hoja[data-state='closed'] {
+  animation-name: hoja-baja;
+}
+@media (min-width: 768px) {
+  .hoja.hoja-lateral[data-state='open'] {
+    animation-name: hoja-entra-derecha;
+  }
+  .hoja.hoja-lateral[data-state='closed'] {
+    animation-name: hoja-sale-derecha;
+  }
+  .hoja.hoja-centro[data-state='open'] {
+    animation-name: hoja-aparece;
+  }
+  .hoja.hoja-centro[data-state='closed'] {
+    animation-name: hoja-desaparece;
+  }
+}
+@keyframes velo-entra {
+  from {
+    opacity: 0;
+  }
+}
+@keyframes velo-sale {
+  to {
+    opacity: 0;
+  }
+}
+@keyframes hoja-sube {
+  from {
+    transform: translateY(100%);
+  }
+}
+@keyframes hoja-baja {
+  to {
+    transform: translateY(100%);
+  }
+}
+@keyframes hoja-entra-derecha {
+  from {
+    transform: translateX(100%);
+  }
+}
+@keyframes hoja-sale-derecha {
+  to {
+    transform: translateX(100%);
+  }
+}
+@keyframes hoja-aparece {
+  from {
+    opacity: 0;
+    transform: translate(-50%, -46%) scale(0.96);
+  }
+}
+@keyframes hoja-desaparece {
+  to {
+    opacity: 0;
+    transform: translate(-50%, -48%) scale(0.97);
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  /* El contador del carrito "rebota" al agregar. */
+  @keyframes rebote {
+    0% {
+      transform: scale(1);
+    }
+    35% {
+      transform: scale(1.35);
+    }
+    60% {
+      transform: scale(0.9);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  .rebote {
+    animation: rebote 0.5s cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+
+  /* La barra del pedido entra desde abajo. */
+  @keyframes barra-sube {
+    from {
+      transform: translateY(120%);
+    }
+  }
+  .barra-sube {
+    animation: barra-sube 0.5s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+
+  /* Confirmación de "agregado". */
+  @keyframes tilde {
+    from {
+      transform: scale(0.4) rotate(-20deg);
+      opacity: 0;
+    }
+  }
+  .tilde {
+    animation: tilde 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hoja,
+  .velo {
+    animation: none !important;
+  }
+}
