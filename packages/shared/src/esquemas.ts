@@ -8,6 +8,7 @@ import {
   ETIQUETAS_PRODUCTO,
   ESTADOS_MESA,
   FUENTES,
+  CATEGORIAS_MOVIMIENTO,
   MEDIOS_PAGO_MANUALES,
   ORIGENES_MANUALES,
   ROLES,
@@ -374,6 +375,23 @@ export const crearPedidoInputSchema = z
     path: ['entrega'],
   });
 
+// ─── Caja ────────────────────────────────────────────────────────────────────
+
+export const abrirCajaInputSchema = z.object({ montoInicial: pesosSchema.max(100_000_000) });
+
+export const cerrarCajaInputSchema = z.object({
+  contado: z.object({ efectivo: pesosSchema, transferencia: pesosSchema }),
+  notas: z.string().trim().max(500).optional(),
+});
+
+/** Ingreso o egreso de efectivo anotado en la caja abierta (lo escribe el panel; ver reglas). */
+export const movimientoCajaSchema = z.object({
+  tipo: z.enum(['ingreso', 'egreso']),
+  categoria: z.enum(CATEGORIAS_MOVIMIENTO),
+  monto: pesosSchema.min(1),
+  detalle: z.string().trim().max(200),
+});
+
 /** Cobro manual que registra el staff desde el panel. */
 export const cobroSchema = z.object({
   medio: z.enum(MEDIOS_PAGO_MANUALES),
@@ -407,3 +425,6 @@ export type CrearPedidoInput = z.input<typeof crearPedidoInputSchema>;
 /** Lo que queda después de validar. */
 export type CrearPedidoDatos = z.infer<typeof crearPedidoInputSchema>;
 export type Cobro = z.infer<typeof cobroSchema>;
+export type AbrirCajaInput = z.infer<typeof abrirCajaInputSchema>;
+export type CerrarCajaInput = z.infer<typeof cerrarCajaInputSchema>;
+export type MovimientoCajaDatos = z.infer<typeof movimientoCajaSchema>;

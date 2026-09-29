@@ -5,6 +5,7 @@ export * from './dinero.js';
 export * from './horarios.js';
 export * from './precios.js';
 export * from './pedidos.js';
+export * from './caja.js';
 export * from './vigencia.js';
 export * from './pedido-whatsapp.js';
 export * from './ajuste-precios.js';

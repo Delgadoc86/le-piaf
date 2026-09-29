@@ -78,6 +78,7 @@ beforeEach(async () => {
     await setDoc(doc(f, 'privado', 'mercadopago'), { accessToken: 'secreto' });
     await setDoc(doc(f, 'statsDiarias', '2026-10-02'), { ventas: 100 });
     await setDoc(doc(f, 'turnosCaja', 't1'), { estado: 'abierto' });
+    await setDoc(doc(f, 'turnosCaja', 't2'), { estado: 'cerrado' });
     await setDoc(doc(f, 'mesas', 'm1'), {
       nombre: 'Mesa 1',
       sector: 'Salón',
@@ -408,5 +409,11 @@ describe('caja', () => {
     const d = db('encargado');
     await assertFails(updateDoc(doc(d, ref.path), { monto: 1 }));
     await assertFails(deleteDoc(doc(d, ref.path)));
+  });
+
+  it('movimientos: solo en la caja abierta (un cierre no se modifica)', async () => {
+    await assertFails(
+      addDoc(collection(db('encargado'), 'turnosCaja', 't2', 'movimientos'), mov()),
+    );
   });
 });

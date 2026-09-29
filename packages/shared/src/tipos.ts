@@ -146,7 +146,15 @@ export interface Pedido {
   tiempoEstimadoMin?: number;
   motivoCancelacion?: string;
   seguimientoToken: string;
+  /** Candado de contabilizarPedido: true si ya está sumado en la caja y en statsDiarias. */
   contabilizado: boolean;
+  /** Qué se sumó y dónde, para poder restarlo igual si se cancela o se deshace el cobro. */
+  contabilizacion?: {
+    turnoCajaId: string | null;
+    total: number;
+    porMedio: Record<MedioPagoManual, number>;
+    hora: string;
+  };
   historial: { estado: EstadoPedido; en: Timestamp; porUid?: string }[];
   creadoEn: Timestamp;
   actualizadoEn: Timestamp;
@@ -189,14 +197,20 @@ export interface Cliente {
 export interface TurnoCaja {
   estado: 'abierto' | 'cerrado';
   abiertoPor: string;
+  abiertoPorNombre: string;
   abiertoEn: Timestamp;
   montoInicial: number;
-  totales: Record<MedioPago, number>;
+  /** Cobros de pedidos pagados mientras la caja estuvo abierta (lo suma contabilizarPedido). */
+  totales: Record<MedioPagoManual, number>;
   cantidadPedidos: number;
   cerradoPor?: string;
+  cerradoPorNombre?: string;
   cerradoEn?: Timestamp;
-  contado?: Record<MedioPago, number>;
-  diferencia?: Record<MedioPago, number>;
+  /** Foto del cierre: lo que tenía que haber, lo contado y la diferencia (contado − esperado). */
+  esperado?: Record<MedioPagoManual, number>;
+  contado?: Record<MedioPagoManual, number>;
+  diferencia?: Record<MedioPagoManual, number>;
+  movimientosNeto?: number;
   notas?: string;
 }
 
@@ -209,13 +223,14 @@ export interface MovimientoCaja {
   en: Timestamp;
 }
 
+/** statsDiarias/{jornada}: ventas cobradas de la jornada (solo pedidos pagados y no anulados). */
 export interface StatsDiarias {
+  jornada: string;
   ventas: number;
   pedidos: number;
-  ticketPromedio: number;
-  cancelados: number;
-  porTipo: Record<TipoPedido, { ventas: number; pedidos: number }>;
-  porMedio: Record<MedioPago, number>;
+  porTipo: Partial<Record<TipoPedido, { ventas: number; pedidos: number }>>;
+  porMedio: Partial<Record<MedioPagoManual, number>>;
+  /** Hora local de creación del pedido ("00".."23"). */
   porHora: Record<string, { ventas: number; pedidos: number }>;
   porProducto: Record<string, { nombre: string; cantidad: number; ventas: number }>;
 }

@@ -290,6 +290,7 @@ pedidos/{pedidoId}
   tiempoEstimadoMin?, motivoCancelacion?
   seguimientoToken                             // para /pedido/[token]
   contabilizado: boolean                       // idempotencia de stats
+  contabilizacion?: { turnoCajaId, total, porMedio, hora }   // lo sumado, para restarlo igual
   historial: { estado, en: ts, porUid? }[]
   creadoEn: ts, actualizadoEn: ts
 
@@ -299,24 +300,26 @@ seguimiento/{token}                            // espejo PÚBLICO mínimo (get s
 
 contadores/{jornada}                           // YYYY-MM-DD de la jornada (corte 06:00)
   ultimoNumero
+contadores/caja                                // { turnoAbiertoId | null }
 
 clientes/{telefono}
   nombre, telefono, direcciones: string[], cantidadPedidos, totalGastado: $, ultimoPedido: ts
 
-turnosCaja/{turnoId}
+turnosCaja/{turnoId}                           // la "caja": una abierta a la vez (candado en contadores/caja)
   estado: "abierto"|"cerrado"
-  abiertoPor, abiertoEn, montoInicial: $
-  totales: Record<MedioPago, $>                 // actualizado por Function
+  abiertoPor, abiertoPorNombre, abiertoEn, montoInicial: $
+  totales: { efectivo, transferencia }          // cobros de pedidos, los suma contabilizarPedido
   cantidadPedidos
-  cerradoPor?, cerradoEn?, contado?: Record<MedioPago, $>, diferencia?: Record<MedioPago, $>, notas?
+  cerradoPor?, cerradoPorNombre?, cerradoEn?, notas?
+  esperado?, contado?, diferencia?: { efectivo, transferencia }, movimientosNeto?   // foto del cierre
 
 turnosCaja/{turnoId}/movimientos/{movId}
   tipo: "ingreso"|"egreso", categoria ("proveedor"|"cambio"|"retiro"|"otro"), monto: $, detalle, porUid, en: ts
 
-statsDiarias/{YYYY-MM-DD}                      // SOLO Functions escriben
-  ventas: $, pedidos, ticketPromedio: $, cancelados
+statsDiarias/{jornada}                         // SOLO Functions escriben; solo pedidos cobrados y no anulados
+  jornada, ventas: $, pedidos                  // ticket promedio = ventas / pedidos (se calcula al leer)
   porTipo: Record<Tipo, { ventas, pedidos }>
-  porMedio: Record<MedioPago, $>
+  porMedio: { efectivo?, transferencia? }
   porHora: Record<"00".."23", { ventas, pedidos }>
   porProducto: Record<productoId, { nombre, cantidad, ventas }>
 
@@ -420,8 +423,8 @@ service cloud.firestore {
 | `crearPedido` | callable (App Check pendiente) | Web: valida el esquema zod, local activo, abierto y sin pausa, tipo y medio habilitados, promos vigentes, disponibilidad y mínimo; límite de 1 pedido por minuto por teléfono. Staff (`origen` mostrador/teléfono, rol dueño, encargado o mozo): sin esas reglas, puede registrar el pago. Siempre **recalcula precios** con `packages/shared/precios.ts`; número correlativo por jornada en transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`. (Con MP, más adelante: crea la preferencia y devuelve `init_point`) | 2 |
 | `espejarSeguimiento` | trigger `pedidos` onUpdate | Copia a `seguimiento/{token}` estado, demora, motivo y estado del pago | 2 |
 | `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | después |
-| `contabilizarPedido` | trigger `pedidos` onUpdate | Al cerrar o entregar y estar pagado: suma en `statsDiarias` y en el `turnosCaja` abierto (con `contabilizado` como candado) | 4 |
-| `revertirContabilizacion` | trigger `pedidos` onUpdate | Si un pedido contabilizado se cancela, resta | 4 |
+| `contabilizarPedido` | trigger `pedidos` onWrite | Cuando el pedido queda **pagado y no anulado**, suma en `statsDiarias/{jornada}` y en la caja abierta; si después se cancela o se deshace el cobro, resta lo mismo (una caja ya cerrada no se toca). Idempotente: relee el pedido en transacción con `contabilizado` como candado. Reemplaza a `revertirContabilizacion` | 4 |
+| `abrirCaja` / `cerrarCaja` | callable (dueño/encargado) | Abre con efectivo inicial (una sola caja abierta, candado en `contadores/caja`). Cierra: esperado = inicial + cobros + ingresos − egresos, contra lo contado; guarda la foto del cierre y registra en `auditoria` | 4 |
 | `limpiezaDiaria` | scheduled | Rota los `qrToken` de mesas libres, archiva seguimientos viejos | 3 |
 
 Región: `southamerica-east1` (São Paulo), la más cercana a Argentina; se fija en `functions/src/opciones.ts`, que `index.ts` importa primero. Secretos (credenciales de MP del local, secreto de revalidación) en **Secret Manager** vía `defineSecret`.
@@ -636,26 +639,31 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 ---
 
-### Fase 4: Caja y reportes (2–3 semanas)
+### Fase 4: Caja y reportes (2–3 semanas) → **hecha antes que la Fase 3**
+
+**Orden (1.9):** a pedido, la Fase 4 se hizo antes que la 3: Silverio trabaja con retiro y lo que el dueño necesita es saber cuánto entró cada día. **Alcance "caja simple"** para locales chicos; lo demás queda en "Después".
 
 **Caja**
-- [ ] Abrir turno con monto inicial. Solo un turno abierto a la vez (validado en Function).
-- [ ] Todo cobro se asocia al turno abierto; sin turno abierto se avisa para abrirlo.
-- [ ] Movimientos: ingresos y egresos con categoría (proveedor, cambio, retiro, otro).
-- [ ] **Cierre:** esperado por medio de pago contra lo contado, diferencia, notas, resumen imprimible y registro en `auditoria`.
-- [ ] Historial de turnos con detalle.
+- [x] Abrir caja con efectivo inicial. Solo una abierta a la vez (`abrirCaja`, candado en `contadores/caja`).
+- [x] Todo cobro de un pedido se suma a la caja abierta; sin caja abierta, el panel de pedidos avisa para abrirla.
+- [x] Movimientos de efectivo: entra o sale plata, con categoría (proveedor, cambio, retiro, otro). Solo en la caja abierta; no se editan ni borran.
+- [x] **Cierre:** efectivo esperado contra contado (y transferencias contra el banco), diferencia en vivo, notas y registro en `auditoria` (`cerrarCaja`).
+- [x] Historial de cierres (cuándo, quién, cuánto faltó o sobró).
 
 **Contabilización**
-- [ ] `contabilizarPedido` y `revertirContabilizacion` (idempotentes, con tests).
+- [x] `contabilizarPedido` (un solo trigger idempotente que suma y resta) con tests de `caja.ts` en shared.
 
-**Reportes**
-- [ ] KPIs de hoy frente al mismo día de la semana anterior: ventas, pedidos, ticket promedio, cancelados.
-- [ ] Ventas por día (rango elegible), mapa de calor por **día y hora**.
-- [ ] Ranking de productos (cantidad y facturación) y por categoría.
-- [ ] Composición por tipo (salón, take away, delivery) y por medio de pago.
-- [ ] Clientes frecuentes (top por cantidad y gasto).
+**Reportes (página "Ventas" y Resumen)**
+- [x] Hoy frente al mismo día de la semana anterior: vendido, pedidos y ticket promedio.
+- [x] Ventas por día (7 o 30 días) con efectivo y transferencias.
+- [x] Ranking de productos (cantidad y facturación) y horarios con más pedidos.
+- [x] Resumen del panel con los números del día y el estado de la caja.
+
+**Después (cuando un local lo pida)**
+- [ ] Resumen de cierre imprimible y envío por WhatsApp o email al dueño.
+- [ ] Ventas por rango libre, mapa de calor día × hora, ranking por categoría y composición por tipo.
+- [ ] Clientes frecuentes.
 - [ ] Exportar a Excel y CSV.
-- [ ] Resumen del día por WhatsApp o email al dueño al cerrar la caja (opcional).
 
 ✅ **Listo cuando:** el dueño de Silverio **cierra caja todos los días con el sistema** y usa los reportes en lugar de planillas.
 
@@ -804,3 +812,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
 - **1.6 (2026-09-29):** panel de **carta** (productos, categorías, aumento masivo con vista previa), **promos** y **configuración** (local, horarios, marca con contraste, web, pedidos y pagos). Functions `ajustarPrecios` y `revalidarWeb`: los cambios del panel se ven en la web en segundos. `pedidos.habilitados` apagado = web en modo carta (sin carrito). Se suman `browser-image-compression` y `@dnd-kit` (ya previstos en §2).
 - **1.7 (2026-09-29):** **panel mínimo**. Configuración reducida a contacto, redes y horarios; salen del panel marca, textos de la web, pedidos y pagos, y la página Equipo. Se suma el **banner de fecha especial** (PC y celular, con fechas). Todas las imágenes a WebP. En productos, lo avanzado queda plegado en "Más opciones"; el QR queda con menos opciones. También: página 404, robots, sitemap, imagen para compartir generada y mensaje de WhatsApp configurable por datos.
 - **1.8 (2026-09-29):** **Fase 2 mínima con cobros manuales**. Silverio queda en producción como demo (excepción a la Fase 1). El checkout crea el pedido con `crearPedido` (WhatsApp pasa a ser un aviso opcional), hay seguimiento en vivo en `/pedido/[token]` y el panel suma **Pedidos**: tablero de la jornada, sonido, estados, cobro en efectivo o transferencia con totales del día y carga manual de mostrador o teléfono. La numeración y los totales van por **jornada** (corte 06:00). Mercado Pago, zonas con costo, pausa, impresión y clientes pasan a "Después". El menú del panel oculta lo que todavía no existe.
+- **1.9 (2026-09-29):** **Fase 4 antes que la 3**, con alcance de **caja simple**: abrir y cerrar caja (efectivo esperado contra contado), movimientos de efectivo, historial de cierres, página **Ventas** (hoy contra la semana pasada, por día, lo más vendido y horarios) y Resumen con números reales. `contabilizarPedido` cuenta el pedido cuando queda pagado y no anulado, y resta si se cancela o se deshace el cobro (reemplaza a `revertirContabilizacion`). Nuevas callables `abrirCaja` y `cerrarCaja`. Los movimientos solo se anotan en la caja abierta. El menú muestra las fases hechas (0, 1, 2 y 4); "Reportes" pasa a llamarse "Ventas".

@@ -16,7 +16,9 @@ import { TarjetaPedido } from '@/components/panel/pedidos/tarjeta-pedido';
 import { DetallePedido } from '@/components/panel/pedidos/detalle-pedido';
 import { DialogoCobro } from '@/components/panel/pedidos/dialogo-cobro';
 import { NuevoPedido } from '@/components/panel/pedidos/nuevo-pedido';
+import Link from 'next/link';
 import { useSesion } from '@/features/auth/sesion';
+import { useCajaAbierta } from '@/features/panel/caja';
 import { mensajeError, useDocumento } from '@/features/panel/firestore';
 import {
   anularCobros,
@@ -63,10 +65,12 @@ export default function PedidosPage() {
 
   const uid = sesion.estado === 'lista' ? sesion.usuario.uid : '';
   const rol = sesion.estado === 'lista' ? sesion.rol : null;
+  const esGestor = rol === 'dueno' || rol === 'encargado';
+  const caja = useCajaAbierta();
   const detalle = pedidos.find((p) => p.id === detalleId) ?? null;
   const aCobrar = pedidos.find((p) => p.id === cobroId) ?? null;
   const nuevos = pedidos.filter((p) => p.estado === 'pendiente');
-  const caja = resumenCaja(pedidos);
+  const totales = resumenCaja(pedidos);
 
   // Pedido nuevo: sonido + contador en la pestaña del navegador.
   const vistos = useRef<Set<string> | null>(null);
@@ -173,6 +177,14 @@ export default function PedidosPage() {
         }
       />
 
+      {esGestor && !caja.cargando && !caja.turno && (
+        <p className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm">
+          La caja está cerrada: lo que cobres no va a sumar a ninguna caja.
+          <Link href="/panel/caja" className="font-medium underline">
+            Abrir caja
+          </Link>
+        </p>
+      )}
       {error && (
         <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
       )}
@@ -194,16 +206,20 @@ export default function PedidosPage() {
       <section aria-label="Totales del día" className="grid grid-cols-2 gap-2 lg:grid-cols-4">
         <Dato
           titulo="Pedidos"
-          valor={String(caja.pedidos)}
+          valor={String(totales.pedidos)}
           detalle={
-            caja.anulados
-              ? `${caja.anulados} ${caja.anulados === 1 ? 'anulado' : 'anulados'}`
+            totales.anulados
+              ? `${totales.anulados} ${totales.anulados === 1 ? 'anulado' : 'anulados'}`
               : undefined
           }
         />
-        <Dato titulo="Efectivo" valor={formatARS(caja.porMedio.efectivo)} />
-        <Dato titulo="Transferencias" valor={formatARS(caja.porMedio.transferencia)} />
-        <Dato titulo="Por cobrar" valor={formatARS(caja.porCobrar)} resaltar={caja.porCobrar > 0} />
+        <Dato titulo="Efectivo" valor={formatARS(totales.porMedio.efectivo)} />
+        <Dato titulo="Transferencias" valor={formatARS(totales.porMedio.transferencia)} />
+        <Dato
+          titulo="Por cobrar"
+          valor={formatARS(totales.porCobrar)}
+          resaltar={totales.porCobrar > 0}
+        />
       </section>
 
       {/* Celular: pestañas; escritorio: columnas */}

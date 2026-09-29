@@ -181,7 +181,7 @@ service cloud.firestore {
       allow read: if esGestor();
       allow write: if false;
 
-      // Los movimientos no se editan ni se borran: quedan como registro.
+      // Los movimientos (gastos, retiros, cambio) no se editan ni se borran: quedan como registro.
       match /movimientos/{movId} {
         allow read: if esGestor();
         allow create: if esGestor()
@@ -191,7 +191,9 @@ service cloud.firestore {
           && esPesos(datos().monto) && datos().monto > 0
           && datos().detalle is string && datos().detalle.size() <= 200
           && datos().porUid == request.auth.uid
-          && datos().en == request.time;
+          && datos().en == request.time
+          // Solo en la caja abierta: un cierre no se modifica después.
+          && get(/databases/$(db)/documents/turnosCaja/$(turnoId)).data.estado == 'abierto';
         allow update, delete: if false;
       }
     }

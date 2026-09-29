@@ -11,3 +11,5 @@ export {
 } from './cache/revalidarWeb.js';
 export { crearPedido } from './pedidos/crearPedido.js';
 export { espejarSeguimiento } from './pedidos/espejarSeguimiento.js';
+export { contabilizarPedido } from './caja/contabilizarPedido.js';
+export { abrirCaja, cerrarCaja } from './caja/caja.js';
