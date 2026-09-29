@@ -1,10 +1,11 @@
 /**
  * Admin SDK para Server Components y route handlers. Nunca se importa desde el cliente.
+ * Solo Firestore: firebase-admin/auth no carga en el runtime de Vercel (jwks-rsa → jose ESM) y la
+ * web no lo necesita (el panel usa el SDK de cliente).
  * Con emuladores no necesita credenciales; en Vercel usa FIREBASE_SERVICE_ACCOUNT_JSON (base64).
  */
 import 'server-only';
 import { cert, getApps, initializeApp, type App } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 
 const usaEmuladores = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
@@ -32,4 +33,3 @@ function iniciar(): App {
 
 const app = iniciar();
 export const adminDb = getFirestore(app);
-export const adminAuth = getAuth(app);
