@@ -24,6 +24,7 @@ import { mensajeError, useDocumento } from '@/features/panel/firestore';
 import {
   anularCobros,
   cambiarDemora,
+  cambiarEnvio,
   cambiarEstado,
   COLOR_ETAPA,
   ETAPAS,
@@ -68,6 +69,8 @@ export default function PedidosPage() {
 
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [cobroId, setCobroId] = useState<string | null>(null);
+  // El cobro se abrió al tocar "Entregado": al confirmar, se cobra y se entrega.
+  const [entregando, setEntregando] = useState(false);
   const [nuevoAbierto, setNuevoAbierto] = useState(false);
   const [ocupados, setOcupados] = useState<ReadonlySet<string>>(new Set());
   const [aviso, setAviso] = useState<Aviso | null>(null);
@@ -142,6 +145,13 @@ export default function PedidosPage() {
   }
 
   function avanzar(p: PedidoConId, estado: EstadoPedido, motivo?: string) {
+    // No se entrega sin dejar asentado el pago: primero se pregunta cómo pagó.
+    if (estado === 'entregado' && totalCobrado(p.pagos) < p.total) {
+      setDetalleId(null);
+      setEntregando(true);
+      setCobroId(p.id);
+      return;
+    }
     void ejecutar(p.id, () =>
       cambiarEstado(p, estado, uid, motivo ? { motivoCancelacion: motivo } : {}),
     );
@@ -181,6 +191,9 @@ export default function PedidosPage() {
     />
   );
   const terminados = pedidos.filter((p) => TERMINADOS.includes(p.estado));
+  const sinCobrar = terminados.filter(
+    (p) => p.estado === 'entregado' && p.estadoPago !== 'pagado',
+  ).length;
   const porEtapa = Object.fromEntries(
     ETAPAS.map((e) => [
       e.id,
@@ -375,6 +388,11 @@ export default function PedidosPage() {
               className={cn('size-4 transition-transform', verTerminados && 'rotate-180')}
             />
             Entregados y cancelados de hoy ({terminados.length})
+            {sinCobrar > 0 && (
+              <span className="rounded-full bg-red-600 px-2 text-xs text-white">
+                {sinCobrar} sin cobrar
+              </span>
+            )}
           </button>
           {verTerminados && (
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -412,6 +430,12 @@ export default function PedidosPage() {
         onEstado={(estado, motivo) => detalle && avanzar(detalle, estado, motivo)}
         onDemora={(min) => detalle && void ejecutar(detalle.id, () => cambiarDemora(detalle, min))}
         onCobrar={() => detalle && setCobroId(detalle.id)}
+        onEnvio={(costo) =>
+          detalle &&
+          void ejecutar(detalle.id, () => cambiarEnvio(detalle, costo), {
+            texto: `Envío del #${detalle.numero}: ${formatARS(costo)}. Avisale al cliente por WhatsApp.`,
+          })
+        }
         onAnularCobros={() =>
           detalle &&
           void ejecutar(detalle.id, () => anularCobros(detalle), { texto: 'Cobro deshecho' })
@@ -419,13 +443,38 @@ export default function PedidosPage() {
       />
       <DialogoCobro
         pedido={aCobrar}
-        onCerrar={() => setCobroId(null)}
+        entregar={entregando}
+        onCerrar={() => {
+          setCobroId(null);
+          setEntregando(false);
+        }}
         onConfirmar={async (cobro) => {
           if (!aCobrar) return;
-          await ejecutar(aCobrar.id, () => registrarCobro(aCobrar, cobro, uid), {
-            texto: `Cobro de ${formatARS(cobro.monto)} registrado en el #${aCobrar.numero}`,
-          });
+          const p = aCobrar;
+          const conEntrega = entregando;
+          await ejecutar(
+            p.id,
+            async () => {
+              await registrarCobro(p, cobro, uid);
+              if (conEntrega) await cambiarEstado(p, 'entregado', uid);
+            },
+            {
+              texto: conEntrega
+                ? `#${p.numero} entregado y cobrado: ${formatARS(cobro.monto)} en ${cobro.medio}`
+                : `Cobro de ${formatARS(cobro.monto)} registrado en el #${p.numero}`,
+            },
+          );
           setCobroId(null);
+          setEntregando(false);
+        }}
+        onEntregarSinCobrar={() => {
+          if (!aCobrar) return;
+          const p = aCobrar;
+          setCobroId(null);
+          setEntregando(false);
+          void ejecutar(p.id, () => cambiarEstado(p, 'entregado', uid), {
+            texto: `#${p.numero} entregado sin cobrar: queda en "Por cobrar"`,
+          });
         }}
       />
       <NuevoPedido

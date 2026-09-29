@@ -231,8 +231,25 @@ function Detalle({ pedido, local }: { pedido: Seguimiento; local: DatosLocal }) 
             </li>
           ))}
         </ul>
-        <div className="mt-4 flex items-baseline justify-between border-t border-borde pt-3">
-          <span className="text-tinta-2">Total</span>
+        {pedido.tipo === 'delivery' && (
+          <div className="mt-4 flex items-baseline justify-between border-t border-borde pt-3 text-sm">
+            <span className="text-tinta-2">🛵 Envío</span>
+            {pedido.costoEnvio ? (
+              <span className="tabular-nums">{formatARS(pedido.costoEnvio)}</span>
+            ) : (
+              <span className="text-marca">A confirmar por WhatsApp</span>
+            )}
+          </div>
+        )}
+        <div
+          className={cn(
+            'flex items-baseline justify-between pt-3',
+            pedido.tipo === 'delivery' ? 'mt-1' : 'mt-4 border-t border-borde',
+          )}
+        >
+          <span className="text-tinta-2">
+            {pedido.tipo === 'delivery' && !pedido.costoEnvio ? 'Total sin envío' : 'Total'}
+          </span>
           <span className="text-xl font-bold tabular-nums">{formatARS(pedido.total)}</span>
         </div>
         <p className="mt-2 text-sm text-tinta-2">

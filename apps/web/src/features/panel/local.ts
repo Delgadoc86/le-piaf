@@ -8,3 +8,11 @@ import { firebase } from '@/lib/firebase/client';
 export function guardarLocal(cambios: Partial<LocalEditable>) {
   return updateDoc(doc(firebase().db, DOC_LOCAL), { ...cambios, actualizadoEn: serverTimestamp() });
 }
+
+/** Formas de entrega que ofrece la web (retiro, delivery, comer en el local). */
+export function guardarTiposEntrega(tipos: LocalEditable['pedidos']['tipos']) {
+  return updateDoc(doc(firebase().db, DOC_LOCAL), {
+    'pedidos.tipos': tipos,
+    actualizadoEn: serverTimestamp(),
+  });
+}

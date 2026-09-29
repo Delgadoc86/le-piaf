@@ -37,9 +37,27 @@ const ITEMS_VISIBLES = 6;
 /** Etiqueta de pago: lo que el cliente eligió y si ya se cobró. */
 export function EtiquetaPago({ pedido, className }: { pedido: Pedido; className?: string }) {
   const medio = pedido.pagoElegido.medio === 'efectivo' ? 'Efectivo' : 'Transferencia';
+  const pagadoCon = [
+    ...new Set(pedido.pagos.filter((p) => p.estado === 'aprobado').map((p) => p.medio)),
+  ]
+    .map((m) => (m === 'efectivo' ? 'efectivo' : 'transferencia'))
+    .join(' + ');
+  // Entregado sin cobrar: lo más importante de ver al final del día.
+  if (pedido.estado === 'entregado' && pedido.estadoPago !== 'pagado') {
+    return (
+      <span
+        className={cn(
+          'inline-flex items-center rounded-full bg-red-600 px-2 py-0.5 text-xs font-semibold text-white',
+          className,
+        )}
+      >
+        {pedido.estadoPago === 'parcial' ? 'Entregado · pago parcial' : 'Entregado sin cobrar'}
+      </span>
+    );
+  }
   const texto =
     pedido.estadoPago === 'pagado'
-      ? '✓ Pagado'
+      ? `✓ Pagado${pagadoCon ? ` · ${pagadoCon}` : ''}`
       : pedido.estadoPago === 'parcial'
         ? `${medio} · pago parcial`
         : `${medio} · a cobrar`;
@@ -163,6 +181,16 @@ export function TarjetaPedido({
         {pedido.cliente?.nombre && (
           <p className="mt-1.5 truncate font-semibold">{pedido.cliente.nombre}</p>
         )}
+        {pedido.tipo === 'delivery' && (
+          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs">
+            <span className="truncate text-muted-foreground">🛵 {pedido.entrega?.direccion}</span>
+            {pedido.costoEnvio === 0 && (
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 font-semibold text-amber-900 dark:text-amber-300">
+                Envío a confirmar
+              </span>
+            )}
+          </p>
+        )}
 
         {/* Qué hay que preparar: lo más importante de la tarjeta */}
         <ul className="mt-2 space-y-0.5 text-sm">
@@ -215,7 +243,9 @@ export function TarjetaPedido({
               onClick={onAvanzar}
               disabled={ocupado}
             >
-              {ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente]}
+              {siguiente === 'entregado' && falta > 0
+                ? 'Cobrar y entregar'
+                : (ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente])}
             </Button>
           )}
           {falta > 0 && (

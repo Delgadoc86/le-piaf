@@ -19,6 +19,7 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { InputPesos } from '@/components/panel/ui-panel';
 import { cn } from '@/lib/utils';
 import { linkWhatsApp } from '@/lib/whatsapp';
 import {
@@ -44,6 +45,7 @@ interface Props {
   onDemora: (minutos: number) => void;
   onCobrar: () => void;
   onAnularCobros: () => void;
+  onEnvio: (costo: number) => void;
 }
 
 const MOTIVOS = ['Nos quedamos sin stock', 'Estamos por cerrar', 'No pudimos contactarte'];
@@ -68,9 +70,11 @@ function Contenido({
   onDemora,
   onCobrar,
   onAnularCobros,
+  onEnvio,
 }: Props & { pedido: PedidoConId }) {
   const [anulando, setAnulando] = useState(false);
   const [motivo, setMotivo] = useState('');
+  const [envio, setEnvio] = useState(pedido.costoEnvio);
   const siguiente = siguienteEstado(pedido.estado, pedido.tipo);
   const etapaSiguiente = siguiente ? etapaDe(siguiente) : null;
   const Icono = ICONO_TIPO[pedido.tipo];
@@ -127,6 +131,12 @@ function Contenido({
             <span className="text-sm tabular-nums">{formatARS(i.subtotal)}</span>
           </li>
         ))}
+        {pedido.costoEnvio > 0 && (
+          <li className="flex justify-between p-3 text-sm">
+            <span>🛵 Envío</span>
+            <span className="tabular-nums">{formatARS(pedido.costoEnvio)}</span>
+          </li>
+        )}
         <li className="flex justify-between p-3 font-semibold">
           <span>Total</span>
           <span className="tabular-nums">{formatARS(pedido.total)}</span>
@@ -175,6 +185,46 @@ function Contenido({
               </a>
             </Button>
           )}
+        </section>
+      )}
+
+      {/* Envío: delivery sin zonas, el local confirma zona y costo por WhatsApp */}
+      {pedido.tipo === 'delivery' && (
+        <section
+          className={cn(
+            'space-y-2 rounded-lg border p-3 text-sm',
+            pedido.costoEnvio === 0 && 'border-amber-500/60 bg-amber-500/5',
+          )}
+        >
+          <div className="flex items-center justify-between gap-2">
+            <span className="font-medium">Envío</span>
+            {pedido.costoEnvio === 0 ? (
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-xs font-semibold text-amber-900 dark:text-amber-300">
+                A confirmar
+              </span>
+            ) : (
+              <span className="font-semibold tabular-nums">{formatARS(pedido.costoEnvio)}</span>
+            )}
+          </div>
+          {operable && (
+            <div className="flex items-end gap-2">
+              <div className="w-36">
+                <InputPesos valor={envio} onCambio={setEnvio} placeholder="Costo" />
+              </div>
+              <Button
+                size="sm"
+                variant="outline"
+                disabled={ocupado || envio === pedido.costoEnvio}
+                onClick={() => onEnvio(envio)}
+              >
+                Guardar envío
+              </Button>
+            </div>
+          )}
+          <p className="text-xs text-muted-foreground">
+            Confirmale al cliente por WhatsApp si llegás a su zona y cuánto sale. Al guardarlo, se
+            suma al total y lo ve en su seguimiento.
+          </p>
         </section>
       )}
 
@@ -268,7 +318,9 @@ function Contenido({
               onClick={() => onEstado(siguiente)}
               disabled={ocupado}
             >
-              {ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente]}
+              {siguiente === 'entregado' && cobrado < pedido.total
+                ? 'Cobrar y entregar'
+                : (ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente])}
             </Button>
           )}
         </div>

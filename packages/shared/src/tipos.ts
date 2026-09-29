@@ -172,6 +172,8 @@ export interface Seguimiento {
   motivoCancelacion?: string;
   items: { nombre: string; cantidad: number }[];
   total: number;
+  /** Delivery: 0 mientras el local no confirma el envío. */
+  costoEnvio?: number;
   medioPago: MedioPagoManual;
   estadoPago: EstadoPagoPedido;
   creadoEn: Timestamp;

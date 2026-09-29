@@ -352,6 +352,10 @@ function Contenido() {
                   onCambio={setReferencia}
                   placeholder="Portón verde, timbre 2…"
                 />
+                <p className="rounded-2xl bg-marca/10 px-4 py-3 text-sm">
+                  🛵 Te confirmamos por WhatsApp si llegamos a tu zona y el costo del envío, que se
+                  suma al total.
+                </p>
               </>
             )}
 
@@ -415,7 +419,7 @@ function Contenido() {
             </p>
           )}
           <div className="flex items-baseline justify-between">
-            <span className="text-tinta-2">Total</span>
+            <span className="text-tinta-2">{tipo === 'delivery' ? 'Total sin envío' : 'Total'}</span>
             <span className="text-2xl font-bold tabular-nums">{formatARS(total)}</span>
           </div>
           <button

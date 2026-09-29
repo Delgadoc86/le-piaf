@@ -145,6 +145,7 @@ service cloud.firestore {
       allow create, delete: if false;
       allow update: if datos().estado in ['pendiente', 'aceptado', 'en_preparacion', 'listo',
             'en_camino', 'entregado', 'rechazado', 'cancelado', 'abierto', 'cuenta_pedida', 'cerrado']
+        && envioCoherente()
         && (
           (esGestor() && soloCambia(camposGestion()))
           || (rol() == 'mozo'
@@ -155,7 +156,16 @@ service cloud.firestore {
 
       function camposGestion() {
         return ['estado', 'items', 'pagos', 'estadoPago', 'tiempoEstimadoMin', 'motivoCancelacion',
-                'historial', 'actualizadoEn', 'comensales'];
+                'historial', 'actualizadoEn', 'comensales', 'costoEnvio', 'total'];
+      }
+
+      // El envío (delivery sin zonas) lo confirma el local: solo en delivery y con el total bien
+      // calculado. Los precios de los ítems, el subtotal y el descuento no se tocan nunca.
+      function envioCoherente() {
+        return !cambios().hasAny(['costoEnvio', 'total'])
+          || (resource.data.tipo == 'delivery'
+              && esPesos(datos().costoEnvio)
+              && datos().total == datos().subtotal - datos().descuento + datos().costoEnvio);
       }
     }
 

@@ -3,6 +3,7 @@ import {
   claveJornada,
   estadoPagoDe,
   inicioJornada,
+  totalConEnvio,
   puedePasar,
   resumenCaja,
   siguienteEstado,
@@ -36,7 +37,11 @@ describe('máquina de estados', () => {
 });
 
 describe('pagos', () => {
-  const pago = (medio: PagoPedido['medio'], monto: number, estado: PagoPedido['estado'] = 'aprobado'): PagoPedido => ({ medio, monto, estado });
+  const pago = (
+    medio: PagoPedido['medio'],
+    monto: number,
+    estado: PagoPedido['estado'] = 'aprobado',
+  ): PagoPedido => ({ medio, monto, estado });
 
   it('estado del pago según lo cobrado', () => {
     expect(estadoPagoDe([], 1000)).toBe('pendiente');
@@ -84,5 +89,12 @@ describe('jornada (corte a las 06:00 hora local)', () => {
   it('justo a las 06:00 ya es la jornada nueva', () => {
     const corte = new Date('2026-10-03T09:00:00Z');
     expect(claveJornada(corte, ZONA)).toBe('2026-10-03');
+  });
+});
+
+describe('envío', () => {
+  it('el total suma el envío que confirma el local', () => {
+    expect(totalConEnvio({ subtotal: 9000, descuento: 0 }, 1500)).toBe(10500);
+    expect(totalConEnvio({ subtotal: 9000, descuento: 1000 }, 0)).toBe(8000);
   });
 });

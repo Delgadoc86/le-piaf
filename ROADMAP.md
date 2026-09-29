@@ -592,6 +592,9 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] **Cobrar**: efectivo (con vuelto) o transferencia, pagos parciales y "deshacer cobro". Totales del día: efectivo, transferencias y por cobrar.
 - [x] **Carga manual** de pedidos (mostrador o teléfono): carta con buscador, variantes y extras, "ya pagó". Entra directo a preparación.
 - [x] El menú del panel muestra solo lo que ya existe (nada de secciones "Pronto").
+- [x] Tablero con colores por etapa, minutos transcurridos con alerta, cobro en un toque con "Deshacer" y barra lateral de íconos en tablet (pensado para compu o tablet; el celular queda de respaldo).
+- [x] **Entregar pide el cobro**: si falta pagar, "Cobrar y entregar" pregunta cómo pagó; se puede entregar sin cobrar y queda marcado en rojo ("Entregado sin cobrar") y en "Por cobrar".
+- [x] **Delivery sin zonas**: el dueño lo prende en Configuración → Formas de entrega. El cliente deja la dirección; el local confirma zona y costo por WhatsApp y carga el envío en el pedido (se suma al total, lo ve el cliente en el seguimiento). La regla solo lo permite en delivery y con `total = subtotal − descuento + costoEnvio`.
 
 **Calidad**
 - [x] Tests de `pedidos.ts` (estados, pagos, jornada) y del esquema de `crearPedido`.

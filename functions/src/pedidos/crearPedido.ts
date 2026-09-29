@@ -111,7 +111,8 @@ export const crearPedido = onCall(async (req) => {
   try {
     totales = calcularPedido(input.items, catalogo, {}, { validarDisponibilidad: !esStaff });
   } catch (e) {
-    if (e instanceof ErrorPrecio) throw new HttpsError('failed-precondition', e.message, { codigo: e.codigo });
+    if (e instanceof ErrorPrecio)
+      throw new HttpsError('failed-precondition', e.message, { codigo: e.codigo });
     throw e;
   }
   if (!esStaff && totales.subtotal < local.pedidos.pedidoMinimo) {
@@ -138,7 +139,14 @@ export const crearPedido = onCall(async (req) => {
   }));
   const pagos: PagoPedido[] =
     esStaff && input.pagado
-      ? [{ medio: input.pago.medio, monto: totales.total, estado: 'aprobado', ...(uid ? { porUid: uid } : {}) }]
+      ? [
+          {
+            medio: input.pago.medio,
+            monto: totales.total,
+            estado: 'aprobado',
+            ...(uid ? { porUid: uid } : {}),
+          },
+        ]
       : [];
   const nombre = input.cliente?.nombre.trim() ?? '';
   const telefono = input.cliente?.telefono;
@@ -186,7 +194,9 @@ export const crearPedido = onCall(async (req) => {
         : {}),
       pagoElegido: {
         medio: input.pago.medio,
-        ...(input.pago.medio === 'efectivo' && input.pago.pagaCon ? { pagaCon: input.pago.pagaCon } : {}),
+        ...(input.pago.medio === 'efectivo' && input.pago.pagaCon
+          ? { pagaCon: input.pago.pagaCon }
+          : {}),
       },
       ...(input.nota ? { nota: input.nota } : {}),
       ...(esStaff && uid ? { mozoUid: uid } : {}),
@@ -218,6 +228,7 @@ export const crearPedido = onCall(async (req) => {
         cantidad: i.cantidad,
       })),
       total: totales.total,
+      costoEnvio: totales.costoEnvio,
       medioPago: input.pago.medio,
       estadoPago: pedido.estadoPago,
       localNombre: local.nombre,

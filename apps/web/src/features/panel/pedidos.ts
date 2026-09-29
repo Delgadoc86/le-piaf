@@ -20,8 +20,10 @@ import {
 import { httpsCallable } from 'firebase/functions';
 import {
   claveJornada,
+  formatARS,
   estadoPagoDe,
   inicioJornada,
+  totalConEnvio,
   type Cobro,
   type CrearPedidoInput,
   type EstadoPedido,
@@ -134,6 +136,17 @@ export function cambiarDemora(pedido: PedidoConId, minutos: number) {
   });
 }
 
+/** Delivery: el local confirma el costo del envío y se recalcula el total (y el estado del pago). */
+export function cambiarEnvio(pedido: PedidoConId, costoEnvio: number) {
+  const total = totalConEnvio(pedido, costoEnvio);
+  return updateDoc(refPedido(pedido.id), {
+    costoEnvio,
+    total,
+    estadoPago: estadoPagoDe(pedido.pagos, total),
+    actualizadoEn: serverTimestamp(),
+  });
+}
+
 /** Registra un cobro manual (efectivo o transferencia) y recalcula el estado del pago. */
 export function registrarCobro(
   pedido: PedidoConId,
@@ -183,8 +196,10 @@ export function mensajeParaCliente(pedido: Pedido, nombreLocal: string): string 
     case 'aceptado':
     case 'en_preparacion':
       return `${hola} Recibimos tu pedido ${n} en ${nombreLocal} y ya lo estamos preparando.${
-        pedido.tiempoEstimadoMin ? ` Demora aprox.: ${pedido.tiempoEstimadoMin} min.` : ''
-      }`;
+        pedido.tipo === 'delivery' && pedido.costoEnvio > 0
+          ? ` Llegamos a tu zona: el envío cuesta ${formatARS(pedido.costoEnvio)} y el total queda en ${formatARS(pedido.total)}.`
+          : ''
+      }${pedido.tiempoEstimadoMin ? ` Demora aprox.: ${pedido.tiempoEstimadoMin} min.` : ''}`;
     case 'listo':
       return pedido.tipo === 'delivery'
         ? `${hola} Tu pedido ${n} está listo y sale en un ratito 🛵`

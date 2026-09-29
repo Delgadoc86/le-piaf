@@ -16,22 +16,42 @@ import { InputPesos } from '@/components/panel/ui-panel';
 import { cn } from '@/lib/utils';
 import type { PedidoConId } from '@/features/panel/pedidos';
 
+export interface CobroManual {
+  medio: MedioPagoManual;
+  monto: number;
+  pagaCon?: number;
+}
+
 interface Props {
   pedido: PedidoConId | null;
+  /** true: se abrió al tocar "Entregado" con el pedido sin cobrar (cobrar y entregar juntos). */
+  entregar?: boolean;
   onCerrar: () => void;
-  onConfirmar: (cobro: {
-    medio: MedioPagoManual;
-    monto: number;
-    pagaCon?: number;
-  }) => Promise<void>;
+  onConfirmar: (cobro: CobroManual) => Promise<void>;
+  /** Solo con `entregar`: se entrega y el pedido queda en "Por cobrar". */
+  onEntregarSinCobrar?: () => void;
 }
 
 /** Cobro manual: efectivo (con cálculo de vuelto) o transferencia. Por defecto, lo que falta. */
-export function DialogoCobro({ pedido, onCerrar, onConfirmar }: Props) {
+export function DialogoCobro({
+  pedido,
+  entregar,
+  onCerrar,
+  onConfirmar,
+  onEntregarSinCobrar,
+}: Props) {
   return (
     <Dialog open={pedido !== null} onOpenChange={(o) => !o && onCerrar()}>
       <DialogContent className="sm:max-w-md">
-        {pedido && <Formulario key={pedido.id} pedido={pedido} onConfirmar={onConfirmar} />}
+        {pedido && (
+          <Formulario
+            key={pedido.id}
+            pedido={pedido}
+            entregar={entregar ?? false}
+            onConfirmar={onConfirmar}
+            onEntregarSinCobrar={onEntregarSinCobrar}
+          />
+        )}
       </DialogContent>
     </Dialog>
   );
@@ -39,10 +59,14 @@ export function DialogoCobro({ pedido, onCerrar, onConfirmar }: Props) {
 
 function Formulario({
   pedido,
+  entregar,
   onConfirmar,
+  onEntregarSinCobrar,
 }: {
   pedido: PedidoConId;
+  entregar: boolean;
   onConfirmar: Props['onConfirmar'];
+  onEntregarSinCobrar: Props['onEntregarSinCobrar'];
 }) {
   const falta = Math.max(0, pedido.total - totalCobrado(pedido.pagos));
   const [medio, setMedio] = useState<MedioPagoManual>(pedido.pagoElegido.medio);
@@ -67,8 +91,11 @@ function Formulario({
   return (
     <>
       <DialogHeader>
-        <DialogTitle>Cobrar pedido #{pedido.numero}</DialogTitle>
+        <DialogTitle>
+          {entregar ? `¿Cómo pagó el #${pedido.numero}?` : `Cobrar pedido #${pedido.numero}`}
+        </DialogTitle>
         <DialogDescription>
+          {entregar ? 'Antes de entregarlo, registrá el pago. ' : ''}
           Total {formatARS(pedido.total)}
           {falta !== pedido.total && <> · falta {formatARS(falta)}</>}
         </DialogDescription>
@@ -84,7 +111,7 @@ function Formulario({
               aria-checked={medio === m}
               onClick={() => setMedio(m)}
               className={cn(
-                'h-12 rounded-lg border text-sm font-medium transition-colors',
+                'h-14 rounded-lg border text-base font-semibold transition-colors',
                 medio === m
                   ? 'border-primary bg-primary text-primary-foreground'
                   : 'hover:bg-muted',
@@ -98,6 +125,11 @@ function Formulario({
         <div className="space-y-1.5">
           <Label htmlFor="monto-cobro">Monto</Label>
           <InputPesos id="monto-cobro" valor={monto} onCambio={setMonto} />
+          {monto > 0 && monto < falta && (
+            <p className="text-xs text-amber-700 dark:text-amber-300">
+              Queda {formatARS(falta - monto)} por cobrar.
+            </p>
+          )}
         </div>
 
         {medio === 'efectivo' && (
@@ -118,14 +150,27 @@ function Formulario({
         )}
       </div>
 
-      <DialogFooter>
+      <DialogFooter className="flex-col gap-2 sm:flex-col">
         <Button
-          className="w-full sm:w-auto"
+          size="lg"
+          className="w-full"
           onClick={() => void confirmar()}
           disabled={monto <= 0 || guardando}
         >
-          Registrar cobro de {formatARS(monto)}
+          {entregar
+            ? `Cobrar ${formatARS(monto)} y entregar`
+            : `Registrar cobro de ${formatARS(monto)}`}
         </Button>
+        {entregar && onEntregarSinCobrar && (
+          <Button
+            variant="ghost"
+            className="w-full text-muted-foreground"
+            onClick={onEntregarSinCobrar}
+            disabled={guardando}
+          >
+            Entregar sin cobrar (queda en “Por cobrar”)
+          </Button>
+        )}
       </DialogFooter>
     </>
   );

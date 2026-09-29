@@ -68,6 +68,7 @@ beforeEach(async () => {
     await setDoc(doc(f, 'categorias', 'c1'), { nombre: 'Hamburguesas', orden: 1, visible: true });
     await setDoc(doc(f, 'pedidos', 'ped1'), pedido);
     await setDoc(doc(f, 'pedidos', 'salon1'), { ...pedido, tipo: 'salon', estado: 'abierto' });
+    await setDoc(doc(f, 'pedidos', 'delivery1'), { ...pedido, tipo: 'delivery' });
     await setDoc(doc(f, 'pedidos', 'mostrador1'), {
       ...pedido,
       origen: 'mostrador',
@@ -327,6 +328,17 @@ describe('pedidos', () => {
     // Lo que eligió el cliente y los datos del pedido no se reescriben desde el panel.
     await assertFails(updateDoc(ref, { pagoElegido: { medio: 'transferencia' } }));
     await assertFails(updateDoc(ref, { cliente: { nombre: 'Otro' } }));
+  });
+
+  it('el costo de envío se carga solo en delivery y con el total bien calculado', async () => {
+    const ref = doc(db('encargado'), 'pedidos', 'delivery1');
+    await assertSucceeds(updateDoc(ref, { costoEnvio: 1500, total: 10500 }));
+    await assertFails(updateDoc(ref, { costoEnvio: 1500, total: 5 }));
+    await assertFails(updateDoc(ref, { costoEnvio: -100, total: 8900 }));
+    await assertFails(updateDoc(ref, { costoEnvio: 1500.5, total: 10500.5 }));
+    await assertFails(
+      updateDoc(doc(db('encargado'), 'pedidos', 'ped1'), { costoEnvio: 1500, total: 10500 }),
+    );
   });
 
   it('el mozo gestiona salón y los pedidos que cargó él, pero no pedidos web ajenos', async () => {

@@ -72,6 +72,17 @@ export function estadoPagoDe(
   return cobrado >= total ? 'pagado' : 'parcial';
 }
 
+/**
+ * Total con el costo de envío que confirma el local (delivery sin zonas: se arregla por WhatsApp).
+ * Misma cuenta que exige firestore.rules al cambiar costoEnvio.
+ */
+export function totalConEnvio(
+  p: { subtotal: number; descuento: number },
+  costoEnvio: number,
+): number {
+  return p.subtotal - p.descuento + costoEnvio;
+}
+
 /** Vuelto a preparar si paga en efectivo con un billete mayor (0 si no corresponde). */
 export function vuelto(total: number, pagaCon: number | undefined): number {
   return pagaCon && pagaCon > total ? pagaCon - total : 0;
