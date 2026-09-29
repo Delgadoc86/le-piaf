@@ -28,7 +28,9 @@ if (!usaEmuladores) {
   process.env.FIREBASE_STORAGE_EMULATOR_HOST ??= '127.0.0.1:9199';
 }
 
-export const bucketName = arg('bucket') ?? `${projectId}.appspot.com`;
+// Emuladores: <proyecto>.appspot.com (igual que .env.example). Proyectos reales nuevos: <proyecto>.firebasestorage.app.
+export const bucketName =
+  arg('bucket') ?? (usaEmuladores ? `${projectId}.appspot.com` : `${projectId}.firebasestorage.app`);
 
 if (getApps().length === 0) initializeApp({ projectId, storageBucket: bucketName });
 
