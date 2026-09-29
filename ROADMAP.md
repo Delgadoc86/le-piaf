@@ -689,7 +689,13 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 ### Después (según la demanda de los clientes)
 - Cupones y promos automáticas por día y hora; programa de puntos.
-- Stock simple por producto (se descuenta con cada venta y avisa cuando hay poco).
+- **Stock del día por producto (prioridad alta dentro de "Después")**. Idea del 2026-09-29: simple a propósito, para diferenciarse de los sistemas con insumos y recetas.
+  - Al abrir la caja (o cuando quiera), el encargado anota solo lo que se puede acabar: "hoy hay 50 hamburguesas, 30 lomos". Lo que no anota, no tiene límite.
+  - Cada pedido descuenta en la misma transacción de `crearPedido`. Las promos descuentan los productos que incluyen. Cancelar o rechazar devuelve el stock.
+  - Aviso en el panel (y sonido) cuando quedan pocas, por ejemplo 10 o el 20 %: "Quedan 8 hamburguesas".
+  - Al llegar a 0, el producto pasa solo a **agotado** en la carta y la web no lo deja pedir. Con la jornada nueva el límite se borra y vuelve a estar disponible.
+  - Modelo tentativo: en `productos`, `stockDia?: { jornada, inicial, quedan }`, lo escribe solo la Function. En el panel, una pantalla "Stock de hoy" con la lista y un número por producto.
+  - Fuera de alcance: insumos, recetas, costos, proveedores y stock que pasa de un día al otro.
 - Pedidos programados (para una hora determinada).
 - Reservas de mesas.
 - Impresión directa en térmica (QZ Tray o agente local) y comandas automáticas.

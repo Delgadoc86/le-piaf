@@ -19,9 +19,12 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
+import { cn } from '@/lib/utils';
 import { linkWhatsApp } from '@/lib/whatsapp';
 import {
   ACCION_HACIA,
+  COLOR_ETAPA,
+  etapaDe,
   ETIQUETA_ESTADO,
   ETIQUETA_TIPO,
   horaDe,
@@ -69,6 +72,7 @@ function Contenido({
   const [anulando, setAnulando] = useState(false);
   const [motivo, setMotivo] = useState('');
   const siguiente = siguienteEstado(pedido.estado, pedido.tipo);
+  const etapaSiguiente = siguiente ? etapaDe(siguiente) : null;
   const Icono = ICONO_TIPO[pedido.tipo];
   const accionAnular: EstadoPedido | null = puedePasar(pedido.estado, 'rechazado', pedido.tipo)
     ? 'rechazado'
@@ -77,7 +81,6 @@ function Contenido({
       : null;
   const cobrado = totalCobrado(pedido.pagos);
   const mensaje = mensajeParaCliente(pedido, nombreLocal);
-  const enCurso = siguiente !== null;
   const cambio = vuelto(pedido.total, pedido.pagoElegido.pagaCon);
 
   return (
@@ -213,7 +216,7 @@ function Contenido({
       </section>
 
       {/* Demora estimada (se ve en el seguimiento del cliente) */}
-      {operable && enCurso && pedido.estado !== 'en_camino' && (
+      {operable && ['pendiente', 'aceptado', 'en_preparacion'].includes(pedido.estado) && (
         <section className="flex items-center justify-between gap-2 text-sm">
           <span className="flex items-center gap-1.5">
             <Clock className="size-4" aria-hidden /> Demora
@@ -259,7 +262,12 @@ function Contenido({
             <span />
           )}
           {siguiente && (
-            <Button size="lg" onClick={() => onEstado(siguiente)} disabled={ocupado}>
+            <Button
+              size="lg"
+              className={cn(etapaSiguiente && COLOR_ETAPA[etapaSiguiente].boton)}
+              onClick={() => onEstado(siguiente)}
+              disabled={ocupado}
+            >
               {ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente]}
             </Button>
           )}

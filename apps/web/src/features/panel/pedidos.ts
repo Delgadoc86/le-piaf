@@ -213,3 +213,85 @@ export function horaDe(ts: { toDate(): Date } | null | undefined, zonaHoraria: s
     hourCycle: 'h23',
   }).format(ts.toDate());
 }
+
+// ─── Tablero ─────────────────────────────────────────────────────────────────
+
+export type IdEtapa = 'nuevos' | 'preparacion' | 'listos';
+
+/**
+ * Columnas del tablero con su color (el mismo en el encabezado, el borde de la tarjeta y el botón
+ * que lleva a esa etapa): ámbar = hay que atender, azul = en la cocina, verde = listo.
+ */
+export const ETAPAS: {
+  id: IdEtapa;
+  titulo: string;
+  corto: string;
+  estados: readonly EstadoPedido[];
+  vacio: string;
+}[] = [
+  {
+    id: 'nuevos',
+    titulo: 'Nuevos',
+    corto: 'Nuevos',
+    estados: ['pendiente', 'aceptado'],
+    vacio: 'Sin pedidos nuevos. Cuando entre uno, suena y aparece acá.',
+  },
+  {
+    id: 'preparacion',
+    titulo: 'En preparación',
+    corto: 'Preparando',
+    estados: ['en_preparacion'],
+    vacio: 'Nada en preparación.',
+  },
+  {
+    id: 'listos',
+    titulo: 'Listos para entregar',
+    corto: 'Listos',
+    estados: ['listo', 'en_camino'],
+    vacio: 'Nada esperando entrega.',
+  },
+];
+
+export const COLOR_ETAPA: Record<
+  IdEtapa,
+  { encabezado: string; fondo: string; borde: string; boton: string; punto: string }
+> = {
+  nuevos: {
+    encabezado: 'bg-amber-400 text-amber-950',
+    fondo: 'bg-amber-500/[0.06]',
+    borde: 'border-l-amber-400',
+    boton: 'bg-amber-400 text-amber-950 hover:bg-amber-500',
+    punto: 'bg-amber-400',
+  },
+  preparacion: {
+    encabezado: 'bg-sky-600 text-white',
+    fondo: 'bg-sky-500/[0.06]',
+    borde: 'border-l-sky-500',
+    boton: 'bg-sky-600 text-white hover:bg-sky-700',
+    punto: 'bg-sky-500',
+  },
+  listos: {
+    encabezado: 'bg-emerald-600 text-white',
+    fondo: 'bg-emerald-500/[0.06]',
+    borde: 'border-l-emerald-500',
+    boton: 'bg-emerald-600 text-white hover:bg-emerald-700',
+    punto: 'bg-emerald-500',
+  },
+};
+
+export function etapaDe(estado: EstadoPedido): IdEtapa | null {
+  return ETAPAS.find((e) => e.estados.includes(estado))?.id ?? null;
+}
+
+/** Hora actual que se actualiza sola (para "hace 7 min"). */
+export function useAhora(intervaloMs = 30_000): number {
+  const [ahora, setAhora] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAhora(Date.now()), intervaloMs);
+    return () => clearInterval(t);
+  }, [intervaloMs]);
+  return ahora;
+}
+
+/** Un pedido nuevo sin aceptar después de estos minutos se marca en rojo. */
+export const MINUTOS_ALERTA_SIN_ACEPTAR = 5;

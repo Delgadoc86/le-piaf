@@ -1,5 +1,5 @@
 import { revalidateTag } from 'next/cache';
-import { TAG_CARTA } from '@/features/sitio/datos';
+import { TAG_CARTA } from '@/features/sitio/etiquetas';
 
 /**
  * Lo llama la Function revalidarWeb cuando cambia la carta o el local.

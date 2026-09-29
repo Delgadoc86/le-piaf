@@ -1,22 +1,23 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { Bell, BellOff, ChevronDown, Plus } from 'lucide-react';
+import Link from 'next/link';
+import { Bell, BellRing, ChevronDown, Monitor, Plus, X } from 'lucide-react';
 import {
   DOC_LOCAL,
   formatARS,
   resumenCaja,
   siguienteEstado,
+  totalCobrado,
   type EstadoPedido,
   type Local,
+  type MedioPagoManual,
 } from '@app/shared';
 import { Button } from '@/components/ui/button';
-import { EncabezadoPagina } from '@/components/panel/ui-panel';
 import { TarjetaPedido } from '@/components/panel/pedidos/tarjeta-pedido';
 import { DetallePedido } from '@/components/panel/pedidos/detalle-pedido';
 import { DialogoCobro } from '@/components/panel/pedidos/dialogo-cobro';
 import { NuevoPedido } from '@/components/panel/pedidos/nuevo-pedido';
-import Link from 'next/link';
 import { useSesion } from '@/features/auth/sesion';
 import { useCajaAbierta } from '@/features/panel/caja';
 import { mensajeError, useDocumento } from '@/features/panel/firestore';
@@ -24,9 +25,13 @@ import {
   anularCobros,
   cambiarDemora,
   cambiarEstado,
+  COLOR_ETAPA,
+  ETAPAS,
   puedeOperar,
   registrarCobro,
+  useAhora,
   usePedidosJornada,
+  type IdEtapa,
   type PedidoConId,
 } from '@/features/panel/pedidos';
 import {
@@ -37,28 +42,40 @@ import {
 } from '@/features/panel/sonido';
 import { cn } from '@/lib/utils';
 
-const COLUMNAS: { id: string; titulo: string; estados: readonly EstadoPedido[] }[] = [
-  { id: 'nuevos', titulo: 'Nuevos', estados: ['pendiente', 'aceptado'] },
-  { id: 'preparacion', titulo: 'En preparación', estados: ['en_preparacion'] },
-  { id: 'listos', titulo: 'Listos / en camino', estados: ['listo', 'en_camino'] },
-];
 const TERMINADOS: readonly EstadoPedido[] = ['entregado', 'cancelado', 'rechazado'];
+const CLAVE_TIP_PANTALLA = 'panel-tip-pantalla-v1';
+
+interface Aviso {
+  tipo: 'ok' | 'error';
+  texto: string;
+  deshacer?: () => void;
+}
+
+function leerLocal(clave: string): string | null {
+  try {
+    return localStorage.getItem(clave);
+  } catch {
+    return null;
+  }
+}
 
 export default function PedidosPage() {
   const sesion = useSesion();
   const local = useDocumento<Local>(DOC_LOCAL);
   const zona = local.datos?.zonaHoraria;
   const { pedidos, cargando, error } = usePedidosJornada(zona);
+  const ahora = useAhora();
 
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [cobroId, setCobroId] = useState<string | null>(null);
   const [nuevoAbierto, setNuevoAbierto] = useState(false);
   const [ocupados, setOcupados] = useState<ReadonlySet<string>>(new Set());
-  const [aviso, setAviso] = useState<{ tipo: 'ok' | 'error'; texto: string } | null>(null);
-  const [pestana, setPestana] = useState('nuevos');
+  const [aviso, setAviso] = useState<Aviso | null>(null);
+  const [pestana, setPestana] = useState<IdEtapa>('nuevos');
   const [verTerminados, setVerTerminados] = useState(false);
-  // Si el sonido estaba activado, el navegador igual pide un toque para habilitarlo (el panel
-  // se renderiza solo en el navegador, así que se puede leer localStorage acá).
+  // El panel se renderiza solo en el navegador: se puede leer localStorage al iniciar el estado.
+  const [verTip, setVerTip] = useState(() => leerLocal(CLAVE_TIP_PANTALLA) !== '1');
+  // Si el sonido estaba activado, el navegador igual pide un toque para habilitarlo.
   const [sonido, setSonido] = useState<'apagado' | 'bloqueado' | 'activo'>(() =>
     sonidoGuardado() ? 'bloqueado' : 'apagado',
   );
@@ -92,11 +109,11 @@ export default function PedidosPage() {
 
   useEffect(() => {
     if (!aviso) return;
-    const t = setTimeout(() => setAviso(null), 4000);
+    const t = setTimeout(() => setAviso(null), aviso.deshacer ? 8000 : 4000);
     return () => clearTimeout(t);
   }, [aviso]);
 
-  async function activarSonido() {
+  async function alternarSonido() {
     if (sonido === 'activo') {
       setSonido('apagado');
       guardarSonido(false);
@@ -108,11 +125,11 @@ export default function PedidosPage() {
     if (ok) sonarPedidoNuevo();
   }
 
-  async function ejecutar(id: string, accion: () => Promise<unknown>, exito?: string) {
+  async function ejecutar(id: string, accion: () => Promise<unknown>, exito?: Omit<Aviso, 'tipo'>) {
     setOcupados((s) => new Set(s).add(id));
     try {
       await accion();
-      if (exito) setAviso({ tipo: 'ok', texto: exito });
+      if (exito) setAviso({ tipo: 'ok', ...exito });
     } catch (e) {
       setAviso({ tipo: 'error', texto: mensajeError(e) });
     } finally {
@@ -130,6 +147,18 @@ export default function PedidosPage() {
     );
   }
 
+  function cobrarRapido(p: PedidoConId, medio: MedioPagoManual) {
+    const monto = Math.max(0, p.total - totalCobrado(p.pagos));
+    if (monto <= 0) return;
+    void ejecutar(p.id, () => registrarCobro(p, { medio, monto }, uid), {
+      texto: `#${p.numero} cobrado: ${formatARS(monto)} en ${medio}`,
+      deshacer: () => {
+        setAviso(null);
+        void ejecutar(p.id, () => anularCobros(p), { texto: `Cobro del #${p.numero} deshecho` });
+      },
+    });
+  }
+
   if (!zona || cargando) {
     return <p className="text-muted-foreground">Cargando pedidos…</p>;
   }
@@ -139,6 +168,7 @@ export default function PedidosPage() {
       key={p.id}
       pedido={p}
       zonaHoraria={zona}
+      ahora={ahora}
       operable={puedeOperar(p, rol, uid)}
       ocupado={ocupados.has(p.id)}
       onAbrir={() => setDetalleId(p.id)}
@@ -146,41 +176,83 @@ export default function PedidosPage() {
         const siguiente = siguienteEstado(p.estado, p.tipo);
         if (siguiente) avanzar(p, siguiente);
       }}
-      onCobrar={() => setCobroId(p.id)}
+      onCobrarRapido={(m) => cobrarRapido(p, m)}
+      onCobrarOtro={() => setCobroId(p.id)}
     />
   );
   const terminados = pedidos.filter((p) => TERMINADOS.includes(p.estado));
+  const porEtapa = Object.fromEntries(
+    ETAPAS.map((e) => [
+      e.id,
+      pedidos
+        .filter((p) => e.estados.includes(p.estado))
+        // Lo más viejo primero: es lo que hay que sacar antes.
+        .sort((a, b) => (a.creadoEn?.toMillis() ?? 0) - (b.creadoEn?.toMillis() ?? 0)),
+    ]),
+  ) as Record<IdEtapa, PedidoConId[]>;
 
   return (
-    <div className="space-y-5">
-      <EncabezadoPagina
-        titulo="Pedidos"
-        descripcion="Los pedidos del día, en vivo. Tocá uno para ver el detalle."
-        acciones={
-          <>
-            <Button
-              variant={sonido === 'bloqueado' ? 'default' : 'outline'}
-              onClick={() => void activarSonido()}
-              aria-pressed={sonido === 'activo'}
-            >
-              {sonido === 'activo' ? <Bell /> : <BellOff />}
-              {sonido === 'activo'
-                ? 'Sonido activado'
-                : sonido === 'bloqueado'
-                  ? 'Tocá para activar el sonido'
-                  : 'Activar sonido'}
-            </Button>
-            <Button onClick={() => setNuevoAbierto(true)}>
-              <Plus /> Nuevo pedido
-            </Button>
-          </>
-        }
-      />
+    <div className="space-y-4">
+      {/* Encabezado compacto: título, totales del día y acciones */}
+      <header className="flex flex-wrap items-center justify-between gap-3">
+        <div className="min-w-0">
+          <h1 className="text-2xl font-semibold">Pedidos</h1>
+          <p className="text-sm text-muted-foreground tabular-nums">
+            Hoy: {totales.pedidos} {totales.pedidos === 1 ? 'pedido' : 'pedidos'} · 💵{' '}
+            {formatARS(totales.porMedio.efectivo)} · 🏦 {formatARS(totales.porMedio.transferencia)}
+            {totales.porCobrar > 0 && (
+              <span className="font-semibold text-amber-700 dark:text-amber-300">
+                {' '}
+                · Por cobrar {formatARS(totales.porCobrar)}
+              </span>
+            )}
+          </p>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <Button
+            variant={sonido === 'activo' ? 'outline' : 'default'}
+            className={cn(
+              sonido !== 'activo' && 'animate-pulse bg-amber-400 text-amber-950 hover:bg-amber-500',
+            )}
+            onClick={() => void alternarSonido()}
+            aria-pressed={sonido === 'activo'}
+            title={sonido === 'activo' ? 'Tocá para silenciar' : undefined}
+          >
+            {sonido === 'activo' ? <Bell /> : <BellRing />}
+            {sonido === 'activo' ? (
+              'Sonido activado'
+            ) : (
+              <>
+                Activar sonido<span className="hidden sm:inline"> de pedidos</span>
+              </>
+            )}
+          </Button>
+          <Button size="lg" onClick={() => setNuevoAbierto(true)}>
+            <Plus /> Nuevo pedido
+          </Button>
+        </div>
+      </header>
 
+      {/* Avisos: lo urgente arriba de todo */}
+      {nuevos.length > 0 && (
+        <button
+          type="button"
+          onClick={() => setPestana('nuevos')}
+          className="flex w-full items-center gap-2 rounded-xl bg-amber-400 px-3 py-2 text-left text-sm font-semibold text-amber-950 shadow-sm md:px-4 md:py-3 md:text-base"
+        >
+          <BellRing className="size-5 shrink-0 animate-bounce" aria-hidden />
+          {nuevos.length === 1
+            ? 'Entró 1 pedido nuevo: aceptalo para que el cliente vea que lo están preparando.'
+            : `Hay ${nuevos.length} pedidos nuevos esperando que los aceptes.`}
+        </button>
+      )}
       {esGestor && !caja.cargando && !caja.turno && (
-        <p className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 p-3 text-sm">
-          La caja está cerrada: lo que cobres no va a sumar a ninguna caja.
-          <Link href="/panel/caja" className="font-medium underline">
+        <p className="flex items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-sm md:py-2">
+          <span>
+            La caja está cerrada
+            <span className="hidden sm:inline">: lo que cobres no va a sumar a ninguna caja</span>.
+          </span>
+          <Link href="/panel/caja" className="font-semibold underline">
             Abrir caja
           </Link>
         </p>
@@ -188,87 +260,104 @@ export default function PedidosPage() {
       {error && (
         <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
       )}
-      {aviso && (
-        <p
-          role="status"
-          className={cn(
-            'rounded-lg p-3 text-sm',
-            aviso.tipo === 'ok'
-              ? 'bg-emerald-500/10 text-emerald-800 dark:text-emerald-300'
-              : 'bg-destructive/10 text-destructive',
-          )}
-        >
-          {aviso.texto}
+      {verTip && (
+        <p className="flex items-start gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm md:hidden">
+          <Monitor className="mt-0.5 size-4 shrink-0" aria-hidden />
+          <span className="flex-1">
+            Para el servicio conviene una <strong>compu o tablet</strong>: ves las 3 columnas
+            juntas. En el celular, usá las pestañas.
+          </span>
+          <button
+            type="button"
+            aria-label="Cerrar sugerencia"
+            onClick={() => {
+              setVerTip(false);
+              try {
+                localStorage.setItem(CLAVE_TIP_PANTALLA, '1');
+              } catch {
+                // sin almacenamiento: vuelve a aparecer la próxima vez
+              }
+            }}
+          >
+            <X className="size-4" />
+          </button>
         </p>
       )}
 
-      {/* Totales del día */}
-      <section aria-label="Totales del día" className="grid grid-cols-2 gap-2 lg:grid-cols-4">
-        <Dato
-          titulo="Pedidos"
-          valor={String(totales.pedidos)}
-          detalle={
-            totales.anulados
-              ? `${totales.anulados} ${totales.anulados === 1 ? 'anulado' : 'anulados'}`
-              : undefined
-          }
-        />
-        <Dato titulo="Efectivo" valor={formatARS(totales.porMedio.efectivo)} />
-        <Dato titulo="Transferencias" valor={formatARS(totales.porMedio.transferencia)} />
-        <Dato
-          titulo="Por cobrar"
-          valor={formatARS(totales.porCobrar)}
-          resaltar={totales.porCobrar > 0}
-        />
-      </section>
-
-      {/* Celular: pestañas; escritorio: columnas */}
-      <div className="flex gap-1 overflow-x-auto rounded-lg bg-muted p-1 md:hidden" role="tablist">
-        {COLUMNAS.map((c) => {
-          const n = pedidos.filter((p) => c.estados.includes(p.estado)).length;
+      {/* Celular: pestañas fijas con contador de color; tablet y compu: columnas */}
+      <div
+        className="sticky top-0 z-10 -mx-4 flex gap-1 bg-background/95 px-4 py-2 backdrop-blur md:hidden"
+        role="tablist"
+      >
+        {ETAPAS.map((e) => {
+          const n = porEtapa[e.id].length;
+          const activa = pestana === e.id;
           return (
             <button
-              key={c.id}
+              key={e.id}
               type="button"
               role="tab"
-              aria-selected={pestana === c.id}
-              onClick={() => setPestana(c.id)}
+              aria-selected={activa}
+              onClick={() => setPestana(e.id)}
               className={cn(
-                'flex-1 rounded-md px-2 py-2 text-sm whitespace-nowrap',
-                pestana === c.id ? 'bg-background font-medium shadow-xs' : 'text-muted-foreground',
+                'flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-sm whitespace-nowrap',
+                activa
+                  ? cn(COLOR_ETAPA[e.id].encabezado, 'border-transparent font-semibold')
+                  : 'bg-card',
               )}
             >
-              {c.titulo.split(' /')[0]} {n > 0 && <span className="tabular-nums">({n})</span>}
+              {e.corto}
+              <span
+                className={cn(
+                  'min-w-5 rounded-full px-1.5 text-xs font-bold tabular-nums',
+                  activa
+                    ? 'bg-black/15'
+                    : n > 0
+                      ? cn(COLOR_ETAPA[e.id].punto, 'text-white')
+                      : 'bg-muted',
+                )}
+              >
+                {n}
+              </span>
             </button>
           );
         })}
       </div>
 
-      <div className="grid gap-4 md:grid-cols-3">
-        {COLUMNAS.map((c) => {
-          const lista = pedidos
-            .filter((p) => c.estados.includes(p.estado))
-            // Lo más viejo primero: es lo que hay que sacar antes.
-            .sort((a, b) => (a.creadoEn?.toMillis() ?? 0) - (b.creadoEn?.toMillis() ?? 0));
+      <div className="grid items-start gap-3 md:grid-cols-3">
+        {ETAPAS.map((e) => {
+          const lista = porEtapa[e.id];
+          const color = COLOR_ETAPA[e.id];
           return (
             <section
-              key={c.id}
-              aria-label={c.titulo}
-              className={cn('space-y-2', pestana !== c.id && 'hidden md:block')}
+              key={e.id}
+              aria-label={e.titulo}
+              className={cn(
+                'min-w-0 rounded-2xl p-2',
+                color.fondo,
+                pestana !== e.id && 'hidden md:block',
+              )}
             >
-              <h2 className="hidden items-center gap-2 text-sm font-semibold md:flex">
-                {c.titulo}
-                <span className="rounded-full bg-muted px-2 text-xs tabular-nums">
+              <h2
+                className={cn(
+                  'mb-2 hidden items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold md:flex',
+                  color.encabezado,
+                )}
+              >
+                {e.titulo}
+                <span className="rounded-full bg-black/15 px-2 text-xs tabular-nums">
                   {lista.length}
                 </span>
               </h2>
-              {lista.length === 0 ? (
-                <p className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
-                  {c.id === 'nuevos' ? 'Sin pedidos nuevos por ahora.' : 'Nada por acá.'}
-                </p>
-              ) : (
-                lista.map(tarjeta)
-              )}
+              <div className="space-y-2">
+                {lista.length === 0 ? (
+                  <p className="rounded-xl border border-dashed bg-card/50 p-6 text-center text-sm text-muted-foreground">
+                    {e.vacio}
+                  </p>
+                ) : (
+                  lista.map(tarjeta)
+                )}
+              </div>
             </section>
           );
         })}
@@ -279,13 +368,13 @@ export default function PedidosPage() {
           <button
             type="button"
             onClick={() => setVerTerminados((v) => !v)}
-            className="flex items-center gap-1 text-sm font-semibold"
+            className="flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
             aria-expanded={verTerminados}
           >
             <ChevronDown
               className={cn('size-4 transition-transform', verTerminados && 'rotate-180')}
             />
-            Terminados ({terminados.length})
+            Entregados y cancelados de hoy ({terminados.length})
           </button>
           {verTerminados && (
             <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
@@ -293,6 +382,24 @@ export default function PedidosPage() {
             </div>
           )}
         </section>
+      )}
+
+      {/* Aviso flotante (con "Deshacer" después de cobrar) */}
+      {aviso && (
+        <div
+          role="status"
+          className={cn(
+            'fixed inset-x-4 bottom-4 z-50 mx-auto flex max-w-md items-center gap-3 rounded-xl px-4 py-3 text-sm font-medium shadow-lg',
+            aviso.tipo === 'ok' ? 'bg-foreground text-background' : 'bg-destructive text-white',
+          )}
+        >
+          <span className="flex-1">{aviso.texto}</span>
+          {aviso.deshacer && (
+            <button type="button" onClick={aviso.deshacer} className="font-bold underline">
+              Deshacer
+            </button>
+          )}
+        </div>
       )}
 
       <DetallePedido
@@ -306,7 +413,8 @@ export default function PedidosPage() {
         onDemora={(min) => detalle && void ejecutar(detalle.id, () => cambiarDemora(detalle, min))}
         onCobrar={() => detalle && setCobroId(detalle.id)}
         onAnularCobros={() =>
-          detalle && void ejecutar(detalle.id, () => anularCobros(detalle), 'Cobro deshecho')
+          detalle &&
+          void ejecutar(detalle.id, () => anularCobros(detalle), { texto: 'Cobro deshecho' })
         }
       />
       <DialogoCobro
@@ -314,11 +422,9 @@ export default function PedidosPage() {
         onCerrar={() => setCobroId(null)}
         onConfirmar={async (cobro) => {
           if (!aCobrar) return;
-          await ejecutar(
-            aCobrar.id,
-            () => registrarCobro(aCobrar, cobro, uid),
-            `Cobro de ${formatARS(cobro.monto)} registrado en el #${aCobrar.numero}`,
-          );
+          await ejecutar(aCobrar.id, () => registrarCobro(aCobrar, cobro, uid), {
+            texto: `Cobro de ${formatARS(cobro.monto)} registrado en el #${aCobrar.numero}`,
+          });
           setCobroId(null);
         }}
       />
@@ -329,24 +435,9 @@ export default function PedidosPage() {
         onCreado={(numero) => {
           setNuevoAbierto(false);
           setPestana('preparacion');
-          setAviso({ tipo: 'ok', texto: `Pedido #${numero} cargado` });
+          setAviso({ tipo: 'ok', texto: `Pedido #${numero} cargado: está en preparación` });
         }}
       />
-    </div>
-  );
-}
-
-function Dato(props: {
-  titulo: string;
-  valor: string;
-  detalle?: string | undefined;
-  resaltar?: boolean;
-}) {
-  return (
-    <div className={cn('rounded-xl border bg-card p-3', props.resaltar && 'border-amber-500/50')}>
-      <p className="text-xs text-muted-foreground">{props.titulo}</p>
-      <p className="text-xl font-semibold tabular-nums">{props.valor}</p>
-      {props.detalle && <p className="text-xs text-muted-foreground">{props.detalle}</p>}
     </div>
   );
 }

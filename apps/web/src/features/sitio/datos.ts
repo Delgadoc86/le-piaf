@@ -13,7 +13,9 @@ import {
 } from '@app/shared';
 import { adminDb } from '@/lib/firebase/admin';
 
-export const TAG_CARTA = 'carta';
+import { TAG_CARTA } from './etiquetas';
+
+export { TAG_CARTA };
 
 export type LocalPublico = LocalEditable;
 export type CategoriaPublica = CategoriaDatos & { id: string };

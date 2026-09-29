@@ -1,3 +1,4 @@
+import path from 'node:path';
 import type { NextConfig } from 'next';
 
 const usaEmuladores = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
@@ -5,6 +6,9 @@ const usaEmuladores = process.env.NEXT_PUBLIC_USE_EMULATORS === 'true';
 const nextConfig: NextConfig = {
   // La web pública se prerenderiza con "use cache" y se invalida por etiqueta (ROADMAP §10).
   cacheComponents: true,
+  // Monorepo con pnpm: las dependencias viven en la raíz (node_modules/.pnpm). Sin esto, la función
+  // de Vercel puede quedar sin firebase-admin y todo lo que lee la base falla en tiempo de ejecución.
+  outputFileTracingRoot: path.join(process.cwd(), '../..'),
   images: {
     formats: ['image/avif', 'image/webp'],
     remotePatterns: [
