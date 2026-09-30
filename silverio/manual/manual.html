@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual del panel · Silverio Club</title>
+<style>
+  @page { size: A4; margin: 16mm 15mm 18mm; }
+  :root { --marca: #f59716; --tinta: #1c1917; --suave: #57534e; --borde: #e7e5e4; --fondo: #fafaf9; }
+  * { box-sizing: border-box; }
+  body { font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif; color: var(--tinta); font-size: 10.5pt; line-height: 1.5; margin: 0; }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 { font-size: 19pt; margin: 0 0 4mm; padding-bottom: 2mm; border-bottom: 3px solid var(--marca); break-after: avoid; }
+  h3 { font-size: 12.5pt; margin: 6mm 0 2mm; break-after: avoid; }
+  p { margin: 0 0 2.5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  section { break-before: page; }
+  .portada { height: 255mm; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; padding: 0 8mm; background: linear-gradient(160deg, #1c1917 0%, #292524 60%, #44403c 100%); color: #fff; border-radius: 6mm; }
+  .portada .etiqueta { color: var(--marca); letter-spacing: .3em; font-size: 10pt; font-weight: 700; text-transform: uppercase; }
+  .portada h1 { font-size: 38pt; margin: 4mm 0 6mm; }
+  .portada p { font-size: 13pt; color: #d6d3d1; max-width: 140mm; }
+  .portada .pie { margin-top: 18mm; font-size: 10pt; color: #a8a29e; }
+  figure { margin: 3mm 0 5mm; break-inside: avoid; }
+  figure img { display: block; max-width: 100%; max-height: 98mm; width: auto; margin: 0 auto; border: 1px solid var(--borde); border-radius: 3mm; }
+  figure.chica img { max-height: 72mm; }
+  .fila { display: flex; gap: 4mm; justify-content: center; }
+  .fila figure { flex: 0 0 31%; margin: 2mm 0; }
+  .fila figure img { max-height: 118mm; }
+  figcaption { text-align: center; }
+  figcaption { font-size: 8.5pt; color: var(--suave); margin-top: 1.5mm; }
+  .caja { border-radius: 3mm; padding: 3mm 4mm; margin: 3mm 0 4mm; break-inside: avoid; }
+  .tip { background: #fff7ed; border-left: 4px solid var(--marca); }
+  .ojo { background: #fef2f2; border-left: 4px solid #dc2626; }
+  .ok { background: #f0fdf4; border-left: 4px solid #16a34a; }
+  .caja strong:first-child { display: block; margin-bottom: 1mm; }
+  .pasos { counter-reset: paso; list-style: none; padding: 0; }
+  .pasos li { counter-increment: paso; position: relative; padding-left: 10mm; margin-bottom: 2.5mm; }
+  .pasos li::before { content: counter(paso); position: absolute; left: 0; top: -.3mm; width: 7mm; height: 7mm; border-radius: 50%; background: var(--marca); color: #1c1917; font-weight: 700; text-align: center; line-height: 7mm; font-size: 9.5pt; }
+  .colores { display: flex; gap: 3mm; margin: 3mm 0 4mm; }
+  .colores div { flex: 1; border-radius: 3mm; padding: 3mm; font-size: 9.5pt; break-inside: avoid; }
+  .colores b { display: block; font-size: 11pt; margin-bottom: 1mm; }
+  .ambar { background: #fbbf24; color: #451a03; } .azul { background: #0284c7; color: #fff; } .verde { background: #059669; color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.5pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 2mm 2.5mm; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { background: var(--fondo); }
+  .indice { columns: 2; column-gap: 10mm; padding-left: 6mm; }
+  .indice li { break-inside: avoid; }
+  kbd { font-family: inherit; font-weight: 600; background: var(--fondo); border: 1px solid var(--borde); border-radius: 1.5mm; padding: 0 1.5mm; white-space: nowrap; }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <span class="etiqueta">Silverio Club</span>
+  <h1>Manual del panel</h1>
+  <p>Cómo tomar pedidos, cobrar, manejar la caja y mantener la carta al día. Pensado para el dueño y el encargado del local.</p>
+  <p class="pie">Versión 1 · septiembre 2026 · Soporte: DelgadoDev</p>
+</div>
+
+<section>
+  <h2>Antes de empezar</h2>
+  <p>El sistema tiene dos partes:</p>
+  <ul>
+    <li><strong>La web del local</strong>: lo que ven los clientes. Ahí miran la carta y hacen su pedido desde el celular.</li>
+    <li><strong>El panel</strong>: lo que usás vos. Se entra agregando <kbd>/panel</kbd> a la dirección de la web (por ejemplo <kbd>silverio-club.vercel.app/panel</kbd>).</li>
+  </ul>
+
+  <div class="caja tip"><strong>💡 Usá una compu o una tablet para el servicio</strong>En una pantalla grande ves todas las columnas de pedidos juntas. El celular sirve de respaldo, pero con muchos pedidos se vuelve incómodo.</div>
+
+  <h3>Qué hay en este manual</h3>
+  <ol class="indice">
+    <li>Entrar al panel y tu contraseña</li>
+    <li>Un día de trabajo, paso a paso</li>
+    <li>Pedidos: el tablero</li>
+    <li>Cobrar y entregar</li>
+    <li>Cargar un pedido a mano</li>
+    <li>Delivery</li>
+    <li>La caja</li>
+    <li>Resumen y ventas</li>
+    <li>La carta: productos, precios y fotos</li>
+    <li>Promos y banner de fecha especial</li>
+    <li>QR de la carta</li>
+    <li>Configuración</li>
+    <li>Lo que ve el cliente</li>
+    <li>Problemas comunes</li>
+  </ol>
+
+  <h3>Quién puede hacer qué</h3>
+  <table>
+    <tr><th>Rol</th><th>Puede</th></tr>
+    <tr><td><strong>Dueño</strong></td><td>Todo: pedidos, caja, ventas, carta, promos, QR y configuración.</td></tr>
+    <tr><td><strong>Encargado</strong></td><td>Todo menos la configuración del local.</td></tr>
+    <tr><td><strong>Mozo</strong></td><td>Ver pedidos, cargar pedidos a mano y manejar los que cargó él.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>1. Entrar al panel y tu contraseña</h2>
+  <div class="dos">
+    <div>
+      <ol class="pasos">
+        <li>Abrí la dirección del panel.</li>
+        <li>Escribí tu <strong>email</strong> y tu <strong>contraseña</strong>. El ojito muestra lo que escribís.</li>
+        <li>Tocá <strong>Entrar</strong>.</li>
+      </ol>
+      <div class="caja ojo"><strong>🔒 5 intentos fallidos</strong>Si le errás 5 veces a la contraseña, el panel se bloquea <strong>10 minutos</strong> por seguridad. Podés esperar o tocar <strong>Recuperar contraseña</strong>.</div>
+    </div>
+    <figure><img src="img/pc-login.png" alt=""><figcaption>Pantalla para entrar.</figcaption></figure>
+  </div>
+
+  <h3>Me olvidé la contraseña</h3>
+  <ol class="pasos">
+    <li>En la pantalla de entrada tocá <strong>¿La olvidaste?</strong>.</li>
+    <li>Escribí tu email y tocá <strong>Enviarme el link</strong>.</li>
+    <li>Abrí el mail (mirá también en <em>spam</em>), tocá el link y elegí una contraseña nueva.</li>
+  </ol>
+
+  <h3>Cambiar la contraseña</h3>
+  <p>Entrá a <strong>Mi cuenta</strong> (menú de la izquierda). Escribí la contraseña actual, la nueva dos veces (mínimo 8 caracteres) y tocá <strong>Cambiar contraseña</strong>.</p>
+  <figure class="chica"><img src="img/pc-cuenta.png" alt=""><figcaption>Mi cuenta: tus datos y el cambio de contraseña.</figcaption></figure>
+</section>
+
+<section>
+  <h2>2. Un día de trabajo, paso a paso</h2>
+  <ol class="pasos">
+    <li><strong>Abrí la caja</strong> con el efectivo del cambio (<em>Caja → Abrir caja</em>).</li>
+    <li>Entrá a <strong>Pedidos</strong> y tocá <strong>Activar sonido de pedidos</strong>. Así suena cada vez que entra uno.</li>
+    <li>Cuando entra un pedido, tocá <strong>Aceptar</strong>: el cliente ve que lo estás preparando.</li>
+    <li>Cuando está listo, tocá <strong>Marcar listo</strong>. El cliente lo ve en su celular.</li>
+    <li>Al entregarlo, tocá <strong>Cobrar y entregar</strong> y marcá cómo pagó.</li>
+    <li>Si pagás algo en efectivo (pan, gas, un retiro), anotalo en <strong>Caja → Movimientos</strong>.</li>
+    <li>Al terminar, <strong>cerrá la caja</strong>: contás la plata y el sistema te dice si falta o sobra.</li>
+  </ol>
+  <figure><img src="img/pc-resumen.png" alt=""><figcaption>Resumen: lo que vendiste hoy y el estado de la caja, apenas entrás.</figcaption></figure>
+</section>
+
+<section>
+  <h2>3. Pedidos: el tablero</h2>
+  <p>Todos los pedidos del día aparecen solos, sin recargar la página. Cada columna es una etapa y tiene su color:</p>
+  <div class="colores">
+    <div class="ambar"><b>Nuevos</b>Recién entraron. Hay que aceptarlos.</div>
+    <div class="azul"><b>En preparación</b>Los estás haciendo.</div>
+    <div class="verde"><b>Listos</b>Esperan que los retiren o que salgan.</div>
+  </div>
+  <figure><img src="img/pc-pedidos.png" alt=""><figcaption>El tablero de pedidos. El botón grande de cada tarjeta lleva el pedido a la etapa siguiente.</figcaption></figure>
+
+  <h3>Cómo leer una tarjeta</h3>
+  <ul>
+    <li><strong>#4</strong>: número del pedido del día. Es el que le decís al cliente.</li>
+    <li><strong>Web / Mostrador / Teléfono</strong>: de dónde vino.</li>
+    <li><strong>🕐 minutos</strong>: hace cuánto entró. Se pone <span style="color:#dc2626;font-weight:700">en rojo</span> si un pedido nuevo espera más de 5 minutos o si se pasó la demora.</li>
+    <li>Lo que pidió, con las <strong>notas resaltadas</strong> (“sin cebolla”).</li>
+    <li>El <strong>total</strong> y cómo va a pagar: <em>Efectivo · a cobrar</em>, <em>Transferencia · a cobrar</em> o <em>✓ Pagado</em>.</li>
+  </ul>
+  <div class="caja tip"><strong>🔔 Si no suena</strong>Los navegadores no dejan sonar nada hasta que tocás la pantalla. Cada vez que abras el panel, tocá <strong>Activar sonido de pedidos</strong> (el botón amarillo que titila).</div>
+</section>
+
+<section>
+  <h2>3. Pedidos: el detalle</h2>
+  <p>Tocá cualquier tarjeta para ver todo el pedido:</p>
+  <figure><img src="img/pc-detalle.png" alt=""><figcaption>Detalle del pedido.</figcaption></figure>
+  <ul>
+    <li><strong>Avisar por WhatsApp</strong>: abre WhatsApp con un mensaje ya escrito para el cliente (“Tu pedido #12 está listo para retirar 🙌”).</li>
+    <li><strong>Demora</strong>: con <kbd>−</kbd> y <kbd>+</kbd> la cambiás de a 5 minutos. El cliente la ve en su celular.</li>
+    <li><strong>Rechazar / Cancelar pedido</strong>: te pide el motivo (“Nos quedamos sin stock”), y el cliente lo ve.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Cobrar y entregar</h2>
+  <p>Hay tres formas de cobrar. Usá la que te quede más cómoda:</p>
+  <table>
+    <tr><th>Cómo</th><th>Cuándo conviene</th></tr>
+    <tr><td><strong>💵 Efectivo</strong> o <strong>🏦 Transf.</strong> en la tarjeta</td><td>Cobra el total en un toque. Abajo aparece <strong>Deshacer</strong> por si te equivocaste.</td></tr>
+    <tr><td><strong>Otro</strong> en la tarjeta</td><td>Para cobrar una parte, o para calcular el vuelto.</td></tr>
+    <tr><td><strong>Cobrar y entregar</strong></td><td>Al entregar un pedido que no estaba pagado. Te pregunta cómo pagó.</td></tr>
+  </table>
+  <figure><img src="img/pc-cobrar-entregar.png" alt=""><figcaption>Al entregar un pedido sin cobrar, el sistema te pregunta cómo pagó.</figcaption></figure>
+  <div class="caja ojo"><strong>Entregar sin cobrar</strong>Si le fiás o paga después, tocá <strong>Entregar sin cobrar</strong>. El pedido queda marcado en rojo: <em>“Entregado sin cobrar”</em>. Lo encontrás abajo en <strong>Entregados y cancelados de hoy</strong> y lo podés cobrar cuando pague.</div>
+  <div class="caja tip"><strong>Transferencias</strong>Marcala como cobrada solo cuando veas la plata acreditada en la app del banco.</div>
+</section>
+
+<section>
+  <h2>5. Cargar un pedido a mano</h2>
+  <p>Para lo que te piden en el mostrador o por teléfono. Tocá <strong>+ Nuevo pedido</strong>:</p>
+  <ol class="pasos">
+    <li>Tocá los productos para sumarlos (usá el buscador si hay muchos). Los que tienen variantes o extras te dejan elegir.</li>
+    <li>Ajustá las cantidades con <kbd>−</kbd> y <kbd>+</kbd>.</li>
+    <li>Elegí si es para llevar o para comer acá, y si vino por mostrador o por teléfono.</li>
+    <li>Nombre y WhatsApp son opcionales.</li>
+    <li>Si ya pagó, marcá <strong>Ya pagó</strong> y el medio. Tocá <strong>Cargar pedido</strong>.</li>
+  </ol>
+  <figure><img src="img/pc-nuevo-pedido.png" alt=""><figcaption>Pedido de mostrador. Entra directo a “En preparación”.</figcaption></figure>
+</section>
+
+<section>
+  <h2>6. Delivery</h2>
+  <p>El delivery se prende en <strong>Configuración → Formas de entrega</strong>. Cuando está prendido:</p>
+  <ol class="pasos">
+    <li>El cliente elige <strong>Delivery</strong> y deja su dirección. La web le avisa que le vas a confirmar el envío por WhatsApp.</li>
+    <li>En el tablero, la tarjeta muestra la dirección y el aviso <strong>Envío a confirmar</strong>.</li>
+    <li>Escribile al cliente por WhatsApp: si llegás a su zona y cuánto sale el envío.</li>
+    <li>En el detalle del pedido, cargá el <strong>costo del envío</strong> y tocá <strong>Guardar envío</strong>. Se suma al total y el cliente lo ve en su celular.</li>
+  </ol>
+  <figure class="chica"><img src="img/pc-entrega.png" alt=""><figcaption>Configuración → Formas de entrega.</figcaption></figure>
+</section>
+
+<section>
+  <h2>7. La caja</h2>
+  <h3>Abrir la caja</h3>
+  <p>Al empezar el día, entrá a <strong>Caja</strong>, poné con cuánto efectivo arrancás (el cambio) y tocá <strong>Abrir caja</strong>. Desde ahí, cada cobro se suma solo.</p>
+  <div class="caja ojo"><strong>Si te olvidás de abrirla</strong>En Pedidos aparece el aviso “La caja está cerrada”. Los cobros se registran igual en las ventas, pero no suman a ninguna caja.</div>
+  <figure><img src="img/pc-caja-abierta.png" alt=""><figcaption>Caja abierta: cuánto efectivo tendría que haber, las transferencias y los movimientos.</figcaption></figure>
+  <h3>Movimientos de efectivo</h3>
+  <p>Si sale plata de la caja (pagás al proveedor, retirás) o entra (te traen cambio), anotalo: elegí <strong>Sale plata</strong> o <strong>Entra plata</strong>, el tipo, el monto y un detalle. Los movimientos no se borran: si te equivocás, anotá uno al revés.</p>
+</section>
+
+<section>
+  <h2>7. La caja: cerrar</h2>
+  <ol class="pasos">
+    <li>Tocá <strong>Cerrar caja</strong>.</li>
+    <li>Contá el efectivo y escribilo. El sistema te dice al instante <strong>“Da justo”</strong>, <strong>“Faltan $…”</strong> o <strong>“Sobran $…”</strong>.</li>
+    <li>Revisá las transferencias contra la app del banco.</li>
+    <li>Si hace falta, dejá una nota y tocá <strong>Cerrar caja</strong>.</li>
+  </ol>
+  <figure><img src="img/pc-cierre.png" alt=""><figcaption>Cierre de caja: lo que tendría que haber contra lo que contaste.</figcaption></figure>
+  <p>Debajo de la caja queda el <strong>historial de cierres</strong>: cuándo se cerró, quién la cerró y cuánto faltó o sobró.</p>
+</section>
+
+<section>
+  <h2>8. Resumen y ventas</h2>
+  <p><strong>Resumen</strong> (la primera pantalla) muestra lo vendido hoy, la cantidad de pedidos, el ticket promedio y el estado de la caja.</p>
+  <p><strong>Ventas</strong> muestra:</p>
+  <ul>
+    <li>Hoy comparado con el <strong>mismo día de la semana pasada</strong> (▲ o ▼ en %).</li>
+    <li>Lo vendido en los últimos <strong>7 o 30 días</strong>, día por día.</li>
+    <li><strong>Lo más vendido</strong> y los <strong>horarios con más pedidos</strong>.</li>
+  </ul>
+  <figure><img src="img/pc-ventas.png" alt=""><figcaption>Ventas. Cuentan solo los pedidos cobrados; los cancelados no suman.</figcaption></figure>
+</section>
+
+<section>
+  <h2>9. La carta: productos, precios y fotos</h2>
+  <p>En <strong>Carta</strong> están todos tus productos agrupados por categoría. Lo que guardás se ve en la web a los pocos segundos.</p>
+  <figure><img src="img/pc-carta.png" alt=""><figcaption>La carta en el panel.</figcaption></figure>
+  <ul>
+    <li><strong>Se terminó algo:</strong> apagá el interruptor <strong>Disponible</strong>. En la web aparece como agotado y no se puede pedir.</li>
+    <li><strong>Cambiar el orden:</strong> arrastrá desde los puntitos de la izquierda.</li>
+    <li><strong>Copiar un producto parecido:</strong> botón de duplicar.</li>
+    <li><strong>Aumento de precios:</strong> en la pestaña <strong>Aumento de precios</strong> subís todo (o una categoría) en un porcentaje. Antes de aplicarlo te muestra cómo quedan los precios.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>9. Editar un producto</h2>
+  <p>Tocá el lápiz de un producto:</p>
+  <figure><img src="img/pc-producto.png" alt=""><figcaption>Editar producto: nombre, descripción, precio y foto.</figcaption></figure>
+  <ul>
+    <li><strong>Precio en 0</strong>: la web muestra “Consultar”.</li>
+    <li><strong>Foto:</strong> tocá <strong>Subir foto</strong>. Se achica sola para que la web cargue rápido. Si no tiene foto, se muestra el ícono de la categoría.</li>
+    <li><strong>Más opciones:</strong> variantes (napolitana, a caballo), extras (cheddar, huevo), etiquetas y días en que se vende.</li>
+  </ul>
+  <div class="caja tip"><strong>📸 Fotos que venden</strong>Sacalas con luz natural, de cerca y con el plato ocupando casi toda la foto. Horizontales o cuadradas.</div>
+</section>
+
+<section>
+  <h2>10. Promos y banner de fecha especial</h2>
+  <p>En <strong>Promos</strong> cargás los combos. La primera promo activa sale destacada en la web. Cada una puede tener días y horarios (por ejemplo “Lunes a jueves de 20 a 23”).</p>
+  <p>El <strong>banner de fecha especial</strong> es una imagen grande debajo de la portada de la web, para el Día del Padre, un partido o un aniversario:</p>
+  <ol class="pasos">
+    <li>Subí una imagen para computadora (horizontal) y otra para celular (vertical).</li>
+    <li>Escribí qué dice el banner.</li>
+    <li>Elegí desde qué día y hasta qué día se muestra, y prendelo. Se apaga solo al terminar la fecha.</li>
+  </ol>
+  <figure><img src="img/pc-promos.png" alt=""><figcaption>Banner de fecha especial y promos.</figcaption></figure>
+</section>
+
+<section>
+  <h2>11. QR de la carta</h2>
+  <p>El QR lleva a la web del local, con la carta y los pedidos. Para las mesas, la vidriera o el mostrador:</p>
+  <ul>
+    <li><strong>Descargar PNG</strong>: para mandarlo o subirlo a redes.</li>
+    <li><strong>Imprimir o guardar PDF</strong>: <em>1 grande</em> (para la vidriera) o <em>4 por hoja</em> (para las mesas).</li>
+  </ul>
+  <div class="caja tip"><strong>Antes de imprimir</strong>Escanealo con tu celular y fijate que abra la web correcta. Si cambia el dominio del local, hay que imprimirlo de nuevo.</div>
+  <figure><img src="img/pc-qr.png" alt=""><figcaption>Generador del QR con el logo del local.</figcaption></figure>
+</section>
+
+<section>
+  <h2>12. Configuración</h2>
+  <p>Solo la ve el <strong>dueño</strong>. Tiene lo que puede cambiar cada tanto:</p>
+  <ul>
+    <li><strong>Contacto y redes</strong>: WhatsApp (con código de país y área, sin espacios), Instagram y Facebook.</li>
+    <li><strong>Horarios</strong>: días y horas de atención. Fuera de horario la web muestra “Cerrado” y no deja pedir.</li>
+    <li><strong>Formas de entrega</strong>: retiro en el local y delivery.</li>
+  </ul>
+  <figure><img src="img/pc-configuracion.png" alt=""><figcaption>Configuración del local.</figcaption></figure>
+  <div class="caja tip"><strong>¿Querés cambiar colores, textos de la web o la dirección?</strong>Eso lo maneja DelgadoDev: escribinos y lo actualizamos.</div>
+</section>
+
+<section>
+  <h2>13. Lo que ve el cliente</h2>
+  <p>Así pide un cliente desde su celular:</p>
+  <ol class="pasos">
+    <li>Mira la carta y toca <strong>+</strong> en lo que quiere.</li>
+    <li>Abre <strong>Ver pedido</strong>, pone su nombre y su WhatsApp, elige cómo lo quiere y cómo paga.</li>
+    <li>Toca <strong>Confirmar pedido</strong> y recibe el <strong>número de pedido</strong>.</li>
+    <li>Con <strong>Seguir mi pedido</strong> ve en vivo cuando lo aceptás, cuando está listo y si ya figura como pagado.</li>
+  </ol>
+  <div class="fila">
+    <figure><img src="img/cel-web-carrito.png" alt=""><figcaption>El carrito.</figcaption></figure>
+    <figure><img src="img/cel-web-confirmado.png" alt=""><figcaption>Pedido recibido.</figcaption></figure>
+    <figure><img src="img/cel-web-seguimiento.png" alt=""><figcaption>Seguimiento en vivo.</figcaption></figure>
+  </div>
+</section>
+
+<section>
+  <h2>14. Problemas comunes</h2>
+  <table>
+    <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
+    <tr><td>No suena cuando entra un pedido</td><td>Tocá <strong>Activar sonido de pedidos</strong> cada vez que abrís el panel. Revisá que el volumen de la compu o la tablet esté alto.</td></tr>
+    <tr><td>Cambié un precio y la web no lo muestra</td><td>Esperá unos segundos y recargá la web. Si sigue igual, avisá a soporte.</td></tr>
+    <tr><td>Un cliente dice que no puede pedir</td><td>Fijate que el local esté <strong>dentro del horario</strong> (Configuración → Horarios) y que los productos estén <strong>disponibles</strong>.</td></tr>
+    <tr><td>Marqué un cobro por error</td><td>Tocá <strong>Deshacer</strong> en el aviso de abajo o, en el detalle del pedido, <strong>Deshacer cobro</strong>.</td></tr>
+    <tr><td>Me bloqueó la entrada</td><td>Esperá 10 minutos o tocá <strong>Recuperar contraseña</strong>.</td></tr>
+    <tr><td>Se cortó internet</td><td>El panel sigue mostrando lo último. Cuando vuelve la conexión, se actualiza solo.</td></tr>
+    <tr><td>La caja no da</td><td>Revisá si falta anotar algún movimiento (pago a proveedor, retiro) o si quedó algún pedido “Entregado sin cobrar”.</td></tr>
+  </table>
+  <div class="caja ok"><strong>¿Necesitás ayuda?</strong>Escribile a DelgadoDev por WhatsApp contando qué estabas haciendo y, si podés, mandá una captura de pantalla.</div>
+</section>
+
+</body>
+</html>

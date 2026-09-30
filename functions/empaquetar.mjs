@@ -41,7 +41,7 @@ writeFileSync(
   aqui('./deploy/package.json'),
   JSON.stringify(
     {
-      name: 'silverio-club-functions',
+      name: 'app-functions',
       private: true,
       type: 'module',
       main: 'index.js',

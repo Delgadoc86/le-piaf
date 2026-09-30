@@ -21,12 +21,23 @@
       "codigoPostal": "M5529",
       "pais": "AR",
       "googleMapsUrl": "https://maps.app.goo.gl/1uZXpRn4AbtLRx4u7",
-      "geo": { "lat": -32.992325, "lng": -68.6892759 },
+      "geo": {
+        "lat": -32.992325,
+        "lng": -68.6892759
+      },
       "_confirmar": "Local físico nuevo (2026-09-29, ficha 'Silverio club' en Google Maps). Sarmiento 119."
     },
     "horarios": [
-      { "dias": [1, 2, 3, 4, 5], "desde": "11:00", "hasta": "02:00" },
-      { "dias": [6, 0], "desde": "11:00", "hasta": "03:00" }
+      {
+        "dias": [1, 2, 3, 4, 5],
+        "desde": "11:00",
+        "hasta": "02:00"
+      },
+      {
+        "dias": [6, 0],
+        "desde": "11:00",
+        "hasta": "03:00"
+      }
     ],
     "_horariosConfirmar": "El footer dice L-V 11-02 y S-D 11-03; el schema SEO decía L-V 23-02. Confirmar horarios reales del local. dias: 0=domingo ... 6=sábado.",
     "marca": {
@@ -46,39 +57,321 @@
       "ogImage": "assets/marca/logo.png",
       "heroDesktop": "assets/fotos/heropc.webp",
       "heroMovil": "assets/fotos/heromovil.webp"
+    },
+    "web": {
+      "_nota": "Textos literales de la web (SILVERIO.md §3 y §5). Las fotos son rutas relativas a assets/.",
+      "secciones": [
+        {
+          "tipo": "hero",
+          "visible": true,
+          "orden": 1
+        },
+        {
+          "tipo": "promos",
+          "visible": true,
+          "orden": 2
+        },
+        {
+          "tipo": "carta",
+          "visible": true,
+          "orden": 3
+        },
+        {
+          "tipo": "nosotros",
+          "visible": true,
+          "orden": 4
+        },
+        {
+          "tipo": "galeria",
+          "visible": true,
+          "orden": 5
+        },
+        {
+          "tipo": "ubicacion",
+          "visible": true,
+          "orden": 6
+        }
+      ],
+      "hero": {
+        "bajada": "FOOD TRUCK & BEER",
+        "titulo": "SILVERIO",
+        "textoBoton": "Ver Promos"
+      },
+      "nosotros": {
+        "titulo": "Nuestra Historia",
+        "parrafos": [
+          "En Silverio Food Truck Beer, sabemos que la buena comida y una cerveza bien fría hacen la combinación perfecta. Hace más de cuatro años, comenzamos este camino con esfuerzo, dedicación y una meta clara: ofrecer a nuestros clientes una experiencia gastronómica única en Rodeo del Medio, Maipú.",
+          "Desde el primer día, apostamos por la calidad, la atención y el compromiso con quienes nos eligen. Gracias a ustedes, hemos crecido, mejorado y perfeccionado cada plato, manteniendo siempre ese toque casero y auténtico que nos caracteriza."
+        ],
+        "fotoUrl": "assets/fotos/foodtruck.webp",
+        "frase": "Hoy somos \"el food truck más completo para los fans de la comida\"",
+        "tarjetas": [
+          {
+            "icono": "beer",
+            "titulo": "Cerveza Tirada",
+            "texto": "Disfruta de nuestras cervezas artesanales tiradas a la temperatura perfecta."
+          },
+          {
+            "icono": "utensils",
+            "titulo": "Comidas al Plato",
+            "texto": "Variedad de platos abundantes ideales para compartir con amigos."
+          },
+          {
+            "icono": "heart",
+            "titulo": "Sabor Único",
+            "texto": "Cada plato mantiene nuestro toque casero y auténtico que nos distingue."
+          },
+          {
+            "icono": "calendar",
+            "titulo": "4+ Años",
+            "texto": "Más de cuatro años de experiencia sirviendo a nuestra comunidad."
+          }
+        ],
+        "cierre": "Queremos seguir siendo parte de sus reuniones y noches especiales por muchos años más. ¡Nos vemos en Silverio Food Truck Beer para disfrutar juntos del buen sabor!"
+      },
+      "galeria": [
+        {
+          "fotoUrl": "assets/fotos/cerveza.webp",
+          "titulo": "Cerveza Tirada"
+        },
+        {
+          "fotoUrl": "assets/fotos/plato.webp",
+          "titulo": "Comidas al Plato"
+        },
+        {
+          "fotoUrl": "assets/fotos/lomo.webp",
+          "titulo": "Nuestros Lomos"
+        }
+      ],
+      "mensajeWhatsApp": "Hola, quiero hacer un pedido.",
+      "notaCarta": "*Consultar por delivery, según zona y disponibilidad. Los precios están sujetos a disponibilidad.",
+      "seo": {
+        "titulo": "Silverio Food Truck Beer - Comida Casera y Cerveza Artesanal en Rodeo del Medio, Maipú",
+        "descripcion": "Silverio Food Truck Beer: Más de cuatro años ofreciendo comida casera y cerveza artesanal en Rodeo del Medio, Maipú. Disfruta de nuestros platos únicos y cerveza tirada.",
+        "keywords": [
+          "Silverio Food Truck",
+          "comida casera",
+          "cerveza artesanal",
+          "Rodeo del Medio",
+          "Maipú",
+          "food truck",
+          "promociones",
+          "menú"
+        ]
+      },
+      "ga4Id": "G-8CN2SBDQ5R"
+    },
+    "pedidos": {
+      "habilitados": true,
+      "tipos": {
+        "takeAway": true,
+        "delivery": false,
+        "salon": false
+      },
+      "tiempoEstimadoMin": 30,
+      "pedidoMinimo": 0,
+      "requiereConfirmacionMozoQR": true
+    },
+    "pagos": {
+      "efectivo": true,
+      "transferencia": {
+        "habilitado": false,
+        "alias": "",
+        "titular": ""
+      },
+      "mercadoPago": {
+        "habilitado": false
+      },
+      "_nota": "Alias de transferencia pendiente de confirmar con el dueño. En los emuladores el seed pone uno de prueba."
     }
   },
   "categorias": [
-    { "id": "viandas", "nombre": "Viandas", "orden": 1, "icono": "set-meal", "_nota": "Existía en el código pero sin productos. En el viejo, las viandas eran productos llamados 'Lunes'...'Viernes'. En el nuevo: producto con disponibilidad por día de semana." },
-    { "id": "hamburguesas", "nombre": "Hamburguesas", "orden": 2, "icono": "burger" },
-    { "id": "lomos", "nombre": "Lomos y Milanesas", "orden": 3, "icono": "sandwich", "_nota": "En el viejo se llamaba 'Lomos' pero contiene milanesas y sándwiches. Confirmar nombre." },
-    { "id": "pizzas", "nombre": "Pizzas", "orden": 4, "icono": "pizza" },
-    { "id": "empanadas", "nombre": "Empanadas", "orden": 5, "icono": "empanada" },
-    { "id": "pollos", "nombre": "Pollos", "orden": 6, "icono": "chicken" },
-    { "id": "choripan", "nombre": "Choripán", "orden": 7, "icono": "sausage" },
-    { "id": "panchos", "nombre": "Panchos", "orden": 8, "icono": "hotdog" },
-    { "id": "papas", "nombre": "Papas", "orden": 9, "icono": "fries" },
-    { "id": "bebidas", "nombre": "Bebidas", "orden": 10, "icono": "drink" }
+    {
+      "id": "viandas",
+      "nombre": "Viandas",
+      "orden": 1,
+      "icono": "set-meal",
+      "_nota": "Existía en el código pero sin productos. En el viejo, las viandas eran productos llamados 'Lunes'...'Viernes'. En el nuevo: producto con disponibilidad por día de semana."
+    },
+    {
+      "id": "hamburguesas",
+      "nombre": "Hamburguesas",
+      "orden": 2,
+      "icono": "burger"
+    },
+    {
+      "id": "lomos",
+      "nombre": "Lomos y Milanesas",
+      "orden": 3,
+      "icono": "sandwich",
+      "_nota": "En el viejo se llamaba 'Lomos' pero contiene milanesas y sándwiches. Confirmar nombre."
+    },
+    {
+      "id": "pizzas",
+      "nombre": "Pizzas",
+      "orden": 4,
+      "icono": "pizza"
+    },
+    {
+      "id": "empanadas",
+      "nombre": "Empanadas",
+      "orden": 5,
+      "icono": "empanada"
+    },
+    {
+      "id": "pollos",
+      "nombre": "Pollos",
+      "orden": 6,
+      "icono": "chicken"
+    },
+    {
+      "id": "choripan",
+      "nombre": "Choripán",
+      "orden": 7,
+      "icono": "sausage"
+    },
+    {
+      "id": "panchos",
+      "nombre": "Panchos",
+      "orden": 8,
+      "icono": "hotdog"
+    },
+    {
+      "id": "papas",
+      "nombre": "Papas",
+      "orden": 9,
+      "icono": "fries"
+    },
+    {
+      "id": "bebidas",
+      "nombre": "Bebidas",
+      "orden": 10,
+      "icono": "drink"
+    }
   ],
   "productos": [
-    { "categoriaId": "hamburguesas", "nombre": "Hamburguesa XL de carne", "descripcion": "Hamburguesa XL de carne.", "precio": 9000, "orden": 1 },
-    { "categoriaId": "lomos", "nombre": "Lomo al plato", "descripcion": "Lomo al plato a caballo con papas fritas y ensalada.", "precio": 14000, "orden": 1 },
-    { "categoriaId": "lomos", "nombre": "Milanesa de carne al plato", "descripcion": "Milanesa de carne napolitana o a caballo, con papas fritas y ensalada.", "precio": 12000, "orden": 2, "_variantesSugeridas": ["Napolitana", "A caballo"] },
-    { "categoriaId": "lomos", "nombre": "Milanesa de pollo al plato", "descripcion": "Milanesa de pollo napolitana o a caballo, con papas fritas y ensalada.", "precio": 11000, "orden": 3, "_variantesSugeridas": ["Napolitana", "A caballo"] },
-    { "categoriaId": "lomos", "nombre": "Sándwich de milanesa de carne", "descripcion": "Sándwich de milanesa de carne.", "precio": 9000, "orden": 4 },
-    { "categoriaId": "lomos", "nombre": "Sándwich de milanesa de pollo", "descripcion": "Sándwich de milanesa de pollo.", "precio": 8500, "orden": 5 },
-    { "categoriaId": "choripan", "nombre": "Choripán", "descripcion": "Choripán clásico.", "precio": 7000, "orden": 1 },
-    { "categoriaId": "panchos", "nombre": "Super Pancho", "descripcion": "Simple.", "precio": 2300, "orden": 1 },
-    { "categoriaId": "panchos", "nombre": "Pancho con lluvia de papas", "descripcion": "Pancho con lluvia de papas.", "precio": 2400, "orden": 2 },
-    { "categoriaId": "panchos", "nombre": "Pancho con poncho", "descripcion": "Super pancho con poncho.", "precio": 3000, "orden": 3 },
-    { "categoriaId": "papas", "nombre": "Cono de papas", "descripcion": "Cono de papas fritas.", "precio": 3500, "orden": 1 },
-    { "categoriaId": "papas", "nombre": "Salchipapa", "descripcion": "Salchichas con papas fritas.", "precio": 8000, "orden": 2 }
+    {
+      "categoriaId": "hamburguesas",
+      "nombre": "Hamburguesa XL de carne",
+      "descripcion": "Hamburguesa XL de carne.",
+      "precio": 9000,
+      "orden": 1
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Lomo al plato",
+      "descripcion": "Lomo al plato a caballo con papas fritas y ensalada.",
+      "precio": 14000,
+      "orden": 1
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Milanesa de carne al plato",
+      "descripcion": "Milanesa de carne napolitana o a caballo, con papas fritas y ensalada.",
+      "precio": 12000,
+      "orden": 2,
+      "_variantesSugeridas": ["Napolitana", "A caballo"]
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Milanesa de pollo al plato",
+      "descripcion": "Milanesa de pollo napolitana o a caballo, con papas fritas y ensalada.",
+      "precio": 11000,
+      "orden": 3,
+      "_variantesSugeridas": ["Napolitana", "A caballo"]
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Sándwich de milanesa de carne",
+      "descripcion": "Sándwich de milanesa de carne.",
+      "precio": 9000,
+      "orden": 4
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Sándwich de milanesa de pollo",
+      "descripcion": "Sándwich de milanesa de pollo.",
+      "precio": 8500,
+      "orden": 5
+    },
+    {
+      "categoriaId": "choripan",
+      "nombre": "Choripán",
+      "descripcion": "Choripán clásico.",
+      "precio": 7000,
+      "orden": 1
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Super Pancho",
+      "descripcion": "Simple.",
+      "precio": 2300,
+      "orden": 1
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Pancho con lluvia de papas",
+      "descripcion": "Pancho con lluvia de papas.",
+      "precio": 2400,
+      "orden": 2
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Pancho con poncho",
+      "descripcion": "Super pancho con poncho.",
+      "precio": 3000,
+      "orden": 3
+    },
+    {
+      "categoriaId": "papas",
+      "nombre": "Cono de papas",
+      "descripcion": "Cono de papas fritas.",
+      "precio": 3500,
+      "orden": 1
+    },
+    {
+      "categoriaId": "papas",
+      "nombre": "Salchipapa",
+      "descripcion": "Salchichas con papas fritas.",
+      "precio": 8000,
+      "orden": 2
+    }
   ],
   "promos": [
-    { "titulo": "Sándwich mila carne + papas", "descripcion": "Sándwich de milanesa de carne con papas fritas.", "precio": 11000, "foto": "assets/promos/sandwich-mila-carne-papas.webp", "orden": 1 },
-    { "titulo": "Sándwich mila pollo + papas", "descripcion": "Sándwich de milanesa de pollo con papas fritas.", "precio": 10000, "foto": "assets/promos/sandwich-mila-pollo-papas.webp", "orden": 2 },
-    { "titulo": "Lomo + papas", "descripcion": "Lomo con papas fritas.", "precio": 14000, "foto": "assets/promos/lomo-papas.webp", "orden": 3 },
-    { "titulo": "Hamburguesa XL carne + papas", "descripcion": "Hamburguesa XL de carne con papas fritas.", "precio": 11000, "foto": "assets/promos/hamburguesa-xl-carne-papas.webp", "orden": 4 },
-    { "titulo": "Choripán + papas", "descripcion": "Choripán con papas fritas.", "precio": 9000, "foto": "assets/promos/choripan-papas.webp", "orden": 5 }
+    {
+      "titulo": "Sándwich mila carne + papas",
+      "descripcion": "Sándwich de milanesa de carne con papas fritas.",
+      "precio": 11000,
+      "foto": "assets/promos/sandwich-mila-carne-papas.webp",
+      "orden": 1
+    },
+    {
+      "titulo": "Sándwich mila pollo + papas",
+      "descripcion": "Sándwich de milanesa de pollo con papas fritas.",
+      "precio": 10000,
+      "foto": "assets/promos/sandwich-mila-pollo-papas.webp",
+      "orden": 2
+    },
+    {
+      "titulo": "Lomo + papas",
+      "descripcion": "Lomo con papas fritas.",
+      "precio": 14000,
+      "foto": "assets/promos/lomo-papas.webp",
+      "orden": 3
+    },
+    {
+      "titulo": "Hamburguesa XL carne + papas",
+      "descripcion": "Hamburguesa XL de carne con papas fritas.",
+      "precio": 11000,
+      "foto": "assets/promos/hamburguesa-xl-carne-papas.webp",
+      "orden": 4
+    },
+    {
+      "titulo": "Choripán + papas",
+      "descripcion": "Choripán con papas fritas.",
+      "precio": 9000,
+      "foto": "assets/promos/choripan-papas.webp",
+      "orden": 5
+    }
   ]
 }

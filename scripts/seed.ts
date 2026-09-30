@@ -31,7 +31,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 const CONTRASENA = 'local123';
 const ahora = FieldValue.serverTimestamp();
 
-// ─── Tipos del seed.json (formato del proyecto viejo, ya normalizado) ─────────
+// ─── Tipos del seed.json (el kit del local: todo lo propio del local vive ahí) ──
 
 interface SeedJson {
   local: {
@@ -53,6 +53,10 @@ interface SeedJson {
     };
     horarios: { dias: number[]; desde: string; hasta: string }[];
     marca: Record<string, string>;
+    /** Textos de la web; las fotos van como rutas relativas a <kit>/assets. */
+    web: LocalEditable['web'];
+    pedidos: LocalEditable['pedidos'];
+    pagos: LocalEditable['pagos'];
   };
   categorias: { id: string; nombre: string; orden: number; icono?: string }[];
   productos: {
@@ -195,98 +199,26 @@ async function seedLocal(): Promise<void> {
       colorSuperficie: s.marca.colorSuperficie!,
       colorTexto: s.marca.colorTexto!,
       colorTextoSecundario: s.marca.colorTextoSecundario!,
-      fuenteTitulos: 'Sriracha',
-      fuenteTexto: 'Roboto',
+      fuenteTitulos: s.marca.fuenteTitulos as LocalEditable['marca']['fuenteTitulos'],
+      fuenteTexto: s.marca.fuenteTexto as LocalEditable['marca']['fuenteTexto'],
       logoUrl: foto(s.marca.logo),
       faviconUrl: foto(s.marca.logoSvg),
       ogImageUrl: '', // se genera sola (opengraph-image.tsx); el logo no tiene la proporción 1200×630
       heroDesktopUrl: foto(s.marca.heroDesktop),
       heroMovilUrl: foto(s.marca.heroMovil),
     },
-    // Textos literales de la web actual (silverio/SILVERIO.md §3 y §5).
     web: {
-      secciones: [
-        { tipo: 'hero', visible: true, orden: 1 },
-        { tipo: 'promos', visible: true, orden: 2 },
-        { tipo: 'carta', visible: true, orden: 3 },
-        { tipo: 'nosotros', visible: true, orden: 4 },
-        { tipo: 'galeria', visible: true, orden: 5 },
-        { tipo: 'ubicacion', visible: true, orden: 6 },
-      ],
-      hero: { bajada: 'FOOD TRUCK & BEER', titulo: 'SILVERIO', textoBoton: 'Ver Promos' },
-      nosotros: {
-        titulo: 'Nuestra Historia',
-        parrafos: [
-          'En Silverio Food Truck Beer, sabemos que la buena comida y una cerveza bien fría hacen la combinación perfecta. Hace más de cuatro años, comenzamos este camino con esfuerzo, dedicación y una meta clara: ofrecer a nuestros clientes una experiencia gastronómica única en Rodeo del Medio, Maipú.',
-          'Desde el primer día, apostamos por la calidad, la atención y el compromiso con quienes nos eligen. Gracias a ustedes, hemos crecido, mejorado y perfeccionado cada plato, manteniendo siempre ese toque casero y auténtico que nos caracteriza.',
-        ],
-        fotoUrl: foto('assets/fotos/foodtruck.webp'),
-        frase: 'Hoy somos "el food truck más completo para los fans de la comida"',
-        tarjetas: [
-          {
-            icono: 'beer',
-            titulo: 'Cerveza Tirada',
-            texto: 'Disfruta de nuestras cervezas artesanales tiradas a la temperatura perfecta.',
-          },
-          {
-            icono: 'utensils',
-            titulo: 'Comidas al Plato',
-            texto: 'Variedad de platos abundantes ideales para compartir con amigos.',
-          },
-          {
-            icono: 'heart',
-            titulo: 'Sabor Único',
-            texto: 'Cada plato mantiene nuestro toque casero y auténtico que nos distingue.',
-          },
-          {
-            icono: 'calendar',
-            titulo: '4+ Años',
-            texto: 'Más de cuatro años de experiencia sirviendo a nuestra comunidad.',
-          },
-        ],
-        cierre:
-          'Queremos seguir siendo parte de sus reuniones y noches especiales por muchos años más. ¡Nos vemos en Silverio Food Truck Beer para disfrutar juntos del buen sabor!',
-      },
-      galeria: [
-        { fotoUrl: foto('assets/fotos/cerveza.webp'), titulo: 'Cerveza Tirada' },
-        { fotoUrl: foto('assets/fotos/plato.webp'), titulo: 'Comidas al Plato' },
-        { fotoUrl: foto('assets/fotos/lomo.webp'), titulo: 'Nuestros Lomos' },
-      ],
-      mensajeWhatsApp: 'Hola, quiero hacer un pedido.',
-      notaCarta:
-        '*Consultar por delivery, según zona y disponibilidad. Los precios están sujetos a disponibilidad.',
-      seo: {
-        titulo:
-          'Silverio Food Truck Beer - Comida Casera y Cerveza Artesanal en Rodeo del Medio, Maipú',
-        descripcion:
-          'Silverio Food Truck Beer: Más de cuatro años ofreciendo comida casera y cerveza artesanal en Rodeo del Medio, Maipú. Disfruta de nuestros platos únicos y cerveza tirada.',
-        keywords: [
-          'Silverio Food Truck',
-          'comida casera',
-          'cerveza artesanal',
-          'Rodeo del Medio',
-          'Maipú',
-          'food truck',
-          'promociones',
-          'menú',
-        ],
-      },
-      ga4Id: 'G-8CN2SBDQ5R',
+      ...s.web,
+      nosotros: { ...s.web.nosotros, fotoUrl: foto(s.web.nosotros.fotoUrl) },
+      galeria: s.web.galeria.map((g) => ({ ...g, fotoUrl: foto(g.fotoUrl) })),
     },
-    pedidos: {
-      habilitados: true, // carrito + pedido con crearPedido (sale en el panel → Pedidos)
-      tipos: { takeAway: true, delivery: false, salon: false },
-      tiempoEstimadoMin: 30,
-      pedidoMinimo: 0,
-      requiereConfirmacionMozoQR: true,
-    },
+    pedidos: s.pedidos,
     pagos: {
-      efectivo: true,
-      // Alias real pendiente de confirmar con el dueño; en los emuladores, uno de prueba.
-      transferencia: usaEmuladores
-        ? { habilitado: true, alias: 'silverio.demo', titular: 'Silverio (prueba)' }
-        : { habilitado: false, alias: '', titular: '' },
-      mercadoPago: { habilitado: false },
+      ...s.pagos,
+      // En los emuladores, transferencia habilitada con un alias de prueba (para probar el checkout).
+      ...(usaEmuladores && !s.pagos.transferencia.alias
+        ? { transferencia: { habilitado: true, alias: 'local.demo', titular: 'Local (prueba)' } }
+        : {}),
     },
   };
 

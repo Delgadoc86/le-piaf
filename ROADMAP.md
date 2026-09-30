@@ -780,21 +780,16 @@ NEXT_PUBLIC_APP_URL=http://localhost:3000
 
 ## 16. Cómo crear la web de un local nuevo
 
-Este repo (Silverio Club) es la **base**. Para un local nuevo:
+Este repo (Silverio Club) es la **base**. La guía paso a paso, con comandos, está en el
+[README](README.md#duplicar-para-un-local-nuevo). En resumen:
 
-1. **Repo:** crear el repo `<local>` en GitHub a partir de este (copia completa del historial). En la copia, agregar el remoto de la base:
-   `git remote add base https://github.com/<usuario>/silverio-club.git`
-2. **Firebase:** crear el proyecto `<local>` con los mismos pasos que Silverio (Blaze + alerta de presupuesto, Firestore y Storage en `southamerica-east1`, Auth email + Google, app web registrada; App Check al llegar a pedidos online). Actualizar el alias `prod` en `.firebaserc`.
-3. **Kit del local:** reemplazar la carpeta `silverio/` por la del nuevo local (`seed.json` con el mismo formato, `assets/`, `<LOCAL>.md` con marca y textos) y apuntar `KIT` en `scripts/entorno.ts`.
-4. **Variables** (los archivos con secretos no vienen con la copia: se regeneran):
-   - `pnpm dev` crea `apps/web/.env.local` y `functions/.secret.local` desde sus `.example`.
-   - `functions/.env.<local>` con `WEB_URL` (la dirección de Vercel del local).
-   - `apps/web/.env.vercel-produccion` (no se sube): config de la app web de Firebase, `FIREBASE_SERVICE_ACCOUNT_JSON` (clave de la cuenta de servicio en base64), `REVALIDATE_SECRET` (aleatorio), `NEXT_PUBLIC_APP_URL`, `NEXT_PUBLIC_NOMBRE_LOCAL` y `ENABLE_EXPERIMENTAL_COREPACK=1`. Se pega completo en Vercel → Environment Variables.
-   - El mismo `REVALIDATE_SECRET` en Firebase: `firebase functions:secrets:set REVALIDATE_SECRET`.
-   - Guardar `.env.vercel-produccion` y `service-account.json` en un gestor de contraseñas (nunca en carpetas sincronizadas ni en el chat).
-5. **Diseño:** ajustar `components/publico/` y estilos a la marca del local (lo propio del local; ver §11).
-6. **Datos:** `pnpm seed --kit <carpeta> --proyecto <local> --si-estoy-seguro` y crear el usuario real del dueño (desde el seed o invitándolo).
-7. **Deploy:** Vercel (Root Directory `apps/web`) + `firebase deploy -P prod`. Apuntar el dominio.
+1. **Repo:** copia completa de este, con la base como remoto `base`.
+2. **Firebase:** proyecto `<local>` en Blaze con alerta de presupuesto, Firestore y Storage en `southamerica-east1`, Auth solo con email y contraseña, app web registrada y alias `prod` en `.firebaserc`.
+3. **Kit del local:** carpeta `<local>/` con `seed.json` (datos, textos de la web, entrega, pagos y carta), `assets/`, `<LOCAL>.md` y `manual/`. Desde 1.10, **todo lo propio del local está en el kit**: `scripts/seed.ts` es genérico.
+4. **Variables y secretos:** `.env.local`, `functions/.env.<local>` (`WEB_URL`), `REVALIDATE_SECRET` en Secret Manager y `.env.vercel-produccion` para Vercel. Los secretos van a un gestor de contraseñas.
+5. **Diseño:** `components/publico/` y estilos (lo propio del local; ver §11).
+6. **Producción:** `pnpm deploy:reglas`, `pnpm deploy:functions` y `pnpm seed --proyecto <local> --si-estoy-seguro --dueno <email>`. Vercel con Root Directory `apps/web`; verificar `/api/salud`.
+7. **Manual:** capturas del local nuevo en `<local>/manual/img` y PDF con `manual/a-pdf.mjs`.
 
 **Traer arreglos de la base a una copia:** `git fetch base && git merge base/main`. Los conflictos solo deberían aparecer en archivos propios del local; si aparecen en código genérico, es señal de que ese cambio tenía que hacerse en la base.
 
@@ -822,3 +817,4 @@ Este repo (Silverio Club) es la **base**. Para un local nuevo:
 - **1.7 (2026-09-29):** **panel mínimo**. Configuración reducida a contacto, redes y horarios; salen del panel marca, textos de la web, pedidos y pagos, y la página Equipo. Se suma el **banner de fecha especial** (PC y celular, con fechas). Todas las imágenes a WebP. En productos, lo avanzado queda plegado en "Más opciones"; el QR queda con menos opciones. También: página 404, robots, sitemap, imagen para compartir generada y mensaje de WhatsApp configurable por datos.
 - **1.8 (2026-09-29):** **Fase 2 mínima con cobros manuales**. Silverio queda en producción como demo (excepción a la Fase 1). El checkout crea el pedido con `crearPedido` (WhatsApp pasa a ser un aviso opcional), hay seguimiento en vivo en `/pedido/[token]` y el panel suma **Pedidos**: tablero de la jornada, sonido, estados, cobro en efectivo o transferencia con totales del día y carga manual de mostrador o teléfono. La numeración y los totales van por **jornada** (corte 06:00). Mercado Pago, zonas con costo, pausa, impresión y clientes pasan a "Después". El menú del panel oculta lo que todavía no existe.
 - **1.9 (2026-09-29):** **Fase 4 antes que la 3**, con alcance de **caja simple**: abrir y cerrar caja (efectivo esperado contra contado), movimientos de efectivo, historial de cierres, página **Ventas** (hoy contra la semana pasada, por día, lo más vendido y horarios) y Resumen con números reales. `contabilizarPedido` cuenta el pedido cuando queda pagado y no anulado, y resta si se cancela o se deshace el cobro (reemplaza a `revertirContabilizacion`). Nuevas callables `abrirCaja` y `cerrarCaja`. Los movimientos solo se anotan en la caja abierta. El menú muestra las fases hechas (0, 1, 2 y 4); "Reportes" pasa a llamarse "Ventas".
+- **1.10 (2026-09-29):** **base lista para copiar**. Todo lo propio del local pasa al kit: textos de la web, SEO, GA4, fuentes, entrega y pagos salen de `silverio/seed.json` (antes estaban en `scripts/seed.ts`). README con stack y guía de duplicado; manual de usuario en PDF en `silverio/manual/`. Login solo con email (sin Google), límite de 5 intentos y "Mi cuenta" para cambiar la contraseña. Entregar pide el cobro; delivery sin zonas con envío a confirmar. `firebase-admin/auth` fuera de la web (fallaba en Vercel) y `/api/salud` para diagnosticar.
