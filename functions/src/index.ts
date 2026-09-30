@@ -13,3 +13,8 @@ export { crearPedido } from './pedidos/crearPedido.js';
 export { espejarSeguimiento } from './pedidos/espejarSeguimiento.js';
 export { contabilizarPedido } from './caja/contabilizarPedido.js';
 export { abrirCaja, cerrarCaja } from './caja/caja.js';
+export {
+  cancelarPedidoCliente,
+  cancelarPedidosSinConfirmar,
+  registrarClienteEntregado,
+} from './pedidos/confirmacion.js';

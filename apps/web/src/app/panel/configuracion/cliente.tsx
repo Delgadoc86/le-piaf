@@ -5,6 +5,7 @@ import { EncabezadoPagina } from '@/components/panel/ui-panel';
 import { Contacto } from '@/components/panel/configuracion/contacto';
 import { Horarios } from '@/components/panel/configuracion/horarios';
 import { Entrega } from '@/components/panel/configuracion/entrega';
+import { ConfirmacionPedidos } from '@/components/panel/configuracion/confirmacion';
 import { useSesion } from '@/features/auth/sesion';
 import { useDocumento } from '@/features/panel/firestore';
 
@@ -21,7 +22,7 @@ export default function ConfiguracionPage() {
     <div className="max-w-4xl space-y-8">
       <EncabezadoPagina
         titulo="Configuración"
-        descripcion="Contacto, redes, horarios y formas de entrega del local."
+        descripcion="Contacto, redes, horarios, formas de entrega y pedidos falsos."
       />
       {error && <p className="text-destructive">{error}</p>}
       {cargando || !local ? (
@@ -31,6 +32,7 @@ export default function ConfiguracionPage() {
           <Contacto local={local} />
           <Horarios local={local} />
           <Entrega local={local} />
+          <ConfirmacionPedidos local={local} />
         </>
       )}
     </div>

@@ -4,6 +4,9 @@ import {
   estadoPagoDe,
   inicioJornada,
   totalConEnvio,
+  requiereConfirmacion,
+  configConfirmacion,
+  puedeCancelarCliente,
   puedePasar,
   resumenCaja,
   siguienteEstado,
@@ -96,5 +99,25 @@ describe('envío', () => {
   it('el total suma el envío que confirma el local', () => {
     expect(totalConEnvio({ subtotal: 9000, descuento: 0 }, 1500)).toBe(10500);
     expect(totalConEnvio({ subtotal: 9000, descuento: 1000 }, 0)).toBe(8000);
+  });
+});
+
+describe('confirmación de clientes nuevos', () => {
+  it('pide confirmar a quien nunca recibió un pedido', () => {
+    const activa = { clientesNuevos: true };
+    expect(requiereConfirmacion(undefined, activa)).toBe(true);
+    expect(requiereConfirmacion({ entregados: 0 }, activa)).toBe(true);
+    expect(requiereConfirmacion({ entregados: 1 }, activa)).toBe(false);
+    expect(requiereConfirmacion(undefined, { clientesNuevos: false })).toBe(false);
+  });
+
+  it('sin config elegida, la confirmación está activada', () => {
+    expect(configConfirmacion({})).toEqual({ clientesNuevos: true, aceptarSinConfirmar: false });
+  });
+
+  it('el cliente solo cancela mientras el local no lo aceptó', () => {
+    expect(puedeCancelarCliente('pendiente')).toBe(true);
+    expect(puedeCancelarCliente('en_preparacion')).toBe(false);
+    expect(puedeCancelarCliente('cancelado')).toBe(false);
   });
 });

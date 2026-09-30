@@ -2,13 +2,17 @@ import { randomBytes } from 'node:crypto';
 import {
   calcularPedido,
   claveJornada,
+  configConfirmacion,
   crearPedidoInputSchema,
   DOC_LOCAL,
   ErrorPrecio,
   estaAbierto,
   estadoPagoDe,
+  MINUTOS_CONFIRMACION,
   promoVigente,
+  requiereConfirmacion,
   type EstadoPedido,
+  type Cliente,
   type ItemPedido,
   type Local,
   type PagoPedido,
@@ -157,11 +161,23 @@ export const crearPedido = onCall(async (req) => {
   const contadorRef = db.doc(`contadores/${jornada}`);
   const clienteRef = telefono ? db.doc(`clientes/${telefono}`) : null;
 
-  const numero = await db.runTransaction(async (tx) => {
-    const [contador, clienteSnap] = await Promise.all([
+  const bloqueoRef = !esStaff && telefono ? db.doc(`bloqueados/${telefono}`) : null;
+  const confirmacion = configConfirmacion(local.pedidos);
+
+  const { numero, porConfirmar, confirmarAntesDe } = await db.runTransaction(async (tx) => {
+    const [contador, clienteSnap, bloqueo] = await Promise.all([
       tx.get(contadorRef),
       clienteRef ? tx.get(clienteRef) : Promise.resolve(null),
+      bloqueoRef ? tx.get(bloqueoRef) : Promise.resolve(null),
     ]);
+
+    // Número bloqueado por el local: mensaje genérico, sin decirle que está bloqueado.
+    if (bloqueo?.exists) {
+      throw new HttpsError(
+        'permission-denied',
+        'No pudimos tomar tu pedido por la web. Escribinos por WhatsApp.',
+      );
+    }
 
     // Límite de frecuencia por teléfono (App Check se suma con el dominio definitivo).
     const ultimo = (clienteSnap?.get('ultimoPedido') as Timestamp | undefined)?.toMillis();
@@ -174,6 +190,14 @@ export const crearPedido = onCall(async (req) => {
 
     const numero = ((contador.get('ultimoNumero') as number | undefined) ?? 0) + 1;
     tx.set(contadorRef, { ultimoNumero: numero }, { merge: true });
+
+    // Cliente nuevo (nunca recibió un pedido): tiene que confirmar por WhatsApp o se cancela solo.
+    const porConfirmar =
+      !esStaff && requiereConfirmacion(clienteSnap?.data() as Cliente | undefined, confirmacion);
+    const confirmarAntesDe = porConfirmar
+      ? Timestamp.fromMillis(ahora.getTime() + MINUTOS_CONFIRMACION * 60_000)
+      : null;
+    const confirmacionPedido = confirmarAntesDe ? { porConfirmar: true, confirmarAntesDe } : {};
 
     const pedido: Omit<Pedido, 'creadoEn' | 'actualizadoEn'> & Record<string, unknown> = {
       numero,
@@ -208,6 +232,7 @@ export const crearPedido = onCall(async (req) => {
       pagos,
       estadoPago: estadoPagoDe(pagos, totales.total),
       tiempoEstimadoMin: local.pedidos.tiempoEstimadoMin,
+      ...confirmacionPedido,
       seguimientoToken: token,
       contabilizado: false,
       historial: [{ estado, en, ...(uid && esStaff ? { porUid: uid } : {}) }],
@@ -231,6 +256,7 @@ export const crearPedido = onCall(async (req) => {
       costoEnvio: totales.costoEnvio,
       medioPago: input.pago.medio,
       estadoPago: pedido.estadoPago,
+      ...confirmacionPedido,
       localNombre: local.nombre,
     };
     tx.create(db.doc(`seguimiento/${token}`), {
@@ -253,8 +279,15 @@ export const crearPedido = onCall(async (req) => {
         { merge: true },
       );
     }
-    return numero;
+    return { numero, porConfirmar, confirmarAntesDe };
   });
 
-  return { id: pedidoRef.id, numero, token, total: totales.total };
+  return {
+    id: pedidoRef.id,
+    numero,
+    token,
+    total: totales.total,
+    porConfirmar,
+    confirmarAntesDe: confirmarAntesDe?.toMillis() ?? null,
+  };
 });

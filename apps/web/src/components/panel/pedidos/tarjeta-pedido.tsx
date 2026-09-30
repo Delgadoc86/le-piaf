@@ -88,6 +88,22 @@ interface Props {
   onCobrarRapido: (medio: MedioPagoManual) => void;
   /** Cobro con otro monto (parcial, vuelto): abre el diálogo. */
   onCobrarOtro: () => void;
+  /** Llegó el WhatsApp del cliente nuevo. */
+  onConfirmar: () => void;
+  /** Config del local: se puede aceptar un pedido que el cliente todavía no confirmó. */
+  aceptarSinConfirmar: boolean;
+}
+
+/** Cuenta regresiva hasta que un pedido sin confirmar se cancela solo. */
+function VenceEn({ pedido, ahora }: { pedido: Pedido; ahora: number }) {
+  const vence = pedido.confirmarAntesDe?.toMillis();
+  if (!vence) return null;
+  const min = Math.max(0, Math.ceil((vence - ahora) / 60_000));
+  return (
+    <span className="inline-flex items-center gap-1 rounded-full bg-zinc-800 px-2 py-0.5 text-xs font-semibold text-white">
+      ⏳ Sin confirmar · {min > 0 ? `vence en ${min} min` : 'vencido'}
+    </span>
+  );
 }
 
 /** Minutos desde que entró el pedido, con alerta si se está demorando. */
@@ -130,7 +146,10 @@ export function TarjetaPedido({
   onAvanzar,
   onCobrarRapido,
   onCobrarOtro,
+  onConfirmar,
+  aceptarSinConfirmar,
 }: Props) {
+  const sinConfirmar = pedido.porConfirmar === true && pedido.estado === 'pendiente';
   const siguiente = siguienteEstado(pedido.estado, pedido.tipo);
   const etapa = etapaDe(pedido.estado);
   const etapaSiguiente = siguiente ? etapaDe(siguiente) : null;
@@ -151,7 +170,8 @@ export function TarjetaPedido({
       className={cn(
         'rounded-xl border border-l-4 bg-card p-3 shadow-sm transition-shadow hover:shadow-md',
         etapa ? COLOR_ETAPA[etapa].borde : 'border-l-border',
-        pedido.estado === 'pendiente' && 'ring-2 ring-amber-400/40',
+        pedido.estado === 'pendiente' && !sinConfirmar && 'ring-2 ring-amber-400/40',
+        sinConfirmar && 'border-dashed border-l-zinc-400 bg-muted/40',
         anulado && 'opacity-60',
       )}
     >
@@ -174,6 +194,8 @@ export function TarjetaPedido({
             <span className="text-xs text-muted-foreground tabular-nums">
               {horaDe(pedido.creadoEn, zonaHoraria)}
             </span>
+          ) : sinConfirmar ? (
+            <VenceEn pedido={pedido} ahora={ahora} />
           ) : (
             <Transcurrido pedido={pedido} ahora={ahora} />
           )}
@@ -232,7 +254,32 @@ export function TarjetaPedido({
         </div>
       </button>
 
-      {operable && !anulado && (
+      {operable && sinConfirmar && (
+        <div className="mt-2 space-y-1.5">
+          <p className="text-xs text-muted-foreground">
+            Cliente nuevo: esperá su WhatsApp confirmando el #{pedido.numero}.
+          </p>
+          <Button
+            className="h-11 w-full bg-[#25D366] text-base font-semibold text-white hover:bg-[#1fb457]"
+            onClick={onConfirmar}
+            disabled={ocupado}
+          >
+            ✓ Ya confirmó por WhatsApp
+          </Button>
+          {aceptarSinConfirmar && (
+            <Button
+              variant="ghost"
+              size="sm"
+              className="w-full"
+              onClick={onAvanzar}
+              disabled={ocupado}
+            >
+              Aceptar igual, sin confirmar
+            </Button>
+          )}
+        </div>
+      )}
+      {operable && !anulado && !sinConfirmar && (
         <div className="mt-2 space-y-2">
           {siguiente && (
             <Button

@@ -11,6 +11,7 @@ import type {
   EstadoPedido,
   MedioPago,
   MedioPagoManual,
+  CanceladoPor,
   OrigenPedido,
   Rol,
   TipoPedido,
@@ -145,6 +146,11 @@ export interface Pedido {
   turnoCajaId?: string;
   tiempoEstimadoMin?: number;
   motivoCancelacion?: string;
+  canceladoPor?: CanceladoPor;
+  /** Cliente nuevo: espera que confirme por WhatsApp. El staff lo pasa a false al recibirlo. */
+  porConfirmar?: boolean;
+  /** Si no se confirma antes de esto, cancelarPedidosVencidos lo cancela. Se borra al confirmar. */
+  confirmarAntesDe?: Timestamp;
   seguimientoToken: string;
   /** Candado de contabilizarPedido: true si ya está sumado en la caja y en statsDiarias. */
   contabilizado: boolean;
@@ -170,6 +176,9 @@ export interface Seguimiento {
   tipo: TipoPedido;
   tiempoEstimadoMin?: number;
   motivoCancelacion?: string;
+  canceladoPor?: CanceladoPor;
+  porConfirmar?: boolean;
+  confirmarAntesDe?: Timestamp | null;
   items: { nombre: string; cantidad: number }[];
   total: number;
   /** Delivery: 0 mientras el local no confirma el envío. */
@@ -192,6 +201,16 @@ export interface Cliente {
   cantidadPedidos: number;
   totalGastado: number;
   ultimoPedido: Timestamp;
+  /** Pedidos que llegó a recibir: con 1 o más, ya no se le pide confirmar por WhatsApp. */
+  entregados?: number;
+}
+
+/** bloqueados/{telefono}: números que no pueden pedir por la web. */
+export interface Bloqueo {
+  telefono: string;
+  motivo: string;
+  porUid: string;
+  en: Timestamp;
 }
 
 // ─── Caja y stats ────────────────────────────────────────────────────────────

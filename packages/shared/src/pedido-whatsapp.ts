@@ -75,3 +75,19 @@ export function mensajePedidoWhatsApp(
 
   return lineas.join('\n');
 }
+
+/**
+ * Mensaje con el que el cliente nuevo confirma su pedido: llega al WhatsApp del local desde el número
+ * real, y el local toca "Confirmado" en el panel.
+ */
+export function mensajeConfirmacionWhatsApp(
+  nombreLocal: string,
+  datos: { numero: number; nombre: string; total: number; linkSeguimiento?: string | undefined },
+): string {
+  const aNombre = datos.nombre.trim() ? ` a nombre de ${datos.nombre.trim()}` : '';
+  const lineas = [
+    `¡Hola ${nombreLocal}! Confirmo mi pedido *#${datos.numero}*${aNombre} (total ${formatARS(datos.total)}).`,
+  ];
+  if (datos.linkSeguimiento) lineas.push('', `Seguimiento: ${datos.linkSeguimiento}`);
+  return lineas.join('\n');
+}

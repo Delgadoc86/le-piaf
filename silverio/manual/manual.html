@@ -72,7 +72,7 @@
   <ol class="indice">
     <li>Entrar al panel y tu contraseña</li>
     <li>Un día de trabajo, paso a paso</li>
-    <li>Pedidos: el tablero</li>
+    <li>Pedidos: el tablero y los pedidos falsos</li>
     <li>Cobrar y entregar</li>
     <li>Cargar un pedido a mano</li>
     <li>Delivery</li>
@@ -165,6 +165,26 @@
     <li><strong>Demora</strong>: con <kbd>−</kbd> y <kbd>+</kbd> la cambiás de a 5 minutos. El cliente la ve en su celular.</li>
     <li><strong>Rechazar / Cancelar pedido</strong>: te pide el motivo (“Nos quedamos sin stock”), y el cliente lo ve.</li>
   </ul>
+</section>
+
+<section>
+  <h2>3. Clientes nuevos y pedidos falsos</h2>
+  <p>Para evitar pedidos en joda sin obligar a nadie a registrarse, la primera vez que un número pide por la web tiene que <strong>confirmar por WhatsApp</strong>:</p>
+  <ol class="pasos">
+    <li>El cliente hace el pedido y la web le muestra <strong>“Falta un paso”</strong> con un botón que abre WhatsApp con el mensaje ya escrito (<em>“Confirmo mi pedido #12…”</em>).</li>
+    <li>En el tablero, el pedido aparece con borde punteado y <strong>⏳ Sin confirmar · vence en 15 min</strong>.</li>
+    <li>Cuando te llega su WhatsApp, tocá <strong>✓ Ya confirmó por WhatsApp</strong>. Desde ahí es un pedido normal y lo podés aceptar.</li>
+    <li>Si no confirma en <strong>15 minutos</strong>, se cancela solo y te aparece un aviso.</li>
+  </ol>
+  <div class="dos">
+    <figure><img src="img/pc-tarjeta-sin-confirmar.png" alt=""><figcaption>Un pedido sin confirmar (abajo), con su cuenta regresiva.</figcaption></figure>
+    <figure><img src="img/cel-falta-confirmar.png" alt="" style="max-height:90mm"><figcaption>Lo que ve el cliente nuevo.</figcaption></figure>
+  </div>
+  <div class="caja ok"><strong>Los clientes que ya compraron no confirman nada</strong>Cuando le entregás un pedido a un número, las próximas veces pide directo, como siempre.</div>
+  <h3>Si el cliente se arrepiente</h3>
+  <p>Mientras no aceptaste el pedido, el cliente lo puede cancelar desde su seguimiento. Te aparece un aviso en rojo: <em>“El cliente canceló el pedido #10”</em>.</p>
+  <h3>Bloquear un número</h3>
+  <p>Si alguien hace pedidos falsos, abrí el pedido y tocá <strong>Bloquear este número</strong> (abajo de todo). No va a poder pedir más por la web: le aparece que escriba por WhatsApp. La lista de bloqueados está en <strong>Configuración → Pedidos falsos</strong>, donde también lo podés desbloquear.</p>
 </section>
 
 <section>
@@ -294,6 +314,7 @@
     <li><strong>Contacto y redes</strong>: WhatsApp (con código de país y área, sin espacios), Instagram y Facebook.</li>
     <li><strong>Horarios</strong>: días y horas de atención. Fuera de horario la web muestra “Cerrado” y no deja pedir.</li>
     <li><strong>Formas de entrega</strong>: retiro en el local y delivery.</li>
+    <li><strong>Pedidos falsos</strong>: prender o apagar la confirmación por WhatsApp de clientes nuevos, permitir aceptarlos sin confirmar, y la lista de números bloqueados.</li>
   </ul>
   <figure><img src="img/pc-configuracion.png" alt=""><figcaption>Configuración del local.</figcaption></figure>
   <div class="caja tip"><strong>¿Querés cambiar colores, textos de la web o la dirección?</strong>Eso lo maneja DelgadoDev: escribinos y lo actualizamos.</div>
@@ -305,8 +326,8 @@
   <ol class="pasos">
     <li>Mira la carta y toca <strong>+</strong> en lo que quiere.</li>
     <li>Abre <strong>Ver pedido</strong>, pone su nombre y su WhatsApp, elige cómo lo quiere y cómo paga.</li>
-    <li>Toca <strong>Confirmar pedido</strong> y recibe el <strong>número de pedido</strong>.</li>
-    <li>Con <strong>Seguir mi pedido</strong> ve en vivo cuando lo aceptás, cuando está listo y si ya figura como pagado.</li>
+    <li>Toca <strong>Confirmar pedido</strong> y recibe el <strong>número de pedido</strong>. Si es su primer pedido, lo confirma por WhatsApp.</li>
+    <li>Con <strong>Seguir mi pedido</strong> ve en vivo cuando lo aceptás, cuando está listo y si ya figura como pagado. Mientras no lo aceptaste, lo puede cancelar.</li>
   </ol>
   <div class="fila">
     <figure><img src="img/cel-web-carrito.png" alt=""><figcaption>El carrito.</figcaption></figure>
@@ -323,6 +344,8 @@
     <tr><td>Cambié un precio y la web no lo muestra</td><td>Esperá unos segundos y recargá la web. Si sigue igual, avisá a soporte.</td></tr>
     <tr><td>Un cliente dice que no puede pedir</td><td>Fijate que el local esté <strong>dentro del horario</strong> (Configuración → Horarios) y que los productos estén <strong>disponibles</strong>.</td></tr>
     <tr><td>Marqué un cobro por error</td><td>Tocá <strong>Deshacer</strong> en el aviso de abajo o, en el detalle del pedido, <strong>Deshacer cobro</strong>.</td></tr>
+    <tr><td>Un pedido se canceló solo</td><td>Era un cliente nuevo que no lo confirmó por WhatsApp en 15 minutos. Si igual te escribe, cargalo con <strong>Nuevo pedido</strong>.</td></tr>
+    <tr><td>Un cliente no puede pedir por la web</td><td>Fijate si su número está en <strong>Configuración → Pedidos falsos → Números bloqueados</strong>.</td></tr>
     <tr><td>Me bloqueó la entrada</td><td>Esperá 10 minutos o tocá <strong>Recuperar contraseña</strong>.</td></tr>
     <tr><td>Se cortó internet</td><td>El panel sigue mostrando lo último. Cuando vuelve la conexión, se actualiza solo.</td></tr>
     <tr><td>La caja no da</td><td>Revisá si falta anotar algún movimiento (pago a proveedor, retiro) o si quedó algún pedido “Entregado sin cobrar”.</td></tr>

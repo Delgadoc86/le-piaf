@@ -170,7 +170,11 @@
       },
       "tiempoEstimadoMin": 30,
       "pedidoMinimo": 0,
-      "requiereConfirmacionMozoQR": true
+      "requiereConfirmacionMozoQR": true,
+      "confirmacion": {
+        "clientesNuevos": true,
+        "aceptarSinConfirmar": false
+      }
     },
     "pagos": {
       "efectivo": true,

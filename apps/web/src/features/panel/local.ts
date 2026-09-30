@@ -16,3 +16,14 @@ export function guardarTiposEntrega(tipos: LocalEditable['pedidos']['tipos']) {
     actualizadoEn: serverTimestamp(),
   });
 }
+
+/** Confirmación por WhatsApp de clientes nuevos (pedidos falsos). */
+export function guardarConfirmacion(confirmacion: {
+  clientesNuevos: boolean;
+  aceptarSinConfirmar: boolean;
+}) {
+  return updateDoc(doc(firebase().db, DOC_LOCAL), {
+    'pedidos.confirmacion': confirmacion,
+    actualizadoEn: serverTimestamp(),
+  });
+}

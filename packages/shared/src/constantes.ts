@@ -78,6 +78,13 @@ export type OrigenManual = (typeof ORIGENES_MANUALES)[number];
  */
 export const HORA_CORTE_JORNADA = 6;
 
+/** Un pedido web de un cliente nuevo que no se confirma por WhatsApp en este tiempo se cancela solo. */
+export const MINUTOS_CONFIRMACION = 15;
+
+/** Quién canceló un pedido (se muestra distinto al cliente y al local). */
+export const CANCELADO_POR = ['cliente', 'vencido', 'local'] as const;
+export type CanceladoPor = (typeof CANCELADO_POR)[number];
+
 export const ESTADOS_PAGO_PEDIDO = ['pendiente', 'parcial', 'pagado'] as const;
 export type EstadoPagoPedido = (typeof ESTADOS_PAGO_PEDIDO)[number];
 

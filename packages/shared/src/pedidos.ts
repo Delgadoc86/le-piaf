@@ -51,6 +51,28 @@ export function siguienteEstado(estado: EstadoPedido, tipo: TipoPedido): EstadoP
   }
 }
 
+/** El cliente puede cancelar desde su seguimiento solo mientras el local no lo aceptó. */
+export function puedeCancelarCliente(estado: EstadoPedido): boolean {
+  return estado === 'pendiente';
+}
+
+export const CONFIRMACION_POR_DEFECTO = { clientesNuevos: true, aceptarSinConfirmar: false };
+
+/** Config de confirmación del local, con los valores por defecto si todavía no la eligió. */
+export function configConfirmacion(pedidos: {
+  confirmacion?: { clientesNuevos: boolean; aceptarSinConfirmar: boolean } | undefined;
+}): { clientesNuevos: boolean; aceptarSinConfirmar: boolean } {
+  return pedidos.confirmacion ?? CONFIRMACION_POR_DEFECTO;
+}
+
+/** ¿Hay que pedirle a este cliente que confirme por WhatsApp? Sí, si nunca recibió un pedido. */
+export function requiereConfirmacion(
+  cliente: { entregados?: number } | undefined,
+  config: { clientesNuevos: boolean },
+): boolean {
+  return config.clientesNuevos && (cliente?.entregados ?? 0) < 1;
+}
+
 /** Cancelado o rechazado: no suma a la caja ni cuenta como venta. */
 export function estaAnulado(estado: EstadoPedido): boolean {
   return estado === 'cancelado' || estado === 'rechazado';

@@ -4,15 +4,18 @@
  * Pedidos en el panel: escucha la jornada en tiempo real y aplica los cambios que permite
  * firestore.rules (estado, historial, demora, cobros). Crear pedidos siempre pasa por crearPedido.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   arrayUnion,
   collection,
+  deleteDoc,
+  deleteField,
   doc,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   Timestamp,
   updateDoc,
   where,
@@ -24,6 +27,7 @@ import {
   estadoPagoDe,
   inicioJornada,
   totalConEnvio,
+  type Bloqueo,
   type Cobro,
   type CrearPedidoInput,
   type EstadoPedido,
@@ -74,6 +78,13 @@ export function usePedidosJornada(zonaHoraria: string | undefined) {
     cargando: boolean;
     error: string | null;
   }>({ pedidos: [], cargando: true, error: null });
+  // Último pedido nuevo que canceló el cliente o que venció sin confirmar (para avisarle al local).
+  const [cancelacion, setCancelacion] = useState<{
+    id: string;
+    numero: number;
+    por: 'cliente' | 'vencido';
+  } | null>(null);
+  const estadosPrevios = useRef<Map<string, string> | null>(null);
 
   // Cambio de jornada (a las 06:00) sin recargar la página.
   useEffect(() => {
@@ -94,17 +105,29 @@ export function usePedidosJornada(zonaHoraria: string | undefined) {
     );
     return onSnapshot(
       q,
-      (snap) =>
-        setEstado({
-          pedidos: snap.docs.map((d) => ({ ...(d.data() as Pedido), id: d.id })),
-          cargando: false,
-          error: null,
-        }),
+      (snap) => {
+        const pedidos = snap.docs.map((d) => ({ ...(d.data() as Pedido), id: d.id }));
+        const previos = estadosPrevios.current;
+        if (previos) {
+          for (const p of pedidos) {
+            const por = p.canceladoPor;
+            if (
+              previos.get(p.id) === 'pendiente' &&
+              p.estado === 'cancelado' &&
+              (por === 'cliente' || por === 'vencido')
+            ) {
+              setCancelacion({ id: p.id, numero: p.numero, por });
+            }
+          }
+        }
+        estadosPrevios.current = new Map(pedidos.map((p) => [p.id, p.estado]));
+        setEstado({ pedidos, cargando: false, error: null });
+      },
       (e) => setEstado((s) => ({ ...s, cargando: false, error: e.message })),
     );
   }, [zonaHoraria, jornada]);
 
-  return { ...estado, jornada };
+  return { ...estado, jornada, cancelacion };
 }
 
 /** El mozo solo opera pedidos de salón y los que cargó él (firestore.rules). */
@@ -125,6 +148,8 @@ export function cambiarEstado(
     estado,
     historial: arrayUnion({ estado, en: Timestamp.now(), porUid: uid }),
     ...(extra.motivoCancelacion ? { motivoCancelacion: extra.motivoCancelacion } : {}),
+    // Lo canceló o rechazó el local (el cliente y el vencimiento los marca el servidor).
+    ...(estado === 'cancelado' || estado === 'rechazado' ? { canceladoPor: 'local' } : {}),
     actualizadoEn: serverTimestamp(),
   });
 }
@@ -134,6 +159,44 @@ export function cambiarDemora(pedido: PedidoConId, minutos: number) {
     tiempoEstimadoMin: Math.max(0, Math.min(300, minutos)),
     actualizadoEn: serverTimestamp(),
   });
+}
+
+/** Llegó el WhatsApp del cliente nuevo: el pedido queda confirmado (ya no vence). */
+export function confirmarPedido(pedido: PedidoConId) {
+  return updateDoc(refPedido(pedido.id), {
+    porConfirmar: false,
+    confirmarAntesDe: deleteField(),
+    actualizadoEn: serverTimestamp(),
+  });
+}
+
+/** El número no puede volver a pedir por la web (lo revisa crearPedido). */
+export function bloquearNumero(telefono: string, motivo: string, uid: string) {
+  return setDoc(doc(firebase().db, 'bloqueados', telefono), {
+    telefono,
+    motivo: motivo.trim().slice(0, 120),
+    porUid: uid,
+    en: serverTimestamp(),
+  });
+}
+
+export function desbloquearNumero(telefono: string) {
+  return deleteDoc(doc(firebase().db, 'bloqueados', telefono));
+}
+
+/** Números bloqueados (solo dueño y encargado los pueden leer). */
+export function useBloqueados() {
+  const [lista, setLista] = useState<(Bloqueo & { id: string })[]>([]);
+  useEffect(
+    () =>
+      onSnapshot(
+        query(collection(firebase().db, 'bloqueados'), orderBy('en', 'desc')),
+        (snap) => setLista(snap.docs.map((d) => ({ ...(d.data() as Bloqueo), id: d.id }))),
+        () => setLista([]),
+      ),
+    [],
+  );
+  return lista;
 }
 
 /** Delivery: el local confirma el costo del envío y se recalcula el total (y el estado del pago). */

@@ -11,6 +11,8 @@ import { AlertTriangle, Check, Loader2, ShoppingBag, Trash2, X } from 'lucide-re
 import {
   estaAbierto,
   formatARS,
+  MINUTOS_CONFIRMACION,
+  mensajeConfirmacionWhatsApp,
   mensajePedidoWhatsApp,
   type MedioPagoWeb,
   type SeleccionItem,
@@ -47,6 +49,8 @@ interface Confirmado {
   total: number;
   pago: MedioPagoWeb;
   mensaje: string;
+  /** Cliente nuevo: tiene que confirmar por WhatsApp (mensaje armado) antes de que venza. */
+  porConfirmar: boolean;
 }
 
 /** Nombre, teléfono y dirección se recuerdan en este navegador (comodidad, no es crítico). */
@@ -191,7 +195,21 @@ function Contenido() {
       });
       guardar(CLAVE_DATOS, { nombre, telefono, direccion, referencia });
       guardar(CLAVE_ULTIMO_PEDIDO, { token: r.token, numero: r.numero, en: Date.now() });
-      setConfirmado({ numero: r.numero, token: r.token, total: r.total, pago, mensaje });
+      setConfirmado({
+        numero: r.numero,
+        token: r.token,
+        total: r.total,
+        pago,
+        porConfirmar: r.porConfirmar,
+        mensaje: r.porConfirmar
+          ? mensajeConfirmacionWhatsApp(tienda.nombreLocal, {
+              numero: r.numero,
+              nombre,
+              total: r.total,
+              linkSeguimiento: `${window.location.origin}/pedido/${r.token}`,
+            })
+          : mensaje,
+      });
       vaciar();
     } catch (e) {
       const { mensajeErrorPedido } = await import('@/lib/firebase/publico');
@@ -419,7 +437,9 @@ function Contenido() {
             </p>
           )}
           <div className="flex items-baseline justify-between">
-            <span className="text-tinta-2">{tipo === 'delivery' ? 'Total sin envío' : 'Total'}</span>
+            <span className="text-tinta-2">
+              {tipo === 'delivery' ? 'Total sin envío' : 'Total'}
+            </span>
             <span className="text-2xl font-bold tabular-nums">{formatARS(total)}</span>
           </div>
           <button
@@ -509,6 +529,7 @@ function Segmentado(props: {
 function PedidoConfirmado({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => void }) {
   const tienda = useTienda();
   const transferencia = tienda.pagos.transferencia;
+  if (pedido.porConfirmar) return <FaltaConfirmar pedido={pedido} onCerrar={onCerrar} />;
   return (
     <div className="flex flex-col items-center gap-4 overflow-y-auto px-6 pt-10 pb-[max(2rem,env(safe-area-inset-bottom))] text-center">
       <span className="tilde inline-flex size-16 items-center justify-center rounded-full bg-marca text-black">
@@ -555,6 +576,47 @@ function PedidoConfirmado({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: 
         <button type="button" onClick={onCerrar} className="h-11 text-sm text-tinta-2 underline">
           Volver a la carta
         </button>
+      </div>
+    </div>
+  );
+}
+
+/** Cliente nuevo: el pedido queda "sin confirmar" hasta que manda el WhatsApp armado. */
+function FaltaConfirmar({ pedido, onCerrar }: { pedido: Confirmado; onCerrar: () => void }) {
+  const tienda = useTienda();
+  return (
+    <div className="flex flex-col items-center gap-4 overflow-y-auto px-6 pt-10 pb-[max(2rem,env(safe-area-inset-bottom))] text-center">
+      <span className="tilde inline-flex size-16 items-center justify-center rounded-full bg-[#25D366] text-white">
+        <IconoWhatsApp className="size-8" />
+      </span>
+      <div>
+        <p className="text-sm tracking-[0.2em] text-tinta-2 uppercase">Falta un paso</p>
+        <Dialog.Title className="font-titulos text-6xl">#{pedido.numero}</Dialog.Title>
+      </div>
+      <p className="max-w-xs">
+        Como es tu primer pedido, <strong>confirmalo por WhatsApp</strong>: tocá el botón y mandá el
+        mensaje que ya está escrito.
+      </p>
+      <p className="w-full rounded-2xl bg-marca/10 px-4 py-3 text-sm text-marca">
+        ⏱ Tenés {MINUTOS_CONFIRMACION} minutos. Si no lo confirmás, se cancela solo.
+      </p>
+      <div className="mt-2 flex w-full flex-col gap-2">
+        <a
+          href={linkWhatsApp(tienda.whatsapp, pedido.mensaje)}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="brillo relative inline-flex h-13 items-center justify-center gap-2 rounded-full bg-[#25D366] font-semibold text-white"
+        >
+          <IconoWhatsApp className="size-5" />
+          Confirmar por WhatsApp
+        </a>
+        <Link
+          href={`/pedido/${pedido.token}`}
+          onClick={onCerrar}
+          className="inline-flex h-12 items-center justify-center rounded-full border border-borde font-medium"
+        >
+          Seguir mi pedido
+        </Link>
       </div>
     </div>
   );

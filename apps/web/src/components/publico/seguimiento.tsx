@@ -18,7 +18,14 @@ import {
   ShoppingBag,
   Truck,
 } from 'lucide-react';
-import { formatARS, type EstadoPedido, type Seguimiento, type TipoPedido } from '@app/shared';
+import {
+  formatARS,
+  mensajeConfirmacionWhatsApp,
+  puedeCancelarCliente,
+  type EstadoPedido,
+  type Seguimiento,
+  type TipoPedido,
+} from '@app/shared';
 import { linkWhatsApp } from '@/lib/whatsapp';
 import { cn } from '@/lib/utils';
 import { IconoWhatsApp } from './iconos-marca';
@@ -142,9 +149,11 @@ function Detalle({ pedido, local }: { pedido: Seguimiento; local: DatosLocal }) 
   const actual = pasos.findIndex((p) => p.estados.includes(pedido.estado));
   const terminado = pedido.estado === 'entregado';
   const mensaje = `Hola ${local.nombre}, te escribo por mi pedido #${pedido.numero}.`;
+  const sinConfirmar = pedido.porConfirmar === true && pedido.estado === 'pendiente';
 
   return (
     <div className="space-y-4">
+      {sinConfirmar && <Confirmar pedido={pedido} local={local} />}
       <section
         className="rounded-[28px] border border-borde bg-superficie p-6 text-center"
         aria-live="polite"
@@ -158,7 +167,11 @@ function Detalle({ pedido, local }: { pedido: Seguimiento; local: DatosLocal }) 
         {anulado ? (
           <p className="mt-3 flex items-center justify-center gap-2 text-tinta-2">
             <CircleX className="size-5 shrink-0 text-red-400" aria-hidden />
-            {pedido.motivoCancelacion || 'Escribinos si tenés alguna duda.'}
+            {pedido.canceladoPor === 'vencido'
+              ? 'Se canceló porque no lo confirmaste por WhatsApp a tiempo. Podés hacer uno nuevo.'
+              : pedido.canceladoPor === 'cliente'
+                ? 'Cancelaste este pedido.'
+                : pedido.motivoCancelacion || 'Escribinos si tenés alguna duda.'}
           </p>
         ) : (
           ['pendiente', 'aceptado', 'en_preparacion'].includes(pedido.estado) &&
@@ -295,9 +308,113 @@ function Detalle({ pedido, local }: { pedido: Seguimiento; local: DatosLocal }) 
       >
         <IconoWhatsApp className="size-5 text-[#25D366]" /> Escribirle al local
       </a>
+      {puedeCancelarCliente(pedido.estado) && <CancelarPedido />}
       <Link href="/" className="block text-center text-sm text-tinta-2 underline">
         Volver a la carta
       </Link>
+    </div>
+  );
+}
+
+/** Cliente nuevo: confirmar por WhatsApp antes de que venza (lo cancela el servidor si no). */
+function Confirmar({ pedido, local }: { pedido: Seguimiento; local: DatosLocal }) {
+  const [ahora, setAhora] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setAhora(Date.now()), 1000);
+    return () => clearInterval(t);
+  }, []);
+  const vence = pedido.confirmarAntesDe?.toMillis();
+  const restante = vence ? Math.max(0, vence - ahora) : null;
+  const min = restante !== null ? Math.floor(restante / 60_000) : null;
+  const seg = restante !== null ? Math.floor((restante % 60_000) / 1000) : null;
+  const mensaje = mensajeConfirmacionWhatsApp(local.nombre, {
+    numero: pedido.numero,
+    nombre: '',
+    total: pedido.total,
+    linkSeguimiento: typeof window === 'undefined' ? undefined : window.location.href,
+  });
+  return (
+    <section className="rounded-[28px] border-2 border-[#25D366] bg-superficie p-5 text-center">
+      <p className="font-semibold">Confirmá tu pedido por WhatsApp</p>
+      <p className="mt-1 text-sm text-tinta-2">
+        Es tu primer pedido: mandanos el mensaje ya escrito para que empecemos a prepararlo.
+      </p>
+      {restante !== null && (
+        <p className="mt-2 text-sm text-marca tabular-nums">
+          {restante > 0
+            ? `⏱ Te quedan ${min}:${String(seg).padStart(2, '0')} para confirmarlo`
+            : 'Se venció el tiempo: en unos minutos se cancela.'}
+        </p>
+      )}
+      <a
+        href={linkWhatsApp(local.whatsapp, mensaje)}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="mt-4 inline-flex h-12 w-full items-center justify-center gap-2 rounded-full bg-[#25D366] font-semibold text-white"
+      >
+        <IconoWhatsApp className="size-5" /> Confirmar por WhatsApp
+      </a>
+    </section>
+  );
+}
+
+/** El cliente cancela mientras el local todavía no aceptó el pedido. */
+function CancelarPedido() {
+  const { token } = useParams<{ token: string }>();
+  const [paso, setPaso] = useState<'inicio' | 'seguro' | 'enviando'>('inicio');
+  const [error, setError] = useState<string | null>(null);
+
+  async function cancelar() {
+    setPaso('enviando');
+    setError(null);
+    try {
+      const { cancelarPedidoCliente, mensajeErrorPedido } = await import('@/lib/firebase/publico');
+      try {
+        await cancelarPedidoCliente(token);
+      } catch (e) {
+        setError(mensajeErrorPedido(e));
+        setPaso('inicio');
+      }
+    } catch {
+      setError('No pudimos cancelar. Probá de nuevo.');
+      setPaso('inicio');
+    }
+  }
+
+  return (
+    <div className="text-center">
+      {paso === 'inicio' ? (
+        <button
+          type="button"
+          onClick={() => setPaso('seguro')}
+          className="text-sm text-tinta-2 underline hover:text-tinta"
+        >
+          Cancelar mi pedido
+        </button>
+      ) : (
+        <div className="rounded-2xl border border-borde bg-superficie p-4">
+          <p className="text-sm">¿Seguro que querés cancelar el pedido?</p>
+          <div className="mt-3 flex gap-2">
+            <button
+              type="button"
+              onClick={() => setPaso('inicio')}
+              disabled={paso === 'enviando'}
+              className="h-10 flex-1 rounded-full border border-borde text-sm"
+            >
+              No, seguir
+            </button>
+            <button
+              type="button"
+              onClick={() => void cancelar()}
+              disabled={paso === 'enviando'}
+              className="h-10 flex-1 rounded-full bg-red-600 text-sm font-semibold text-white disabled:opacity-60"
+            >
+              {paso === 'enviando' ? 'Cancelando…' : 'Sí, cancelar'}
+            </button>
+          </div>
+        </div>
+      )}
+      {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
     </div>
   );
 }

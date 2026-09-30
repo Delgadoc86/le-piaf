@@ -6,6 +6,7 @@ import { Bell, BellRing, ChevronDown, Monitor, Plus, X } from 'lucide-react';
 import {
   DOC_LOCAL,
   formatARS,
+  configConfirmacion,
   resumenCaja,
   siguienteEstado,
   totalCobrado,
@@ -25,7 +26,9 @@ import {
   anularCobros,
   cambiarDemora,
   cambiarEnvio,
+  bloquearNumero,
   cambiarEstado,
+  confirmarPedido,
   COLOR_ETAPA,
   ETAPAS,
   puedeOperar,
@@ -64,7 +67,7 @@ export default function PedidosPage() {
   const sesion = useSesion();
   const local = useDocumento<Local>(DOC_LOCAL);
   const zona = local.datos?.zonaHoraria;
-  const { pedidos, cargando, error } = usePedidosJornada(zona);
+  const { pedidos, cargando, error, cancelacion } = usePedidosJornada(zona);
   const ahora = useAhora();
 
   const [detalleId, setDetalleId] = useState<string | null>(null);
@@ -90,6 +93,13 @@ export default function PedidosPage() {
   const detalle = pedidos.find((p) => p.id === detalleId) ?? null;
   const aCobrar = pedidos.find((p) => p.id === cobroId) ?? null;
   const nuevos = pedidos.filter((p) => p.estado === 'pendiente');
+  const porAceptar = nuevos.filter((p) => !p.porConfirmar);
+  const sinConfirmar = nuevos.length - porAceptar.length;
+  const confirmacion = configConfirmacion(local.datos?.pedidos ?? {});
+
+  // Aviso cuando un pedido nuevo se cancela solo (vencido) o lo cancela el cliente.
+  const [cancelacionVista, setCancelacionVista] = useState<string | null>(null);
+  const cancelacionActiva = cancelacion && cancelacion.id !== cancelacionVista ? cancelacion : null;
   const totales = resumenCaja(pedidos);
 
   // Pedido nuevo: sonido + contador en la pestaña del navegador.
@@ -188,6 +198,12 @@ export default function PedidosPage() {
       }}
       onCobrarRapido={(m) => cobrarRapido(p, m)}
       onCobrarOtro={() => setCobroId(p.id)}
+      onConfirmar={() =>
+        void ejecutar(p.id, () => confirmarPedido(p), {
+          texto: `#${p.numero} confirmado: ya lo podés aceptar`,
+        })
+      }
+      aceptarSinConfirmar={confirmacion.aceptarSinConfirmar}
     />
   );
   const terminados = pedidos.filter((p) => TERMINADOS.includes(p.estado));
@@ -247,17 +263,40 @@ export default function PedidosPage() {
       </header>
 
       {/* Avisos: lo urgente arriba de todo */}
-      {nuevos.length > 0 && (
+      {porAceptar.length > 0 && (
         <button
           type="button"
           onClick={() => setPestana('nuevos')}
           className="flex w-full items-center gap-2 rounded-xl bg-amber-400 px-3 py-2 text-left text-sm font-semibold text-amber-950 shadow-sm md:px-4 md:py-3 md:text-base"
         >
           <BellRing className="size-5 shrink-0 animate-bounce" aria-hidden />
-          {nuevos.length === 1
+          {porAceptar.length === 1
             ? 'Entró 1 pedido nuevo: aceptalo para que el cliente vea que lo están preparando.'
-            : `Hay ${nuevos.length} pedidos nuevos esperando que los aceptes.`}
+            : `Hay ${porAceptar.length} pedidos nuevos esperando que los aceptes.`}
         </button>
+      )}
+      {cancelacionActiva && (
+        <p
+          role="alert"
+          className="flex items-center justify-between gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+        >
+          {cancelacionActiva.por === 'cliente'
+            ? `El cliente canceló el pedido #${cancelacionActiva.numero}.`
+            : `Se canceló el #${cancelacionActiva.numero}: el cliente no lo confirmó a tiempo.`}
+          <button
+            type="button"
+            className="underline"
+            onClick={() => setCancelacionVista(cancelacionActiva.id)}
+          >
+            Entendido
+          </button>
+        </p>
+      )}
+      {sinConfirmar > 0 && (
+        <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
+          ⏳ {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
+          cliente lo confirme por WhatsApp. Si no confirma, se cancela solo.
+        </p>
       )}
       {esGestor && !caja.cargando && !caja.turno && (
         <p className="flex items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-sm md:py-2">
@@ -430,6 +469,30 @@ export default function PedidosPage() {
         onEstado={(estado, motivo) => detalle && avanzar(detalle, estado, motivo)}
         onDemora={(min) => detalle && void ejecutar(detalle.id, () => cambiarDemora(detalle, min))}
         onCobrar={() => detalle && setCobroId(detalle.id)}
+        onConfirmar={() =>
+          detalle &&
+          void ejecutar(detalle.id, () => confirmarPedido(detalle), {
+            texto: `#${detalle.numero} confirmado: ya lo podés aceptar`,
+          })
+        }
+        onBloquear={(motivo) => {
+          const tel = detalle?.cliente?.telefono;
+          if (!detalle || !tel) return;
+          void ejecutar(
+            detalle.id,
+            async () => {
+              await bloquearNumero(tel, motivo, uid);
+              if (detalle.estado === 'pendiente') {
+                await cambiarEstado(detalle, 'cancelado', uid, {
+                  motivoCancelacion: 'No pudimos tomar tu pedido',
+                });
+              }
+            },
+            { texto: `+${tel} bloqueado: ya no puede pedir por la web` },
+          );
+        }}
+        puedeBloquear={esGestor}
+        aceptarSinConfirmar={confirmacion.aceptarSinConfirmar}
         onEnvio={(costo) =>
           detalle &&
           void ejecutar(detalle.id, () => cambiarEnvio(detalle, costo), {

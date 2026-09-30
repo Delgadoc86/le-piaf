@@ -46,6 +46,12 @@ interface Props {
   onCobrar: () => void;
   onAnularCobros: () => void;
   onEnvio: (costo: number) => void;
+  onConfirmar: () => void;
+  /** Bloquea el número del cliente (y cancela el pedido si todavía no se aceptó). */
+  onBloquear: (motivo: string) => void;
+  /** Solo dueño y encargado bloquean números. */
+  puedeBloquear: boolean;
+  aceptarSinConfirmar: boolean;
 }
 
 const MOTIVOS = ['Nos quedamos sin stock', 'Estamos por cerrar', 'No pudimos contactarte'];
@@ -71,8 +77,16 @@ function Contenido({
   onCobrar,
   onAnularCobros,
   onEnvio,
+  onConfirmar,
+  onBloquear,
+  puedeBloquear,
+  aceptarSinConfirmar,
 }: Props & { pedido: PedidoConId }) {
   const [anulando, setAnulando] = useState(false);
+  const [bloqueando, setBloqueando] = useState(false);
+  const [motivoBloqueo, setMotivoBloqueo] = useState('Pedido falso');
+  const sinConfirmar = pedido.porConfirmar === true && pedido.estado === 'pendiente';
+  const aceptarBloqueado = sinConfirmar && !aceptarSinConfirmar;
   const [motivo, setMotivo] = useState('');
   const [envio, setEnvio] = useState(pedido.costoEnvio);
   const siguiente = siguienteEstado(pedido.estado, pedido.tipo);
@@ -106,6 +120,43 @@ function Contenido({
               : 'en mostrador'}
         </DialogDescription>
       </DialogHeader>
+
+      {/* Cliente nuevo: confirmación por WhatsApp */}
+      {sinConfirmar && (
+        <section className="space-y-2 rounded-lg border border-dashed border-zinc-400 bg-muted/40 p-3 text-sm">
+          <p className="font-medium">⏳ Esperando que el cliente lo confirme por WhatsApp</p>
+          <p className="text-muted-foreground">
+            Es su primer pedido. Cuando te llegue su mensaje con el #{pedido.numero}, tocá “Ya
+            confirmó”. Si no confirma, se cancela solo.
+          </p>
+          {operable && (
+            <div className="flex flex-wrap gap-2">
+              <Button
+                size="sm"
+                className="bg-[#25D366] text-white hover:bg-[#1fb457]"
+                onClick={onConfirmar}
+                disabled={ocupado}
+              >
+                ✓ Ya confirmó por WhatsApp
+              </Button>
+              {pedido.cliente?.telefono && (
+                <Button variant="outline" size="sm" asChild>
+                  <a
+                    href={linkWhatsApp(
+                      pedido.cliente.telefono,
+                      `¡Hola! Recibimos tu pedido #${pedido.numero} en ${nombreLocal}. ¿Nos lo confirmás?`,
+                    )}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Escribirle
+                  </a>
+                </Button>
+              )}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* Ítems: lo más importante, bien grande para la cocina */}
       <ul className="divide-y rounded-lg border">
@@ -316,7 +367,8 @@ function Contenido({
               size="lg"
               className={cn(etapaSiguiente && COLOR_ETAPA[etapaSiguiente].boton)}
               onClick={() => onEstado(siguiente)}
-              disabled={ocupado}
+              disabled={ocupado || aceptarBloqueado}
+              title={aceptarBloqueado ? 'Primero tiene que confirmarlo por WhatsApp' : undefined}
             >
               {siguiente === 'entregado' && cobrado < pedido.total
                 ? 'Cobrar y entregar'
@@ -360,6 +412,52 @@ function Contenido({
               {accionAnular === 'rechazado' ? 'Rechazar pedido' : 'Cancelar pedido'}
             </Button>
           </div>
+        </section>
+      )}
+      {/* Bloquear número: pedidos falsos o bromas */}
+      {puedeBloquear && pedido.cliente?.telefono && pedido.origen === 'web' && (
+        <section className="border-t pt-3">
+          {!bloqueando ? (
+            <button
+              type="button"
+              onClick={() => setBloqueando(true)}
+              className="text-xs text-muted-foreground underline hover:text-destructive"
+            >
+              Bloquear este número (pedido falso)
+            </button>
+          ) : (
+            <div className="space-y-2 rounded-lg border border-destructive/40 p-3 text-sm">
+              <p className="font-medium">
+                ¿Bloquear +{pedido.cliente.telefono}? No va a poder pedir más por la web.
+                {pedido.estado === 'pendiente' && ' Este pedido se cancela.'}
+              </p>
+              <Textarea
+                rows={1}
+                value={motivoBloqueo}
+                onChange={(e) => setMotivoBloqueo(e.target.value.slice(0, 120))}
+                aria-label="Motivo (solo lo ve el local)"
+              />
+              <p className="text-xs text-muted-foreground">
+                El motivo solo lo ve el local. Se puede desbloquear desde Configuración.
+              </p>
+              <div className="flex justify-end gap-2">
+                <Button variant="ghost" size="sm" onClick={() => setBloqueando(false)}>
+                  Volver
+                </Button>
+                <Button
+                  variant="destructive"
+                  size="sm"
+                  disabled={ocupado}
+                  onClick={() => {
+                    onBloquear(motivoBloqueo);
+                    setBloqueando(false);
+                  }}
+                >
+                  Bloquear número
+                </Button>
+              </div>
+            </div>
+          )}
         </section>
       )}
     </>

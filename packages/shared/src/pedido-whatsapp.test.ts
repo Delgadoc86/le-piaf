@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { mensajePedidoWhatsApp } from './pedido-whatsapp.js';
+import { mensajeConfirmacionWhatsApp, mensajePedidoWhatsApp } from './pedido-whatsapp.js';
 import type { TotalesPedido } from './precios.js';
 
 const totales: TotalesPedido = {
@@ -94,5 +94,18 @@ describe('mensajePedidoWhatsApp con pedido creado', () => {
     expect(m).toContain('Te hice el pedido *#12* por la web');
     expect(m).toContain('Pago: Transferencia');
     expect(m.trim().endsWith('Seguimiento: https://x.test/pedido/abc')).toBe(true);
+  });
+});
+
+describe('mensajeConfirmacionWhatsApp', () => {
+  it('lleva número, nombre y total', () => {
+    const m = mensajeConfirmacionWhatsApp('Silverio', {
+      numero: 7,
+      nombre: ' Pedro ',
+      total: 3500,
+    });
+    expect(m.replace(/\s/g, ' ')).toContain(
+      'Confirmo mi pedido *#7* a nombre de Pedro (total $ 3.500)',
+    );
   });
 });

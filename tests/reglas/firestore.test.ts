@@ -8,6 +8,7 @@ import {
   arrayUnion,
   collection,
   deleteDoc,
+  deleteField,
   doc,
   getDoc,
   getDocs,
@@ -341,6 +342,17 @@ describe('pedidos', () => {
     );
   });
 
+  it('pedidos sin confirmar: el staff solo confirma, nunca "desconfirma"', async () => {
+    const ref = doc(db('encargado'), 'pedidos', 'ped1');
+    await assertSucceeds(updateDoc(ref, { porConfirmar: false, confirmarAntesDe: deleteField() }));
+    await assertFails(updateDoc(ref, { porConfirmar: true }));
+    await assertFails(updateDoc(ref, { confirmarAntesDe: new Date() }));
+    await assertSucceeds(
+      updateDoc(ref, { estado: 'cancelado', canceladoPor: 'local', motivoCancelacion: 'Falso' }),
+    );
+    await assertFails(updateDoc(ref, { canceladoPor: 'cliente' }));
+  });
+
   it('el mozo gestiona salón y los pedidos que cargó él, pero no pedidos web ajenos', async () => {
     await assertSucceeds(
       updateDoc(doc(db('mozo'), 'pedidos', 'salon1'), { estado: 'cuenta_pedida' }),
@@ -356,6 +368,35 @@ describe('pedidos', () => {
     await assertFails(
       updateDoc(ref, { pagos: [{ medio: 'efectivo', monto: 9000, estado: 'aprobado' }] }),
     );
+  });
+});
+
+describe('bloqueados', () => {
+  const bloqueo = (u: string) => ({
+    telefono: '5492611234567',
+    motivo: 'Pedidos falsos',
+    porUid: u,
+    en: serverTimestamp(),
+  });
+
+  it('dueño y encargado bloquean y desbloquean a su nombre', async () => {
+    const ref = doc(db('encargado'), 'bloqueados', '5492611234567');
+    await assertSucceeds(setDoc(ref, bloqueo('encargado')));
+    await assertSucceeds(getDoc(ref));
+    await assertSucceeds(deleteDoc(ref));
+    await assertFails(setDoc(ref, bloqueo('dueno')));
+    await assertFails(
+      setDoc(doc(db('encargado'), 'bloqueados', '123'), {
+        ...bloqueo('encargado'),
+        telefono: '123',
+      }),
+    );
+  });
+
+  it('mozo, cocina y anónimos no ven ni tocan la lista', async () => {
+    await assertFails(getDocs(collection(db('mozo'), 'bloqueados')));
+    await assertFails(setDoc(doc(db('mozo'), 'bloqueados', '5492611234567'), bloqueo('mozo')));
+    await assertFails(getDoc(doc(db(null), 'bloqueados', '5492611234567')));
   });
 });
 

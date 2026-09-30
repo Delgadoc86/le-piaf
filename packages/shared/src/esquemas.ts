@@ -142,6 +142,18 @@ export const configPedidosSchema = z.object({
   pedidoMinimo: pesosSchema,
   requiereConfirmacionMozoQR: z.boolean(),
   mensajeCerrado: z.string().max(200).optional(),
+  /**
+   * Pedidos falsos: a los clientes nuevos (sin pedidos entregados) se les pide confirmar por
+   * WhatsApp. Si falta, rige CONFIRMACION_POR_DEFECTO (activada).
+   */
+  confirmacion: z
+    .object({
+      /** Pedir confirmación por WhatsApp a los números que nunca recibieron un pedido. */
+      clientesNuevos: z.boolean(),
+      /** El local puede aceptar un pedido aunque el cliente todavía no lo confirmó. */
+      aceptarSinConfirmar: z.boolean(),
+    })
+    .optional(),
 });
 
 export const configPagosSchema = z.object({
@@ -392,6 +404,17 @@ export const movimientoCajaSchema = z.object({
   detalle: z.string().trim().max(200),
 });
 
+/** El cliente cancela su pedido desde el seguimiento (solo mientras el local no lo aceptó). */
+export const cancelarPedidoClienteInputSchema = z.object({
+  token: z.string().regex(/^[A-Za-z0-9_-]{16,64}$/, 'Link inválido'),
+});
+
+/** Número bloqueado por el local: no puede hacer pedidos por la web. */
+export const bloqueoSchema = z.object({
+  telefono: telefonoSchema,
+  motivo: z.string().trim().max(120),
+});
+
 /** Cobro manual que registra el staff desde el panel. */
 export const cobroSchema = z.object({
   medio: z.enum(MEDIOS_PAGO_MANUALES),
@@ -425,6 +448,8 @@ export type CrearPedidoInput = z.input<typeof crearPedidoInputSchema>;
 /** Lo que queda después de validar. */
 export type CrearPedidoDatos = z.infer<typeof crearPedidoInputSchema>;
 export type Cobro = z.infer<typeof cobroSchema>;
+export type CancelarPedidoClienteInput = z.infer<typeof cancelarPedidoClienteInputSchema>;
+export type BloqueoDatos = z.infer<typeof bloqueoSchema>;
 export type AbrirCajaInput = z.infer<typeof abrirCajaInputSchema>;
 export type CerrarCajaInput = z.infer<typeof cerrarCajaInputSchema>;
 export type MovimientoCajaDatos = z.infer<typeof movimientoCajaSchema>;

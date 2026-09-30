@@ -5,7 +5,15 @@ import { db } from '../util/admin.js';
 
 type CamposEspejados = Pick<
   Seguimiento,
-  'estado' | 'tiempoEstimadoMin' | 'motivoCancelacion' | 'estadoPago' | 'total' | 'costoEnvio'
+  | 'estado'
+  | 'tiempoEstimadoMin'
+  | 'motivoCancelacion'
+  | 'estadoPago'
+  | 'total'
+  | 'costoEnvio'
+  | 'porConfirmar'
+  | 'confirmarAntesDe'
+  | 'canceladoPor'
 >;
 
 /**
@@ -32,6 +40,13 @@ export const espejarSeguimiento = onDocumentUpdated('pedidos/{id}', async (event
   if (antes.total !== despues.total || antes.costoEnvio !== despues.costoEnvio) {
     cambios.total = despues.total;
     cambios.costoEnvio = despues.costoEnvio;
+  }
+  if (antes.porConfirmar !== despues.porConfirmar) {
+    cambios.porConfirmar = despues.porConfirmar ?? false;
+    cambios.confirmarAntesDe = despues.confirmarAntesDe ?? null;
+  }
+  if (antes.canceladoPor !== despues.canceladoPor && despues.canceladoPor) {
+    cambios.canceladoPor = despues.canceladoPor;
   }
   if (Object.keys(cambios).length === 0) return;
 

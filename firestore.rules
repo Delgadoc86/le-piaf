@@ -146,6 +146,7 @@ service cloud.firestore {
       allow update: if datos().estado in ['pendiente', 'aceptado', 'en_preparacion', 'listo',
             'en_camino', 'entregado', 'rechazado', 'cancelado', 'abierto', 'cuenta_pedida', 'cerrado']
         && envioCoherente()
+        && confirmacionCoherente()
         && (
           (esGestor() && soloCambia(camposGestion()))
           || (rol() == 'mozo'
@@ -156,7 +157,16 @@ service cloud.firestore {
 
       function camposGestion() {
         return ['estado', 'items', 'pagos', 'estadoPago', 'tiempoEstimadoMin', 'motivoCancelacion',
-                'historial', 'actualizadoEn', 'comensales', 'costoEnvio', 'total'];
+                'historial', 'actualizadoEn', 'comensales', 'costoEnvio', 'total', 'porConfirmar',
+                'confirmarAntesDe', 'canceladoPor'];
+      }
+
+      // Pedidos de clientes nuevos: el staff solo puede confirmarlos (nunca volver a "sin confirmar"),
+      // borrar el vencimiento y marcar que la cancelación fue del local. El resto lo hacen Functions.
+      function confirmacionCoherente() {
+        return (!cambios().hasAny(['porConfirmar']) || datos().porConfirmar == false)
+          && (!cambios().hasAny(['confirmarAntesDe']) || !('confirmarAntesDe' in datos()))
+          && (!cambios().hasAny(['canceladoPor']) || datos().canceladoPor == 'local');
       }
 
       // El envío (delivery sin zonas) lo confirma el local: solo en delivery y con el total bien
@@ -167,6 +177,18 @@ service cloud.firestore {
               && esPesos(datos().costoEnvio)
               && datos().total == datos().subtotal - datos().descuento + datos().costoEnvio);
       }
+    }
+
+    // Números que no pueden pedir por la web (los revisa crearPedido). Solo dueño y encargado.
+    match /bloqueados/{telefono} {
+      allow read, delete: if esGestor();
+      allow create, update: if esGestor()
+        && datos().keys().hasOnly(['telefono', 'motivo', 'porUid', 'en'])
+        && datos().telefono == telefono
+        && telefono.matches('^[0-9]{8,15}$')
+        && datos().motivo is string && datos().motivo.size() <= 120
+        && datos().porUid == request.auth.uid
+        && datos().en == request.time;
     }
 
     // Espejo público mínimo para /pedido/[token]: get sí, list nunca.

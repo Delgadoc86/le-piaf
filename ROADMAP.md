@@ -287,7 +287,8 @@ pedidos/{pedidoId}
   pagos: { medio: "efectivo"|"transferencia"|"mercadopago"|"tarjeta", monto: $, estado: "pendiente"|"aprobado"|"rechazado", mpPaymentId?, pagaCon?: $, porUid? }[]   // lo cobrado de verdad
   estadoPago: "pendiente"|"parcial"|"pagado"
   turnoCajaId?
-  tiempoEstimadoMin?, motivoCancelacion?
+  tiempoEstimadoMin?, motivoCancelacion?, canceladoPor?: "cliente"|"vencido"|"local"
+  porConfirmar?, confirmarAntesDe?             // cliente nuevo: confirma por WhatsApp o se cancela solo
   seguimientoToken                             // para /pedido/[token]
   contabilizado: boolean                       // idempotencia de stats
   contabilizacion?: { turnoCajaId, total, porMedio, hora }   // lo sumado, para restarlo igual
@@ -304,6 +305,10 @@ contadores/caja                                // { turnoAbiertoId | null }
 
 clientes/{telefono}
   nombre, telefono, direcciones: string[], cantidadPedidos, totalGastado: $, ultimoPedido: ts
+  entregados?                                  // con 1 o más, ya no se le pide confirmar
+
+bloqueados/{telefono}                          // no pueden pedir por la web (dueño y encargado)
+  telefono, motivo, porUid, en: ts
 
 turnosCaja/{turnoId}                           // la "caja": una abierta a la vez (candado en contadores/caja)
   estado: "abierto"|"cerrado"
@@ -422,6 +427,9 @@ service cloud.firestore {
 | `ajustarPrecios` | callable (dueño/encargado) | Actualización masiva con `planAjuste` (mismo cálculo que la vista previa), lotes de 500 y registro en `auditoria` | 1 |
 | `crearPedido` | callable (App Check pendiente) | Web: valida el esquema zod, local activo, abierto y sin pausa, tipo y medio habilitados, promos vigentes, disponibilidad y mínimo; límite de 1 pedido por minuto por teléfono. Staff (`origen` mostrador/teléfono, rol dueño, encargado o mozo): sin esas reglas, puede registrar el pago. Siempre **recalcula precios** con `packages/shared/precios.ts`; número correlativo por jornada en transacción; crea `pedidos` y `seguimiento`; upsert en `clientes`. (Con MP, más adelante: crea la preferencia y devuelve `init_point`) | 2 |
 | `espejarSeguimiento` | trigger `pedidos` onUpdate | Copia a `seguimiento/{token}` estado, demora, motivo y estado del pago | 2 |
+| `cancelarPedidoCliente` | callable (sin cuenta; el token del seguimiento es la credencial) | El cliente cancela su pedido mientras el local no lo aceptó | 2 |
+| `cancelarPedidosSinConfirmar` | scheduled (cada 5 min) | Cancela los pedidos de clientes nuevos que no se confirmaron por WhatsApp a tiempo (`confirmarAntesDe`) | 2 |
+| `registrarClienteEntregado` | trigger `pedidos` onUpdate | Al entregar, suma `clientes/{tel}.entregados`: el cliente pasa a ser de confianza | 2 |
 | `mpWebhookPedidos` | https | Valida la firma HMAC (`x-signature`), consulta el pago y actualiza `pagos` y `estadoPago` | después |
 | `contabilizarPedido` | trigger `pedidos` onWrite | Cuando el pedido queda **pagado y no anulado**, suma en `statsDiarias/{jornada}` y en la caja abierta; si después se cancela o se deshace el cobro, resta lo mismo (una caja ya cerrada no se toca). Idempotente: relee el pedido en transacción con `contabilizado` como candado. Reemplaza a `revertirContabilizacion` | 4 |
 | `abrirCaja` / `cerrarCaja` | callable (dueño/encargado) | Abre con efectivo inicial (una sola caja abierta, candado en `contadores/caja`). Cierra: esperado = inicial + cobros + ingresos − egresos, contra lo contado; guarda la foto del cierre y registra en `auditoria` | 4 |
@@ -595,6 +603,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 - [x] Tablero con colores por etapa, minutos transcurridos con alerta, cobro en un toque con "Deshacer" y barra lateral de íconos en tablet (pensado para compu o tablet; el celular queda de respaldo).
 - [x] **Entregar pide el cobro**: si falta pagar, "Cobrar y entregar" pregunta cómo pagó; se puede entregar sin cobrar y queda marcado en rojo ("Entregado sin cobrar") y en "Por cobrar".
 - [x] **Delivery sin zonas**: el dueño lo prende en Configuración → Formas de entrega. El cliente deja la dirección; el local confirma zona y costo por WhatsApp y carga el envío en el pedido (se suma al total, lo ve el cliente en el seguimiento). La regla solo lo permite en delivery y con `total = subtotal − descuento + costoEnvio`.
+- [x] **Pedidos falsos (sin registro de usuarios)**: los clientes nuevos (sin pedidos entregados) confirman por WhatsApp con un mensaje armado y el local toca "Ya confirmó"; si no confirman en 15 minutos, `cancelarPedidosSinConfirmar` los cancela. El dueño elige si se pueden aceptar sin confirmar. El cliente puede cancelar desde su seguimiento mientras no lo aceptaron. Números bloqueados desde el detalle del pedido (lista en Configuración para desbloquear); `crearPedido` los rechaza con un mensaje genérico.
 
 **Calidad**
 - [x] Tests de `pedidos.ts` (estados, pagos, jornada) y del esquema de `crearPedido`.
@@ -818,3 +827,4 @@ Este repo (Silverio Club) es la **base**. La guía paso a paso, con comandos, es
 - **1.8 (2026-09-29):** **Fase 2 mínima con cobros manuales**. Silverio queda en producción como demo (excepción a la Fase 1). El checkout crea el pedido con `crearPedido` (WhatsApp pasa a ser un aviso opcional), hay seguimiento en vivo en `/pedido/[token]` y el panel suma **Pedidos**: tablero de la jornada, sonido, estados, cobro en efectivo o transferencia con totales del día y carga manual de mostrador o teléfono. La numeración y los totales van por **jornada** (corte 06:00). Mercado Pago, zonas con costo, pausa, impresión y clientes pasan a "Después". El menú del panel oculta lo que todavía no existe.
 - **1.9 (2026-09-29):** **Fase 4 antes que la 3**, con alcance de **caja simple**: abrir y cerrar caja (efectivo esperado contra contado), movimientos de efectivo, historial de cierres, página **Ventas** (hoy contra la semana pasada, por día, lo más vendido y horarios) y Resumen con números reales. `contabilizarPedido` cuenta el pedido cuando queda pagado y no anulado, y resta si se cancela o se deshace el cobro (reemplaza a `revertirContabilizacion`). Nuevas callables `abrirCaja` y `cerrarCaja`. Los movimientos solo se anotan en la caja abierta. El menú muestra las fases hechas (0, 1, 2 y 4); "Reportes" pasa a llamarse "Ventas".
 - **1.10 (2026-09-29):** **base lista para copiar**. Todo lo propio del local pasa al kit: textos de la web, SEO, GA4, fuentes, entrega y pagos salen de `silverio/seed.json` (antes estaban en `scripts/seed.ts`). README con stack y guía de duplicado; manual de usuario en PDF en `silverio/manual/`. Login solo con email (sin Google), límite de 5 intentos y "Mi cuenta" para cambiar la contraseña. Entregar pide el cobro; delivery sin zonas con envío a confirmar. `firebase-admin/auth` fuera de la web (fallaba en Vercel) y `/api/salud` para diagnosticar.
+- **1.11 (2026-09-30):** **pedidos falsos sin registro de usuarios**: confirmación por WhatsApp para clientes nuevos con vencimiento de 15 minutos (`cancelarPedidosSinConfirmar`), cancelación del cliente desde el seguimiento (`cancelarPedidoCliente`), números bloqueados (`bloqueados/{telefono}`, con reglas y tests) y clientes de confianza al recibir su primer pedido (`registrarClienteEntregado`). Configurable en Configuración → Pedidos falsos. Comprobantes de transferencia: por WhatsApp, como hasta ahora.

@@ -20,6 +20,9 @@ export interface PedidoCreado {
   numero: number;
   token: string;
   total: number;
+  /** Cliente nuevo: tiene que confirmar por WhatsApp antes de este momento (ms) o se cancela. */
+  porConfirmar: boolean;
+  confirmarAntesDe: number | null;
 }
 
 let funcionesConectadas = false;
@@ -36,6 +39,25 @@ export async function crearPedido(input: CrearPedidoInput): Promise<PedidoCreado
   }
   const r = await httpsCallable<CrearPedidoInput, PedidoCreado>(functions, 'crearPedido')(input);
   return r.data;
+}
+
+/** El cliente cancela su pedido (solo mientras el local no lo aceptó). */
+export async function cancelarPedidoCliente(token: string): Promise<void> {
+  const [{ connectFunctionsEmulator, getFunctions, httpsCallable }, a] = await Promise.all([
+    import('firebase/functions'),
+    app(),
+  ]);
+  const functions = getFunctions(a, REGION_FUNCTIONS);
+  if (usaEmuladores && !funcionesConectadas) {
+    connectFunctionsEmulator(functions, '127.0.0.1', 5001);
+    funcionesConectadas = true;
+  }
+  await httpsCallable<{ token: string }, { ok: boolean }>(
+    functions,
+    'cancelarPedidoCliente',
+  )({
+    token,
+  });
 }
 
 let firestoreConectado = false;
