@@ -48,3 +48,12 @@ export function guardarUltimoPedido(pedido: UltimoPedidoGuardado): void {
     // El pedido sigue confirmado aunque el navegador no permita guardar el acceso.
   }
 }
+
+export function ocultarUltimoPedido(): void {
+  try {
+    localStorage.removeItem(CLAVE_ULTIMO_PEDIDO);
+    window.dispatchEvent(new Event('ultimo-pedido-cambio'));
+  } catch {
+    // El acceso se puede volver a ocultar cuando el navegador permita guardar cambios.
+  }
+}

@@ -583,7 +583,7 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
   - pedido mínimo;
   - medio de pago: efectivo ("¿con cuánto pagás?") o transferencia (muestra alias y titular).
 - [x] Si el local está cerrado, no se puede confirmar y se explica por qué (el servidor además valida pausa, pedidos habilitados, tipo y medio de pago).
-- [x] Confirmación con número de pedido, link de seguimiento y botón opcional "Avisar por WhatsApp" (o "Mandar comprobante" si paga por transferencia); acceso para retomar el último seguimiento desde la portada en el mismo navegador.
+- [x] Confirmación con número de pedido, link de seguimiento y botón opcional "Avisar por WhatsApp" (o "Mandar comprobante" si paga por transferencia); acceso para retomar el último seguimiento desde la portada en el mismo navegador y ocultarlo sin cambiar el estado del pedido.
 - [x] Seguimiento `/pedido/[token]`: estado en tiempo real, demora estimada, ítems, total, cómo pagar y datos del local (`noindex`).
 
 **Backend**
