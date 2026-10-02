@@ -26,6 +26,7 @@ import { cn } from '@/lib/utils';
 import { IconoWhatsApp } from '../iconos-marca';
 import { Contador } from './hoja-producto';
 import { Miniatura } from './ilustracion';
+import { guardarUltimoPedido } from '@/features/pedidos/ultimo-pedido';
 
 const ETIQUETA_TIPO: Record<TipoPedido, string> = {
   take_away: 'Retiro',
@@ -33,8 +34,6 @@ const ETIQUETA_TIPO: Record<TipoPedido, string> = {
   salon: 'En el local',
 };
 const CLAVE_DATOS = 'datos-cliente-v1';
-/** Último pedido hecho desde este navegador (para volver al seguimiento). */
-const CLAVE_ULTIMO_PEDIDO = 'ultimo-pedido-v1';
 
 interface DatosGuardados {
   nombre: string;
@@ -194,7 +193,7 @@ function Contenido() {
         linkSeguimiento: `${window.location.origin}/pedido/${r.token}`,
       });
       guardar(CLAVE_DATOS, { nombre, telefono, direccion, referencia });
-      guardar(CLAVE_ULTIMO_PEDIDO, { token: r.token, numero: r.numero, en: Date.now() });
+      guardarUltimoPedido({ token: r.token, numero: r.numero });
       setConfirmado({
         numero: r.numero,
         token: r.token,

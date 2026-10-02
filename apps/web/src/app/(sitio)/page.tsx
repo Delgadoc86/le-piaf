@@ -10,6 +10,7 @@ import { InfoLocal } from '@/components/publico/tienda/info-local';
 import { Menu, type GrupoCarta } from '@/components/publico/tienda/menu';
 import { Portada } from '@/components/publico/tienda/portada';
 import { PromosBento } from '@/components/publico/tienda/promos-bento';
+import { SeguimientoGuardado } from '@/components/publico/tienda/seguimiento-guardado';
 
 /**
  * Web del local con experiencia de app de pedidos: portada compacta, promos, carta con "+",
@@ -85,6 +86,8 @@ export default async function Inicio() {
           horario={horario}
           pedidos={local.pedidos}
         />
+
+        <SeguimientoGuardado />
 
         <BannerFecha banner={local.banner} zonaHoraria={local.zonaHoraria} />
 
