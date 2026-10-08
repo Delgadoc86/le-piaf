@@ -681,6 +681,34 @@ Las estimaciones son para 1 dev con dedicación alta. Cada fase termina con algo
 
 ---
 
+### Fase 4.5: Modernización UI/UX del Panel de Administración (2026-10-08)
+
+Adaptación de la interfaz del panel a estándares gastronómicos profesionales (POS / KDS tipo Fudo / Toast), ganando jerarquía visual, contraste cromático semántico, escala tipográfica para pantallas táctiles y modelos mentales familiares.
+
+**Fase 1: Tokens y Fundaciones Visuales**
+- [x] Incorporar el naranja de Silverio (`#F59716` / `#EA580C`) como acento primario del panel (`--primary` gastronómico).
+- [x] Definir tokens de elevación y superficie: fondo suave de aplicación (`bg-slate-50` / `bg-zinc-50`), tarjetas blancas elevadas (`bg-white` con `shadow-sm` y `border-slate-200/80`).
+- [x] Semáforos universales accesibles: Ámbar (nuevos/atención), Azul (en preparación/cocina), Esmeralda (listos/cobrado) y Carmesí (demorados/impagos).
+- [x] Escala tipográfica: utilidades para números de comanda extrabold (`text-3xl` / `text-4xl tabular-nums`) legibles a distancia.
+
+**Fase 2: Barra Lateral y Navegación Ergonómica**
+- [x] Agrupación por módulos en la barra lateral (`OPERACIONES`, `FINANZAS`, `CATÁLOGO`, `SISTEMA`).
+- [x] Widget de estado de caja en vivo (`🟢 Caja Abierta · $XX.XXX` / `🟡 Abrir Caja`) visible permanentemente en la barra.
+- [x] Mayor área de toque táctil (≥ 44 px) y acentos activos claros.
+
+**Fase 3: Tablero de Pedidos (KDS) y Tarjetas de Comanda**
+- [x] Rediseño de `TarjetaPedido`: cabecera tintada por etapa, número `#104` gigante, chip de origen, timer semafórico, items con cantidades destacadas y notas en chip de alerta.
+- [x] Botones táctiles grandes para avance de estado y separación clara de acción de cobro.
+- [x] Headers de columnas Kanban en `cliente.tsx` con píldoras de conteo y montos en pesos.
+
+**Fase 4: Dashboard Resumen y Componentes Comunes**
+- [x] Rediseño de `ResumenPage`: KPI cards con íconos temáticos en cápsula tintada, cifras en `text-3xl font-extrabold` y desglose visual de medios de pago.
+- [x] Armonización de `Bloque` y `EncabezadoPagina` en `ui-panel.tsx` para sincronizar el resto de pantallas (Carta, Caja, Ventas).
+
+✅ **Listo cuando:** el panel tiene alta jerarquía visual, contraste accesible, navegación categorizada, estado de caja permanente y el flujo de pedidos se opera rápido y sin esfuerzo visual en desktop, tablet y móvil.
+
+---
+
 ### Fase 5: Plantilla replicable y venta (1–2 semanas)
 
 **Replicar**

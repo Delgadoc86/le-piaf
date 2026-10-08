@@ -2,7 +2,24 @@
 
 import { useEffect, useRef, useState } from 'react';
 import Link from 'next/link';
-import { Bell, BellRing, ChevronDown, Monitor, Plus, X } from 'lucide-react';
+import {
+  Activity,
+  AlertTriangle,
+  Archive,
+  BellRing,
+  CheckCircle2,
+  ChefHat,
+  ChevronDown,
+  CircleDollarSign,
+  Coins,
+  Monitor,
+  Plus,
+  ShoppingBag,
+  Volume2,
+  VolumeX,
+  Wallet,
+  X,
+} from 'lucide-react';
 import {
   DOC_LOCAL,
   formatARS,
@@ -62,6 +79,12 @@ function leerLocal(clave: string): string | null {
     return null;
   }
 }
+
+const ICONO_ETAPA: Record<IdEtapa, typeof BellRing> = {
+  nuevos: BellRing,
+  preparacion: ChefHat,
+  listos: CheckCircle2,
+};
 
 export default function PedidosPage() {
   const sesion = useSesion();
@@ -221,43 +244,79 @@ export default function PedidosPage() {
   ) as Record<IdEtapa, PedidoConId[]>;
 
   return (
-    <div className="space-y-4">
-      {/* Encabezado compacto: título, totales del día y acciones */}
-      <header className="flex flex-wrap items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h1 className="text-2xl font-semibold">Pedidos</h1>
-          <p className="text-sm text-muted-foreground tabular-nums">
-            Hoy: {totales.pedidos} {totales.pedidos === 1 ? 'pedido' : 'pedidos'} · 💵{' '}
-            {formatARS(totales.porMedio.efectivo)} · 🏦 {formatARS(totales.porMedio.transferencia)}
-            {totales.porCobrar > 0 && (
-              <span className="font-semibold text-amber-700 dark:text-amber-300">
-                {' '}
-                · Por cobrar {formatARS(totales.porCobrar)}
+    <div className="rounded-3xl bg-[#0b1120] text-slate-100 p-4 md:p-6 shadow-2xl border border-slate-800/80 space-y-5">
+      {/* Encabezado KDS idéntico al Mockup 2 con iconos de ayuda rápida */}
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+        <div className="flex items-center gap-3">
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-xl shadow-lg shadow-orange-500/20">
+            <ChefHat className="size-6 text-white" />
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-xl md:text-2xl font-black tracking-tight text-white">Tablero KDS</h1>
+              <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-300 border border-slate-700">
+                Cocina &amp; Barra
               </span>
-            )}
-          </p>
+            </div>
+            <p className="flex items-center gap-1.5 text-xs text-slate-400">
+              <Activity className="size-3 text-emerald-400" />
+              <span>Control de pedidos en vivo</span>
+            </p>
+          </div>
         </div>
-        <div className="flex flex-wrap gap-2">
+
+        {/* Métrica de pedidos y ventas del día con iconos */}
+        <div className="flex items-center gap-2 rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2 text-xs md:text-sm text-slate-300 shadow-inner">
+          <span className="text-slate-400">Hoy:</span>
+          <span className="inline-flex items-center gap-1 font-extrabold text-white tabular-nums">
+            <ShoppingBag className="size-3.5 text-slate-400" />
+            {totales.pedidos} pedidos
+          </span>
+          <span className="text-slate-600">·</span>
+          <span className="inline-flex items-center gap-1 font-extrabold text-emerald-400 tabular-nums">
+            <CircleDollarSign className="size-3.5 text-emerald-400" />
+            {formatARS(totales.vendido)}
+          </span>
+          {totales.porCobrar > 0 && (
+            <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-500/20 px-2 py-0.5 font-bold text-amber-300 text-xs">
+              <Coins className="size-3" />
+              Por cobrar {formatARS(totales.porCobrar)}
+            </span>
+          )}
+        </div>
+
+        {/* Acciones */}
+        <div className="flex flex-wrap items-center gap-2">
           <Button
-            variant={sonido === 'activo' ? 'outline' : 'default'}
+            variant="outline"
             className={cn(
-              sonido !== 'activo' && 'animate-pulse bg-amber-400 text-amber-950 hover:bg-amber-500',
+              'h-10 rounded-xl font-bold border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white flex items-center gap-2',
+              sonido === 'activo'
+                ? 'border-emerald-500/50 text-emerald-400 bg-slate-900/90'
+                : 'animate-pulse bg-amber-500 text-slate-950 hover:bg-amber-400 border-none',
             )}
             onClick={() => void alternarSonido()}
             aria-pressed={sonido === 'activo'}
             title={sonido === 'activo' ? 'Tocá para silenciar' : undefined}
           >
-            {sonido === 'activo' ? <Bell /> : <BellRing />}
             {sonido === 'activo' ? (
-              'Sonido activado'
+              <>
+                <Volume2 className="size-4 text-emerald-400" />
+                <span>Sonido ON</span>
+              </>
             ) : (
               <>
-                Activar sonido<span className="hidden sm:inline"> de pedidos</span>
+                <VolumeX className="size-4" />
+                <span>Activar sonido</span>
               </>
             )}
           </Button>
-          <Button size="lg" onClick={() => setNuevoAbierto(true)}>
-            <Plus /> Nuevo pedido
+          <Button
+            size="lg"
+            className="h-10 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black shadow-lg shadow-blue-600/30 transition-transform active:scale-[0.98] flex items-center gap-1.5"
+            onClick={() => setNuevoAbierto(true)}
+          >
+            <Plus className="size-4" /> Nuevo pedido
           </Button>
         </div>
       </header>
@@ -267,54 +326,67 @@ export default function PedidosPage() {
         <button
           type="button"
           onClick={() => setPestana('nuevos')}
-          className="flex w-full items-center gap-2 rounded-xl bg-amber-400 px-3 py-2 text-left text-sm font-semibold text-amber-950 shadow-sm md:px-4 md:py-3 md:text-base"
+          className="flex w-full items-center gap-3 rounded-2xl bg-amber-500 px-4 py-3 text-left font-black text-slate-950 shadow-lg shadow-amber-500/20 transition hover:bg-amber-400 md:text-base animate-pulse"
         >
           <BellRing className="size-5 shrink-0 animate-bounce" aria-hidden />
-          {porAceptar.length === 1
-            ? 'Entró 1 pedido nuevo: aceptalo para que el cliente vea que lo están preparando.'
-            : `Hay ${porAceptar.length} pedidos nuevos esperando que los aceptes.`}
+          <span className="flex-1">
+            {porAceptar.length === 1
+              ? '¡Entró 1 pedido nuevo! Aceptalo para que comience la preparación.'
+              : `¡Hay ${porAceptar.length} pedidos nuevos esperando confirmación!`}
+          </span>
+          <span className="rounded-lg bg-black/20 px-3 py-1 text-xs uppercase tracking-wider font-extrabold">
+            Ver ahora →
+          </span>
         </button>
       )}
       {cancelacionActiva && (
-        <p
+        <div
           role="alert"
-          className="flex items-center justify-between gap-2 rounded-lg bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive"
+          className="flex items-center justify-between gap-2 rounded-xl bg-rose-950/60 border border-rose-800/80 px-4 py-3 text-sm font-semibold text-rose-300"
         >
-          {cancelacionActiva.por === 'cliente'
-            ? `El cliente canceló el pedido #${cancelacionActiva.numero}.`
-            : `Se canceló el #${cancelacionActiva.numero}: el cliente no lo confirmó a tiempo.`}
+          <span className="flex items-center gap-2">
+            <AlertTriangle className="size-4 text-rose-400 shrink-0" />
+            <span>
+              {cancelacionActiva.por === 'cliente'
+                ? `El cliente canceló el pedido #${cancelacionActiva.numero}.`
+                : `Se canceló el #${cancelacionActiva.numero}: el cliente no lo confirmó a tiempo.`}
+            </span>
+          </span>
           <button
             type="button"
-            className="underline"
+            className="rounded-lg bg-rose-900/60 px-2.5 py-1 text-xs font-bold text-white hover:bg-rose-800"
             onClick={() => setCancelacionVista(cancelacionActiva.id)}
           >
             Entendido
           </button>
-        </p>
+        </div>
       )}
       {sinConfirmar > 0 && (
-        <p className="rounded-lg border border-dashed px-3 py-2 text-sm text-muted-foreground">
-          ⏳ {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
-          cliente lo confirme por WhatsApp. Si no confirma, se cancela solo.
+        <p className="flex items-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-2.5 text-sm text-slate-400">
+          <AlertTriangle className="size-4 text-amber-400 shrink-0" />
+          <span>
+            ⏳ {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
+            cliente lo confirme por WhatsApp. Si no confirma, se cancela solo.
+          </span>
         </p>
       )}
       {esGestor && !caja.cargando && !caja.turno && (
-        <p className="flex items-center justify-between gap-2 rounded-lg border border-amber-500/50 bg-amber-500/10 px-3 py-1.5 text-sm md:py-2">
-          <span>
-            La caja está cerrada
-            <span className="hidden sm:inline">: lo que cobres no va a sumar a ninguna caja</span>.
+        <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-600/50 bg-amber-950/40 px-4 py-2.5 text-sm text-amber-200">
+          <span className="flex items-center gap-2">
+            <Wallet className="size-4 text-amber-400 shrink-0" />
+            <span>La caja está cerrada: lo que cobres no va a sumar a ningún turno de caja.</span>
           </span>
-          <Link href="/panel/caja" className="font-semibold underline">
+          <Link href="/panel/caja" className="font-bold underline text-amber-300 hover:text-amber-100">
             Abrir caja
           </Link>
-        </p>
+        </div>
       )}
       {error && (
-        <p className="rounded-lg bg-destructive/10 p-3 text-sm text-destructive">{error}</p>
+        <p className="rounded-xl bg-destructive/20 border border-destructive/40 p-3 text-sm text-destructive">{error}</p>
       )}
       {verTip && (
-        <p className="flex items-start gap-2 rounded-lg border bg-muted/50 px-3 py-2 text-sm md:hidden">
-          <Monitor className="mt-0.5 size-4 shrink-0" aria-hidden />
+        <p className="flex items-start gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-sm text-slate-400 md:hidden">
+          <Monitor className="mt-0.5 size-4 shrink-0 text-slate-300" aria-hidden />
           <span className="flex-1">
             Para el servicio conviene una <strong>compu o tablet</strong>: ves las 3 columnas
             juntas. En el celular, usá las pestañas.
@@ -338,12 +410,13 @@ export default function PedidosPage() {
 
       {/* Celular: pestañas fijas con contador de color; tablet y compu: columnas */}
       <div
-        className="sticky top-0 z-10 -mx-4 flex gap-1 bg-background/95 px-4 py-2 backdrop-blur md:hidden"
+        className="sticky top-0 z-10 -mx-4 flex gap-1.5 bg-[#0b1120]/95 px-4 py-2.5 backdrop-blur md:hidden border-b border-slate-800"
         role="tablist"
       >
         {ETAPAS.map((e) => {
           const n = porEtapa[e.id].length;
           const activa = pestana === e.id;
+          const IconoEtapa = ICONO_ETAPA[e.id];
           return (
             <button
               key={e.id}
@@ -352,21 +425,22 @@ export default function PedidosPage() {
               aria-selected={activa}
               onClick={() => setPestana(e.id)}
               className={cn(
-                'flex flex-1 items-center justify-center gap-1.5 rounded-lg border px-2 py-2 text-sm whitespace-nowrap',
+                'flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap transition',
                 activa
-                  ? cn(COLOR_ETAPA[e.id].encabezado, 'border-transparent font-semibold')
-                  : 'bg-card',
+                  ? cn(COLOR_ETAPA[e.id].encabezado, 'border-transparent shadow-md')
+                  : 'bg-slate-900 text-slate-400 border-slate-800',
               )}
             >
-              {e.corto}
+              <IconoEtapa className="size-3.5 shrink-0" />
+              <span>{e.corto}</span>
               <span
                 className={cn(
-                  'min-w-5 rounded-full px-1.5 text-xs font-bold tabular-nums',
+                  'min-w-5 rounded-full px-1.5 py-0.5 text-xs font-black tabular-nums',
                   activa
-                    ? 'bg-black/15'
+                    ? 'bg-black/20 text-white'
                     : n > 0
                       ? cn(COLOR_ETAPA[e.id].punto, 'text-white')
-                      : 'bg-muted',
+                      : 'bg-slate-800 text-slate-500',
                 )}
               >
                 {n}
@@ -376,36 +450,47 @@ export default function PedidosPage() {
         })}
       </div>
 
-      <div className="grid items-start gap-3 md:grid-cols-3">
+      <div className="grid items-start gap-4 md:grid-cols-3">
         {ETAPAS.map((e) => {
           const lista = porEtapa[e.id];
           const color = COLOR_ETAPA[e.id];
+          const totalColumna = lista.reduce((acc, p) => acc + p.total, 0);
+          const IconoEtapa = ICONO_ETAPA[e.id];
+
           return (
             <section
               key={e.id}
               aria-label={e.titulo}
               className={cn(
-                'min-w-0 rounded-2xl p-2',
-                color.fondo,
+                'min-w-0 rounded-2xl p-2.5 md:p-3 bg-slate-900/60 border border-slate-800/80 shadow-md transition-colors',
                 pestana !== e.id && 'hidden md:block',
               )}
             >
-              <h2
+              <div
                 className={cn(
-                  'mb-2 hidden items-center justify-between rounded-xl px-3 py-2 text-sm font-semibold md:flex',
+                  'mb-3 hidden items-center justify-between rounded-xl px-4 py-3 shadow-md md:flex',
                   color.encabezado,
                 )}
               >
-                {e.titulo}
-                <span className="rounded-full bg-black/15 px-2 text-xs tabular-nums">
-                  {lista.length}
-                </span>
-              </h2>
-              <div className="space-y-2">
+                <div className="flex items-center gap-2">
+                  <IconoEtapa className="size-4 shrink-0" />
+                  <h2 className="text-xs font-black uppercase tracking-wider">{e.titulo}</h2>
+                  <span className="flex size-6 items-center justify-center rounded-full bg-black/20 text-xs font-black tabular-nums">
+                    {lista.length}
+                  </span>
+                </div>
+                {lista.length > 0 && (
+                  <span className="text-xs font-black tabular-nums opacity-95">
+                    {formatARS(totalColumna)}
+                  </span>
+                )}
+              </div>
+              <div className="space-y-3">
                 {lista.length === 0 ? (
-                  <p className="rounded-xl border border-dashed bg-card/50 p-6 text-center text-sm text-muted-foreground">
-                    {e.vacio}
-                  </p>
+                  <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center text-sm font-medium text-slate-500">
+                    <IconoEtapa className="mx-auto size-7 text-slate-600 mb-2" />
+                    <p>{e.vacio}</p>
+                  </div>
                 ) : (
                   lista.map(tarjeta)
                 )}
@@ -416,25 +501,26 @@ export default function PedidosPage() {
       </div>
 
       {terminados.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3 pt-4 border-t border-slate-800/80">
           <button
             type="button"
             onClick={() => setVerTerminados((v) => !v)}
-            className="flex items-center gap-1 text-sm font-semibold text-muted-foreground hover:text-foreground"
+            className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-200 transition"
             aria-expanded={verTerminados}
           >
             <ChevronDown
               className={cn('size-4 transition-transform', verTerminados && 'rotate-180')}
             />
-            Entregados y cancelados de hoy ({terminados.length})
+            <Archive className="size-4 text-slate-400" />
+            <span>Entregados y cancelados de hoy ({terminados.length})</span>
             {sinCobrar > 0 && (
-              <span className="rounded-full bg-red-600 px-2 text-xs text-white">
+              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
                 {sinCobrar} sin cobrar
               </span>
             )}
           </button>
           {verTerminados && (
-            <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
               {terminados.map(tarjeta)}
             </div>
           )}

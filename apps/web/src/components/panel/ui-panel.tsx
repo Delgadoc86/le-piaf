@@ -41,10 +41,12 @@ export function EncabezadoPagina({
   return (
     <header className="mb-6 flex flex-wrap items-end justify-between gap-4">
       <div>
-        <h1 className="text-2xl font-semibold">{titulo}</h1>
-        {descripcion && <p className="mt-1 text-muted-foreground">{descripcion}</p>}
+        <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-foreground">
+          {titulo}
+        </h1>
+        {descripcion && <p className="mt-1 text-sm font-medium text-muted-foreground">{descripcion}</p>}
       </div>
-      {acciones && <div className="flex flex-wrap gap-2">{acciones}</div>}
+      {acciones && <div className="flex flex-wrap items-center gap-2">{acciones}</div>}
     </header>
   );
 }
@@ -61,8 +63,13 @@ export function Bloque({
   className?: string;
 }) {
   return (
-    <section className={cn('rounded-xl border bg-card p-5', className)}>
-      <h2 className="font-semibold">{titulo}</h2>
+    <section
+      className={cn(
+        'rounded-2xl border bg-card p-5 md:p-6 shadow-sm transition-all hover:border-slate-300/80 hover:shadow-md dark:hover:border-slate-700/80',
+        className,
+      )}
+    >
+      <h2 className="text-base md:text-lg font-bold tracking-tight text-foreground">{titulo}</h2>
       {descripcion && <p className="mt-0.5 text-sm text-muted-foreground">{descripcion}</p>}
       <div className="mt-4 space-y-4">{children}</div>
     </section>

@@ -44,7 +44,7 @@ export function MarcoPanel({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col md:flex-row">
+    <div className="flex min-h-dvh flex-col bg-[#f1f5f9] text-foreground md:flex-row dark:bg-[#0b1120]">
       <BarraLateral
         rol={sesion.rol}
         email={sesion.usuario.email ?? ''}

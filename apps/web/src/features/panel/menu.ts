@@ -18,6 +18,8 @@ import {
   type LucideIcon,
 } from 'lucide-react';
 
+export type SeccionMenu = 'operaciones' | 'finanzas' | 'catalogo' | 'sistema';
+
 export interface ItemMenu {
   ruta: string; // relativa a /panel
   titulo: string;
@@ -25,6 +27,7 @@ export interface ItemMenu {
   roles: readonly Rol[];
   /** Fase en la que se construye; mientras tanto se muestra deshabilitado. */
   fase: number;
+  seccion: SeccionMenu;
 }
 
 const GESTORES = ['dueno', 'encargado'] as const;
@@ -36,6 +39,7 @@ export const MENU: readonly ItemMenu[] = [
     icono: Home,
     roles: ['dueno', 'encargado', 'mozo', 'cocina'],
     fase: 0,
+    seccion: 'operaciones',
   },
   {
     ruta: 'pedidos',
@@ -43,26 +47,112 @@ export const MENU: readonly ItemMenu[] = [
     icono: ClipboardList,
     roles: [...GESTORES, 'mozo'],
     fase: 2,
+    seccion: 'operaciones',
   },
-  { ruta: 'cocina', titulo: 'Cocina', icono: ChefHat, roles: [...GESTORES, 'cocina'], fase: 3 },
-  { ruta: 'salon', titulo: 'Salón', icono: Armchair, roles: [...GESTORES, 'mozo'], fase: 3 },
-  { ruta: 'caja', titulo: 'Caja', icono: Wallet, roles: GESTORES, fase: 4 },
-  { ruta: 'carta', titulo: 'Carta', icono: UtensilsCrossed, roles: GESTORES, fase: 1 },
-  { ruta: 'promos', titulo: 'Promos', icono: Percent, roles: GESTORES, fase: 1 },
-  { ruta: 'qr', titulo: 'QR de la carta', icono: QrCode, roles: GESTORES, fase: 1 },
-  { ruta: 'mesas', titulo: 'Mesas', icono: LayoutGrid, roles: GESTORES, fase: 3 },
-  { ruta: 'zonas', titulo: 'Zonas de delivery', icono: MapPin, roles: GESTORES, fase: 9 },
-  { ruta: 'ventas', titulo: 'Ventas', icono: BarChart3, roles: GESTORES, fase: 4 },
-  { ruta: 'clientes', titulo: 'Clientes', icono: UserSquare, roles: GESTORES, fase: 9 },
-  { ruta: 'configuracion', titulo: 'Configuración', icono: Settings, roles: ['dueno'], fase: 1 },
+  {
+    ruta: 'cocina',
+    titulo: 'Cocina',
+    icono: ChefHat,
+    roles: [...GESTORES, 'cocina'],
+    fase: 3,
+    seccion: 'operaciones',
+  },
+  {
+    ruta: 'salon',
+    titulo: 'Salón',
+    icono: Armchair,
+    roles: [...GESTORES, 'mozo'],
+    fase: 3,
+    seccion: 'operaciones',
+  },
+  {
+    ruta: 'caja',
+    titulo: 'Caja',
+    icono: Wallet,
+    roles: GESTORES,
+    fase: 4,
+    seccion: 'finanzas',
+  },
+  {
+    ruta: 'ventas',
+    titulo: 'Ventas',
+    icono: BarChart3,
+    roles: GESTORES,
+    fase: 4,
+    seccion: 'finanzas',
+  },
+  {
+    ruta: 'carta',
+    titulo: 'Carta',
+    icono: UtensilsCrossed,
+    roles: GESTORES,
+    fase: 1,
+    seccion: 'catalogo',
+  },
+  {
+    ruta: 'promos',
+    titulo: 'Promos',
+    icono: Percent,
+    roles: GESTORES,
+    fase: 1,
+    seccion: 'catalogo',
+  },
+  {
+    ruta: 'qr',
+    titulo: 'QR de la carta',
+    icono: QrCode,
+    roles: GESTORES,
+    fase: 1,
+    seccion: 'catalogo',
+  },
+  {
+    ruta: 'mesas',
+    titulo: 'Mesas',
+    icono: LayoutGrid,
+    roles: GESTORES,
+    fase: 3,
+    seccion: 'operaciones',
+  },
+  {
+    ruta: 'zonas',
+    titulo: 'Zonas de delivery',
+    icono: MapPin,
+    roles: GESTORES,
+    fase: 9,
+    seccion: 'catalogo',
+  },
+  {
+    ruta: 'clientes',
+    titulo: 'Clientes',
+    icono: UserSquare,
+    roles: GESTORES,
+    fase: 9,
+    seccion: 'finanzas',
+  },
+  {
+    ruta: 'configuracion',
+    titulo: 'Configuración',
+    icono: Settings,
+    roles: ['dueno'],
+    fase: 1,
+    seccion: 'sistema',
+  },
   {
     ruta: 'cuenta',
     titulo: 'Mi cuenta',
     icono: KeyRound,
     roles: ['dueno', 'encargado', 'mozo', 'cocina'],
     fase: 0,
+    seccion: 'sistema',
   },
 ];
+
+export const ETIQUETA_SECCION: Record<SeccionMenu, string> = {
+  operaciones: 'Operaciones',
+  finanzas: 'Finanzas',
+  catalogo: 'Catálogo',
+  sistema: 'Sistema',
+};
 
 /**
  * Fases ya construidas (la 4 se hizo antes que la 3, a pedido). Lo demás no se muestra: panel

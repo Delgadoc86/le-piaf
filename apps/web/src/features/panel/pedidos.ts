@@ -332,28 +332,31 @@ export const ETAPAS: {
 
 export const COLOR_ETAPA: Record<
   IdEtapa,
-  { encabezado: string; fondo: string; borde: string; boton: string; punto: string }
+  { encabezado: string; fondo: string; borde: string; boton: string; punto: string; textoBoton: string }
 > = {
   nuevos: {
-    encabezado: 'bg-amber-400 text-amber-950',
-    fondo: 'bg-amber-500/[0.06]',
-    borde: 'border-l-amber-400',
-    boton: 'bg-amber-400 text-amber-950 hover:bg-amber-500',
-    punto: 'bg-amber-400',
+    encabezado: 'bg-[#d97706] text-white font-black',
+    fondo: 'bg-amber-950/20',
+    borde: 'border-2 border-amber-500 shadow-amber-500/10',
+    boton: 'bg-[#f59e0b] hover:bg-[#d97706] text-slate-950 font-black',
+    punto: 'bg-amber-500',
+    textoBoton: 'Aceptar Pedido',
   },
   preparacion: {
-    encabezado: 'bg-sky-600 text-white',
-    fondo: 'bg-sky-500/[0.06]',
-    borde: 'border-l-sky-500',
-    boton: 'bg-sky-600 text-white hover:bg-sky-700',
-    punto: 'bg-sky-500',
+    encabezado: 'bg-[#2563eb] text-white font-black',
+    fondo: 'bg-blue-950/20',
+    borde: 'border-2 border-blue-500 shadow-blue-500/10',
+    boton: 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold',
+    punto: 'bg-blue-500',
+    textoBoton: 'Marcar Listo',
   },
   listos: {
-    encabezado: 'bg-emerald-600 text-white',
-    fondo: 'bg-emerald-500/[0.06]',
-    borde: 'border-l-emerald-500',
-    boton: 'bg-emerald-600 text-white hover:bg-emerald-700',
+    encabezado: 'bg-[#059669] text-white font-black',
+    fondo: 'bg-emerald-950/20',
+    borde: 'border-2 border-emerald-500 shadow-emerald-500/10',
+    boton: 'bg-[#059669] hover:bg-[#047857] text-white font-bold',
     punto: 'bg-emerald-500',
+    textoBoton: 'Entregar y Cerrar',
   },
 };
 
