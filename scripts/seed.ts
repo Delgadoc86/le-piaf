@@ -65,6 +65,8 @@ interface SeedJson {
     descripcion: string;
     precio: number;
     orden: number;
+    foto?: string;
+    estacion?: 'cocina' | 'barra';
     _variantesSugeridas?: string[];
   }[];
   promos: { titulo: string; descripcion: string; precio: number; foto?: string; orden: number }[];
@@ -250,7 +252,10 @@ async function seedLocal(): Promise<void> {
       orden: p.orden,
       visible: true,
       disponible: true,
-      estacion: 'cocina' as const,
+      estacion: (p.estacion ?? (p.categoriaId === 'bebidas' ? 'barra' : 'cocina')) as
+        | 'cocina'
+        | 'barra',
+      ...(p.foto ? { fotoUrl: foto(p.foto) } : {}),
       ...(variantes ? { variantes } : {}),
     };
   });

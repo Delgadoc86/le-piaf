@@ -131,10 +131,17 @@ Extraído del proyecto viejo (React + Vite + Firebase, repo `Silverio-FoodTruck`
 - **Google Analytics 4:** `G-8CN2SBDQ5R` (mantener el mismo ID para no perder el historial)
 - **Schema.org:** hoy usa `LocalBusiness`. En la nueva conviene `Restaurant` con `servesCuisine`, `priceRange`, `menu` (URL de la carta), `hasMap`, `openingHoursSpecification` correcta y `acceptsReservations`.
 
-## 6. Carta actual (resumen; el detalle está en seed.json)
+## 6. Carta actual (Menú Silverio Club 2026; detalle en seed.json)
 
-**Orden de categorías:** Viandas → Hamburguesas → Lomos → Pizzas → Empanadas → Pollos → Choripán → Panchos → Papas → Bebidas.
-Solo 6 tienen productos cargados: 12 productos y 5 promos.
+**Categorías y Platos cargados según flyer oficial:**
+- **Choripanes:** Chori ($10.000) · Chori morrón y provoleta ($12.000)
+- **Hamburguesas:** Hamburguesa chica carne ($7.000) · Hamburguesa grande carne ($10.000) · Hamburguesa chica pollo ($5.000)
+- **Lomos y Milanesas:** Sándwich milanesa carne ($12.000) · Sándwich milanesa pollo ($10.000) · Lomo ($15.000)
+- **Pizzas:** Pizzas redondas ($10.000) · Pizza especial ($13.000)
+- **Panchos:** Pancho común ($2.500) · Pancho provoleta ($3.000)
+- **Empanadas:** Empanadas de carne ($15.000)
+- **Bebidas y Cerveza:** Cerveza tirada 500cc ($4.000) · Cerveza tirada 1L ($8.000)
+- **Papas Fritas:** Cono de papas ($3.500) · Salchipapa ($8.000)
 
 **Mejoras del modelo:**
 - Los precios eran strings (`"11.000"`) y pasan a enteros (`11000`).
@@ -147,8 +154,8 @@ Solo 6 tienen productos cargados: 12 productos y 5 promos.
 - [ ] Dirección, coordenadas y link de Maps del **local físico**.
 - [ ] ¿El food truck sigue funcionando? ¿En qué días y dónde? (Podría ser un "segundo punto de venta").
 - [ ] Horarios reales del local (hoy hay datos contradictorios).
-- [ ] Carta completa y **precios actualizados**; bebidas y cervezas (hoy no hay ninguna cargada).
-- [ ] Fotos del local y de los productos.
+- [x] Carta completa y **precios actualizados** (cargados según flyer oficial de Silverio Club).
+- [ ] Fotos individuales de productos faltantes (pizzas, panchos, empanadas, etc.).
 - [ ] Cantidad de mesas y zonas del salón (barra, patio, etc.).
 - [ ] ¿Hace delivery? ¿A qué zonas y a qué costo? ¿Pedido mínimo?
 - [ ] Medios de pago: efectivo, transferencia (alias/CBU), Mercado Pago (¿tiene cuenta?).

@@ -4,7 +4,7 @@
 > **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
 > **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.7, del 2026-09-29.
+Versión del documento: 1.12, del 2026-10-11.
 
 ---
 
@@ -709,6 +709,39 @@ Adaptación de la interfaz del panel a estándares gastronómicos profesionales 
 
 ---
 
+### Fase 4.6: Experiencia Táctil Gastronómica & Operación Ágil (Caja, POS y KDS) (2026-10-11)
+
+Diseñado para operadores de cocina y mostrador no técnicos ("regla de la plancha": botones grandes ≥ 48px, alto contraste, semáforos cromáticos inequívocos, visibilidad a distancia y máxima simpleza). Se mantienen los pasos manuales de duplicación para conservar la personalización de cada local.
+
+**1. Sistema de Caja Táctil y Visual (Prioridad UX)**
+- [ ] Banner destacado de "Caja Cerrada": aviso visual prominente a todo el ancho si la caja está cerrada, alertando que no se registran cobros hasta abrir.
+- [ ] Atajos de cambio inicial rápido: botones táctiles grandes (`$0`, `$10.000`, `$20.000`, `$50.000`, `Otro monto`) y botón de apertura de gran tamaño (`h-14+`).
+- [ ] Jerarquía clara de métricas: tarjeta dominante para "Efectivo Físico en Cajón" (con desglose claro) vs "Transferencias Digitales".
+- [ ] Movimientos de efectivo táctiles: botones grandes `[🔴 Salió Plata]` y `[🟢 Entró Plata]` con categorías gráficas (`🚚 Proveedor`, `🪙 Cambio`, `💵 Retiro`, `📦 Varios`).
+- [ ] Cierre de caja con semáforo de diferencias: carteles de impacto para cuadre (`✅ Cuadre Exacto`, `❌ Faltante`, `⚠️ Sobrante`).
+
+**2. Carga Rápida de Pedidos (POS de Mostrador)**
+- [ ] Barra de categorías superior fija con tabs/píldoras rápidas (`🔥 Promos`, `🍔 Burgers`, `🍟 Papas`, `🍺 Bebidas`) para evitar scrolls largos.
+- [ ] Azulejos de productos táctiles: botón grande con precio destacado; un toque suma directo si no tiene variantes.
+- [ ] Configuración de variantes simplificada: selector claro de opciones sin modales complejos.
+- [ ] Ticket de mostrador en 3 pasos: Comanda rápida (+/- táctil de 44px), Datos del cliente simplificados para mostrador (solo nombre opcional) y Botones de cobro directo (`💵 Cobrar Efectivo`, `🏦 Cobrar Transf.`, `⏳ Cobrar Después`).
+- [ ] En móvil: modal full-screen para evitar scrolls anidados incómodos.
+
+**3. Perfeccionamiento del Tablero KDS (Cocina y Despacho)**
+- [ ] Comanda de alto contraste a distancia: cantidades en cápsula destacada (`[ 2x ]`) y notas/exclusiones críticas en pastilla llamativa (`⚠️ SIN CEBOLLA`).
+- [ ] Desacople de cobro para rol cocina: para personal de cocina, botón directo `👨‍🍳 MARCAR LISTO` sin interrumpir con pantallas de cobro.
+- [ ] Botones de cobro rápido con mayor superficie táctil (≥ 48px de alto).
+- [ ] Alerta de pedidos demorados: indicación visual suave cuando un pedido supera los 15-20 minutos.
+
+**4. Adaptabilidad Móvil y Respaldo ante Falla de PC**
+- [ ] Limpieza de encabezados en móvil para evitar acumular barras fijas que quiten espacio vertical.
+- [ ] Vista cómoda de comandas en tarjeta vertical accesible para operación con el pulgar.
+- [ ] Documentación y actualización del proceso de replicación para nuevos locales (conservando los pasos manuales que dan la identidad a cada local).
+
+✅ **Listo cuando:** la caja se abre y cierra con un par de toques grandes, los pedidos de mostrador se cargan en segundos por categorías, la cocina visualiza comandas a distancia sin distracciones de cobro, y todo es utilizable de forma ordenada tanto en PC como en celular.
+
+---
+
 ### Fase 5: Plantilla replicable y venta (1–2 semanas)
 
 **Replicar**
@@ -856,3 +889,5 @@ Este repo (Silverio Club) es la **base**. La guía paso a paso, con comandos, es
 - **1.9 (2026-09-29):** **Fase 4 antes que la 3**, con alcance de **caja simple**: abrir y cerrar caja (efectivo esperado contra contado), movimientos de efectivo, historial de cierres, página **Ventas** (hoy contra la semana pasada, por día, lo más vendido y horarios) y Resumen con números reales. `contabilizarPedido` cuenta el pedido cuando queda pagado y no anulado, y resta si se cancela o se deshace el cobro (reemplaza a `revertirContabilizacion`). Nuevas callables `abrirCaja` y `cerrarCaja`. Los movimientos solo se anotan en la caja abierta. El menú muestra las fases hechas (0, 1, 2 y 4); "Reportes" pasa a llamarse "Ventas".
 - **1.10 (2026-09-29):** **base lista para copiar**. Todo lo propio del local pasa al kit: textos de la web, SEO, GA4, fuentes, entrega y pagos salen de `silverio/seed.json` (antes estaban en `scripts/seed.ts`). README con stack y guía de duplicado; manual de usuario en PDF en `silverio/manual/`. Login solo con email (sin Google), límite de 5 intentos y "Mi cuenta" para cambiar la contraseña. Entregar pide el cobro; delivery sin zonas con envío a confirmar. `firebase-admin/auth` fuera de la web (fallaba en Vercel) y `/api/salud` para diagnosticar.
 - **1.11 (2026-09-30):** **pedidos falsos sin registro de usuarios**: confirmación por WhatsApp para clientes nuevos con vencimiento de 15 minutos (`cancelarPedidosSinConfirmar`), cancelación del cliente desde el seguimiento (`cancelarPedidoCliente`), números bloqueados (`bloqueados/{telefono}`, con reglas y tests) y clientes de confianza al recibir su primer pedido (`registrarClienteEntregado`). Configurable en Configuración → Pedidos falsos. Comprobantes de transferencia: por WhatsApp, como hasta ahora.
+- **1.12 (2026-10-11):** **Fase 4.6 anexada**: Experiencia táctil gastronómica para personal de cocina y mostrador (rediseño visual de Caja con atajos de cambio y métricas claras de cajón vs banco, POS de carga rápida con tabs superiores tipo Fudo, KDS con notas de exclusión de alto impacto y separación de cobro para cocina). Se preservan los pasos manuales de duplicación para conservar la personalización de cada local.
+

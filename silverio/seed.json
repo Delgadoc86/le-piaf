@@ -191,11 +191,10 @@
   },
   "categorias": [
     {
-      "id": "viandas",
-      "nombre": "Viandas",
+      "id": "choripan",
+      "nombre": "Choripanes",
       "orden": 1,
-      "icono": "set-meal",
-      "_nota": "Existía en el código pero sin productos. En el viejo, las viandas eran productos llamados 'Lunes'...'Viernes'. En el nuevo: producto con disponibilidad por día de semana."
+      "icono": "sausage"
     },
     {
       "id": "hamburguesas",
@@ -207,8 +206,7 @@
       "id": "lomos",
       "nombre": "Lomos y Milanesas",
       "orden": 3,
-      "icono": "sandwich",
-      "_nota": "En el viejo se llamaba 'Lomos' pero contiene milanesas y sándwiches. Confirmar nombre."
+      "icono": "sandwich"
     },
     {
       "id": "pizzas",
@@ -217,126 +215,156 @@
       "icono": "pizza"
     },
     {
-      "id": "empanadas",
-      "nombre": "Empanadas",
-      "orden": 5,
-      "icono": "empanada"
-    },
-    {
-      "id": "pollos",
-      "nombre": "Pollos",
-      "orden": 6,
-      "icono": "chicken"
-    },
-    {
-      "id": "choripan",
-      "nombre": "Choripán",
-      "orden": 7,
-      "icono": "sausage"
-    },
-    {
       "id": "panchos",
       "nombre": "Panchos",
-      "orden": 8,
+      "orden": 5,
       "icono": "hotdog"
     },
     {
-      "id": "papas",
-      "nombre": "Papas",
-      "orden": 9,
-      "icono": "fries"
+      "id": "empanadas",
+      "nombre": "Empanadas",
+      "orden": 6,
+      "icono": "empanada"
     },
     {
       "id": "bebidas",
-      "nombre": "Bebidas",
-      "orden": 10,
-      "icono": "drink"
+      "nombre": "Bebidas y Cerveza",
+      "orden": 7,
+      "icono": "beer"
+    },
+    {
+      "id": "papas",
+      "nombre": "Papas Fritas",
+      "orden": 8,
+      "icono": "fries"
     }
   ],
   "productos": [
     {
-      "categoriaId": "hamburguesas",
-      "nombre": "Hamburguesa XL de carne",
-      "descripcion": "Hamburguesa XL de carne.",
-      "precio": 9000,
-      "orden": 1
-    },
-    {
-      "categoriaId": "lomos",
-      "nombre": "Lomo al plato",
-      "descripcion": "Lomo al plato a caballo con papas fritas y ensalada.",
-      "precio": 14000,
-      "orden": 1
-    },
-    {
-      "categoriaId": "lomos",
-      "nombre": "Milanesa de carne al plato",
-      "descripcion": "Milanesa de carne napolitana o a caballo, con papas fritas y ensalada.",
-      "precio": 12000,
-      "orden": 2,
-      "_variantesSugeridas": ["Napolitana", "A caballo"]
-    },
-    {
-      "categoriaId": "lomos",
-      "nombre": "Milanesa de pollo al plato",
-      "descripcion": "Milanesa de pollo napolitana o a caballo, con papas fritas y ensalada.",
-      "precio": 11000,
-      "orden": 3,
-      "_variantesSugeridas": ["Napolitana", "A caballo"]
-    },
-    {
-      "categoriaId": "lomos",
-      "nombre": "Sándwich de milanesa de carne",
-      "descripcion": "Sándwich de milanesa de carne.",
-      "precio": 9000,
-      "orden": 4
-    },
-    {
-      "categoriaId": "lomos",
-      "nombre": "Sándwich de milanesa de pollo",
-      "descripcion": "Sándwich de milanesa de pollo.",
-      "precio": 8500,
-      "orden": 5
+      "categoriaId": "choripan",
+      "nombre": "Chori",
+      "descripcion": "Choripán clásico a las brasas con chimichurri o salsa criolla.",
+      "precio": 10000,
+      "orden": 1,
+      "foto": "assets/promos/choripan-papas.webp"
     },
     {
       "categoriaId": "choripan",
-      "nombre": "Choripán",
-      "descripcion": "Choripán clásico.",
+      "nombre": "Chori morron y provoleta",
+      "descripcion": "Choripán a las brasas con morrón asado y provoleta fundida.",
+      "precio": 12000,
+      "orden": 2
+    },
+    {
+      "categoriaId": "hamburguesas",
+      "nombre": "Hamburguesa chica de carne",
+      "descripcion": "Hamburguesa individual de carne vacuna con queso y aderezos.",
       "precio": 7000,
       "orden": 1
     },
     {
-      "categoriaId": "panchos",
-      "nombre": "Super Pancho",
-      "descripcion": "Simple.",
-      "precio": 2300,
+      "categoriaId": "hamburguesas",
+      "nombre": "Hamburguesa grande de carne",
+      "descripcion": "Hamburguesa grande de carne vacuna con jamón, queso, lechuga y tomate.",
+      "precio": 10000,
+      "orden": 2,
+      "foto": "assets/promos/hamburguesa-xl-carne-papas.webp"
+    },
+    {
+      "categoriaId": "hamburguesas",
+      "nombre": "Hamburguesa chica de pollo",
+      "descripcion": "Hamburguesa individual de pollo con queso, lechuga y aderezos.",
+      "precio": 5000,
+      "orden": 3
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Sándwich de milanesa de carne",
+      "descripcion": "Sándwich de milanesa de carne vacuna con lechuga, tomate y aderezos.",
+      "precio": 12000,
+      "orden": 1,
+      "foto": "assets/promos/sandwich-mila-carne-papas.webp"
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Sándwich de milanesa de pollo",
+      "descripcion": "Sándwich de milanesa de pechuga de pollo con lechuga y tomate.",
+      "precio": 10000,
+      "orden": 2,
+      "foto": "assets/promos/sandwich-mila-pollo-papas.webp"
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Lomo",
+      "descripcion": "Sándwich de lomo completo con jamón, queso, huevo, lechuga y tomate.",
+      "precio": 15000,
+      "orden": 3,
+      "foto": "assets/fotos/lomo.webp"
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Pizzas redondas",
+      "descripcion": "Pizza redonda tradicional a la piedra con abundante muzzarella.",
+      "precio": 10000,
       "orden": 1
     },
     {
-      "categoriaId": "panchos",
-      "nombre": "Pancho con lluvia de papas",
-      "descripcion": "Pancho con lluvia de papas.",
-      "precio": 2400,
+      "categoriaId": "pizzas",
+      "nombre": "Pizza especial",
+      "descripcion": "Pizza redonda especial con muzzarella, jamón cocido y morrones.",
+      "precio": 13000,
       "orden": 2
     },
     {
       "categoriaId": "panchos",
-      "nombre": "Pancho con poncho",
-      "descripcion": "Super pancho con poncho.",
+      "nombre": "Pancho comun",
+      "descripcion": "Super pancho clásico con lluvia de papas y aderezos.",
+      "precio": 2500,
+      "orden": 1
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Pancho provoleta",
+      "descripcion": "Super pancho con provoleta derretida y lluvia de papas.",
       "precio": 3000,
-      "orden": 3
+      "orden": 2
+    },
+    {
+      "categoriaId": "empanadas",
+      "nombre": "Empanadas de carne",
+      "descripcion": "Empanadas caseras de carne cortada a cuchillo, horneadas.",
+      "precio": 15000,
+      "orden": 1
+    },
+    {
+      "categoriaId": "bebidas",
+      "nombre": "Cerveza tirada de 500",
+      "descripcion": "Pinta de cerveza artesanal tirada de 500cc fría.",
+      "precio": 4000,
+      "orden": 1,
+      "estacion": "barra",
+      "foto": "assets/fotos/cerveza.webp"
+    },
+    {
+      "categoriaId": "bebidas",
+      "nombre": "Cerveza tirada L",
+      "descripcion": "Chop de 1 litro de cerveza artesanal tirada.",
+      "precio": 8000,
+      "orden": 2,
+      "estacion": "barra",
+      "foto": "assets/fotos/cerveza.webp"
     },
     {
       "categoriaId": "papas",
       "nombre": "Cono de papas",
-      "descripcion": "Cono de papas fritas.",
+      "descripcion": "Cono de papas fritas crujientes.",
       "precio": 3500,
       "orden": 1
     },
     {
       "categoriaId": "papas",
       "nombre": "Salchipapa",
-      "descripcion": "Salchichas con papas fritas.",
+      "descripcion": "Papas fritas con rodajas de salchicha y salsas.",
       "precio": 8000,
       "orden": 2
     }
@@ -345,35 +373,35 @@
     {
       "titulo": "Sándwich mila carne + papas",
       "descripcion": "Sándwich de milanesa de carne con papas fritas.",
-      "precio": 11000,
+      "precio": 14000,
       "foto": "assets/promos/sandwich-mila-carne-papas.webp",
       "orden": 1
     },
     {
       "titulo": "Sándwich mila pollo + papas",
       "descripcion": "Sándwich de milanesa de pollo con papas fritas.",
-      "precio": 10000,
+      "precio": 12000,
       "foto": "assets/promos/sandwich-mila-pollo-papas.webp",
       "orden": 2
     },
     {
       "titulo": "Lomo + papas",
-      "descripcion": "Lomo con papas fritas.",
-      "precio": 14000,
+      "descripcion": "Lomo completo con papas fritas.",
+      "precio": 17000,
       "foto": "assets/promos/lomo-papas.webp",
       "orden": 3
     },
     {
-      "titulo": "Hamburguesa XL carne + papas",
-      "descripcion": "Hamburguesa XL de carne con papas fritas.",
-      "precio": 11000,
+      "titulo": "Hamburguesa grande carne + papas",
+      "descripcion": "Hamburguesa grande de carne con papas fritas.",
+      "precio": 12000,
       "foto": "assets/promos/hamburguesa-xl-carne-papas.webp",
       "orden": 4
     },
     {
       "titulo": "Choripán + papas",
-      "descripcion": "Choripán con papas fritas.",
-      "precio": 9000,
+      "descripcion": "Chori a las brasas con papas fritas.",
+      "precio": 12000,
       "foto": "assets/promos/choripan-papas.webp",
       "orden": 5
     }
