@@ -5,8 +5,7 @@ Web de pedidos + panel de gestión ("semi-FUDO") para **un** local de comida. Es
 un proyecto de Firebase y un proyecto de Vercel por local.
 
 - **Web pública:** carta tipo app, carrito, pedido online (retiro o delivery), seguimiento en vivo.
-- **Panel:** pedidos en tiempo real, cobro manual (efectivo o transferencia), caja, ventas, carta,
-  promos, banner de fecha especial, QR y configuración mínima.
+- **Panel:** mostrador POS táctil (carga rápida de mostrador/delivery/salón, calculadora de vuelto en efectivo y exclusión ágil de ingredientes), pantalla de cocina con comandas en vivo, caja y turnos, ventas y reportes diarios, carta, promos, banner de fecha especial, QR y configuración.
 
 | Documento | Para qué |
 |---|---|
