@@ -256,36 +256,47 @@ export function TarjetaPedido({
           </p>
         )}
 
-        {/* Lista de comanda con cantidades en blanco nítido */}
-        <ul className="mt-2.5 space-y-1 text-sm text-slate-200">
+        {/* Lista de comanda con cantidades en blanco nítido y notas de cocina de alto impacto */}
+        <ul className="mt-2.5 space-y-1.5 text-sm text-slate-200">
           {visibles.map((i) => (
             <li key={i.id} className="leading-snug">
-              <span className="font-bold text-white tabular-nums">{i.cantidad}x</span>{' '}
-              <span className="font-semibold">{i.nombre}</span>
-              {i.varianteNombre && (
-                <span className="text-slate-400 font-normal"> · {i.varianteNombre}</span>
-              )}
-              {i.extras.length > 0 && (
-                <span className="block pl-5 text-xs text-slate-400">
-                  + {i.extras.map((e) => e.nombre).join(', ')}
+              <div className="flex items-start">
+                <span className="inline-flex items-center justify-center min-w-7 h-6 px-1.5 rounded-lg bg-white text-slate-950 font-black text-sm tabular-nums mr-2 shrink-0 shadow-xs">
+                  {i.cantidad}x
                 </span>
-              )}
+                <div className="min-w-0 flex-1">
+                  <span className="font-bold text-base text-white">{i.nombre}</span>
+                  {i.varianteNombre && (
+                    <span className="text-slate-300 font-semibold text-xs"> · {i.varianteNombre}</span>
+                  )}
+                  {i.extras.length > 0 && (
+                    <span className="block text-xs font-semibold text-slate-300">
+                      + {i.extras.map((e) => e.nombre).join(', ')}
+                    </span>
+                  )}
+                </div>
+              </div>
               {i.nota && (
-                <span className="mt-0.5 flex items-center gap-1 pl-5 text-xs font-bold text-amber-400">
-                  <AlertTriangle className="size-3 shrink-0" />
-                  <span>“{i.nota}”</span>
-                </span>
+                <div className="mt-1 ml-9 flex items-center gap-1.5 rounded-lg bg-amber-400 text-slate-950 px-2 py-0.5 text-xs font-black shadow-xs">
+                  <AlertTriangle className="size-3.5 shrink-0" />
+                  <span>⚠️ COCINA: “{i.nota}”</span>
+                </div>
               )}
             </li>
           ))}
-          {ocultos > 0 && <li className="pl-5 text-xs text-slate-400">y {ocultos} más…</li>}
+          {ocultos > 0 && <li className="pl-9 text-xs font-bold text-slate-400">y {ocultos} más…</li>}
         </ul>
 
         {pedido.nota && (
-          <p className="mt-2.5 flex items-center gap-1.5 rounded-xl border border-amber-600/40 bg-amber-950/40 px-3 py-1.5 text-xs font-semibold text-amber-200">
-            <AlertCircle className="size-3.5 text-amber-400 shrink-0" />
-            <span><strong>Nota:</strong> {pedido.nota}</span>
-          </p>
+          <div className="mt-2.5 rounded-xl border-2 border-amber-400 bg-amber-400/20 px-3 py-2 text-xs font-black text-amber-200 flex items-start gap-2 shadow-sm">
+            <AlertCircle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+            <div>
+              <span className="uppercase tracking-wider text-amber-300 font-black">
+                Aclaración de Comanda:
+              </span>
+              <p className="text-white text-sm font-bold mt-0.5">“{pedido.nota}”</p>
+            </div>
+          </div>
         )}
 
         {/* Total y etiqueta de pago */}
@@ -310,7 +321,7 @@ export function TarjetaPedido({
             Cliente nuevo: esperá su WhatsApp confirmando el #{pedido.numero}.
           </p>
           <Button
-            className="h-11 w-full rounded-xl bg-[#25D366] text-base font-bold text-white shadow-sm hover:bg-[#1fb457] flex items-center justify-center gap-2"
+            className="h-12 w-full rounded-xl bg-[#25D366] text-base font-bold text-white shadow-sm hover:bg-[#1fb457] flex items-center justify-center gap-2"
             onClick={onConfirmar}
             disabled={ocupado}
           >
@@ -336,18 +347,18 @@ export function TarjetaPedido({
           {siguiente && (
             <Button
               className={cn(
-                'h-12 w-full rounded-xl text-base font-black shadow-md transition-transform active:scale-[0.99] flex items-center justify-center gap-2',
+                'h-14 w-full rounded-2xl text-base md:text-lg font-black shadow-lg transition-transform active:scale-[0.99] flex items-center justify-center gap-2',
                 etapa && COLOR_ETAPA[etapa].boton,
               )}
               onClick={onAvanzar}
               disabled={ocupado}
             >
               {etapa === 'nuevos' ? (
-                <Check className="size-5 shrink-0" />
+                <Check className="size-6 shrink-0" />
               ) : etapa === 'preparacion' ? (
-                <CheckCircle2 className="size-5 shrink-0" />
+                <CheckCircle2 className="size-6 shrink-0" />
               ) : (
-                <Sparkles className="size-5 shrink-0" />
+                <Sparkles className="size-6 shrink-0" />
               )}
               <span>
                 {siguiente === 'entregado' && falta > 0
@@ -364,19 +375,19 @@ export function TarjetaPedido({
                   key={m}
                   size="sm"
                   variant="outline"
-                  className="h-9 flex-1 rounded-xl border-slate-700 bg-slate-800 text-xs font-bold text-slate-200 hover:bg-slate-700 hover:text-white flex items-center justify-center gap-1.5"
+                  className="h-12 flex-1 rounded-xl border-slate-700 bg-slate-800 text-xs md:text-sm font-black text-slate-200 hover:bg-slate-700 hover:text-white flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98]"
                   onClick={() => onCobrarRapido(m)}
                   disabled={ocupado}
                   title={`Cobrar ${formatARS(falta)} en ${m}`}
                 >
                   {m === 'efectivo' ? (
                     <>
-                      <Banknote className="size-3.5 text-emerald-400" />
+                      <Banknote className="size-4 text-emerald-400" />
                       <span>Efectivo</span>
                     </>
                   ) : (
                     <>
-                      <Building2 className="size-3.5 text-blue-400" />
+                      <Building2 className="size-4 text-blue-400" />
                       <span>Transf.</span>
                     </>
                   )}
@@ -385,11 +396,11 @@ export function TarjetaPedido({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-9 rounded-xl px-2 text-xs font-semibold text-slate-400 hover:text-white flex items-center gap-1"
+                className="h-12 rounded-xl px-2.5 text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1"
                 onClick={onCobrarOtro}
                 disabled={ocupado}
               >
-                <CreditCard className="size-3.5" />
+                <CreditCard className="size-4" />
                 <span>Otro</span>
               </Button>
             </div>

@@ -64,7 +64,7 @@ export default function PromosPage() {
   const esDueno = sesion.estado === 'lista' && sesion.rol === 'dueno';
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <EncabezadoPagina
         titulo="Promos"
         descripcion="La primera activa sale destacada en la web. Arrastrá para cambiar el orden."

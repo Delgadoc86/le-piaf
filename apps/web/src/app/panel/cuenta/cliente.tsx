@@ -26,7 +26,7 @@ export default function CuentaPage() {
   const email = sesion.usuario.email ?? '';
 
   return (
-    <div className="max-w-xl space-y-6">
+    <div className="max-w-xl mx-auto space-y-6">
       <EncabezadoPagina titulo="Mi cuenta" descripcion="Tus datos para entrar al panel." />
       <Bloque titulo="Sesión">
         <p className="text-sm">

@@ -112,21 +112,23 @@ export function InputPesos({
   valor,
   onCambio,
   placeholder,
+  className,
 }: {
   id?: string;
   valor: number;
   onCambio: (n: number) => void;
   placeholder?: string;
+  className?: string;
 }) {
   return (
     <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
+      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm font-medium text-muted-foreground">
         $
       </span>
       <Input
         id={id}
         inputMode="numeric"
-        className="pl-7 tabular-nums"
+        className={cn('pl-7 tabular-nums', className)}
         placeholder={placeholder ?? '0'}
         value={valor ? valor.toLocaleString('es-AR') : ''}
         onChange={(e) => onCambio(Number(e.target.value.replace(/\D/g, '').slice(0, 9)) || 0)}

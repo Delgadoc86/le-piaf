@@ -137,14 +137,14 @@ export default function QrPage() {
     );
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Al imprimir, solo sale la hoja con las tarjetas. */}
       <style>{`@media print{@page{size:A4;margin:10mm}body *{visibility:hidden}#hoja-qr,#hoja-qr *{visibility:visible}#hoja-qr{position:absolute;inset:0}}`}</style>
       <EncabezadoPagina
         titulo="QR de la carta"
         descripcion="Para las mesas, la vidriera o el mostrador. Lleva a la web con la carta y los pedidos."
       />
-      <div className="grid gap-5 lg:grid-cols-[340px_1fr]">
+      <div className="grid gap-6 lg:grid-cols-[380px_1fr]">
         <div className="space-y-5">
           <Bloque titulo="Opciones">
             <Campo

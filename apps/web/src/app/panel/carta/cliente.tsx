@@ -19,7 +19,7 @@ export default function CartaPage() {
   );
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-5xl mx-auto space-y-6">
       <EncabezadoPagina
         titulo="Carta"
         descripcion="Productos, categorías y precios. Lo que guardás se ve en la web a los pocos segundos."

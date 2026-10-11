@@ -19,7 +19,7 @@ export default function ConfiguracionPage() {
   }
 
   return (
-    <div className="max-w-4xl space-y-8">
+    <div className="max-w-4xl mx-auto space-y-8">
       <EncabezadoPagina
         titulo="Configuración"
         descripcion="Contacto, redes, horarios, formas de entrega y pedidos falsos."

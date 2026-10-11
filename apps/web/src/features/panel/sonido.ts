@@ -1,18 +1,19 @@
 'use client';
 
 /**
- * Aviso sonoro de pedido nuevo con Web Audio (sin archivos de audio). El navegador exige un toque
- * del usuario para habilitar el sonido: por eso el panel muestra "Activar sonido".
+ * Aviso sonoro de pedido nuevo con Web Audio (sin archivos de audio).
+ * Activado por defecto: se desbloquea automáticamente con el primer toque o click del usuario.
  */
 const CLAVE = 'panel-sonido-v1';
 
 let contexto: AudioContext | null = null;
+let listenerRegistrado = false;
 
 export function sonidoGuardado(): boolean {
   try {
-    return localStorage.getItem(CLAVE) === '1';
+    return localStorage.getItem(CLAVE) !== '0';
   } catch {
-    return false;
+    return true;
   }
 }
 
@@ -39,8 +40,42 @@ export function sonidoHabilitado(): boolean {
   return contexto?.state === 'running';
 }
 
+/**
+ * Registra listeners globales al primer click o toque para desbloquear automáticamente el audio
+ * respetando la política de autoplay del navegador sin forzar al usuario a buscar un botón.
+ */
+export function inicializarAudioAutomatico() {
+  if (typeof window === 'undefined' || listenerRegistrado) return;
+  listenerRegistrado = true;
+
+  const desbloquear = () => {
+    if (!sonidoGuardado()) return;
+    try {
+      contexto ??= new AudioContext();
+      if (contexto.state === 'suspended') {
+        void contexto.resume();
+      }
+    } catch {
+      // Ignorar restricciones del navegador si aún no hubo gesto válido
+    }
+  };
+
+  window.addEventListener('click', desbloquear, { passive: true });
+  window.addEventListener('keydown', desbloquear, { passive: true });
+  window.addEventListener('touchstart', desbloquear, { passive: true });
+}
+
 /** "Ding-dong" corto: dos tonos con caída suave. */
 export function sonarPedidoNuevo() {
+  if (!sonidoGuardado()) return;
+  try {
+    contexto ??= new AudioContext();
+    if (contexto.state === 'suspended') {
+      void contexto.resume();
+    }
+  } catch {
+    // ignore
+  }
   if (!contexto || contexto.state !== 'running') return;
   const ahora = contexto.currentTime;
   [
@@ -61,3 +96,4 @@ export function sonarPedidoNuevo() {
     osc.stop(ahora + t + 0.4);
   });
 }
+

@@ -11,6 +11,7 @@ import {
   Percent,
   QrCode,
   Settings,
+  ShoppingBag,
   UtensilsCrossed,
   UserSquare,
   Wallet,
@@ -39,6 +40,14 @@ export const MENU: readonly ItemMenu[] = [
     icono: Home,
     roles: ['dueno', 'encargado', 'mozo', 'cocina'],
     fase: 0,
+    seccion: 'operaciones',
+  },
+  {
+    ruta: 'mostrador',
+    titulo: 'Mostrador',
+    icono: ShoppingBag,
+    roles: [...GESTORES, 'mozo'],
+    fase: 2,
     seccion: 'operaciones',
   },
   {

@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ExternalLink, LogOut, UserCircle, Wallet } from 'lucide-react';
-import type { Rol } from '@app/shared';
+import { DOC_LOCAL, type Local, type Rol } from '@app/shared';
 import { cn } from '@/lib/utils';
 import { NOMBRE_LOCAL } from '@/lib/local';
 import {
@@ -14,6 +14,8 @@ import {
   type SeccionMenu,
 } from '@/features/panel/menu';
 import { useCajaAbierta } from '@/features/panel/caja';
+import { useDocumento } from '@/features/panel/firestore';
+import { useAlertaPedidosPendientes } from '@/features/panel/pedidos';
 
 interface Props {
   rol: Rol;
@@ -31,6 +33,9 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
   const pathname = usePathname();
   const esGestor = rol === 'dueno' || rol === 'encargado';
   const { turno, cargando: cargandoCaja } = useCajaAbierta();
+  const local = useDocumento<Local>(DOC_LOCAL);
+  const zona = local.datos?.zonaHoraria ?? 'America/Argentina/Buenos_Aires';
+  const pedidosNuevos = useAlertaPedidosPendientes(zona, pathname);
 
   const todosLosItems = menuPara(rol);
 
@@ -43,28 +48,49 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
     const href = item.ruta ? `/panel/${item.ruta}` : '/panel';
     const activo = pathname === href;
     const Icono = item.icono;
+    const esPedidos = item.ruta === 'pedidos';
+    const hayAlerta = esPedidos && pedidosNuevos > 0 && pathname !== '/panel/pedidos';
 
     return (
       <Link
         key={item.ruta}
         href={href}
         aria-current={activo ? 'page' : undefined}
-        title={item.titulo}
+        title={hayAlerta ? `${item.titulo} (${pedidosNuevos} pedidos nuevos)` : item.titulo}
         className={cn(
-          'flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-colors md:justify-center md:px-0 md:py-2.5 xl:justify-start xl:px-3 xl:py-2',
-          activo
-            ? 'bg-slate-800 font-semibold text-white shadow-xs'
-            : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100',
+          'relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all md:justify-center md:px-0 md:py-2.5 xl:justify-start xl:px-3 xl:py-2',
+          hayAlerta
+            ? 'border border-orange-500/60 bg-orange-500/20 text-orange-200 shadow-md shadow-orange-500/20 animate-pulse'
+            : activo
+              ? 'bg-slate-800 font-semibold text-white shadow-xs'
+              : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100',
         )}
       >
-        <Icono
-          className={cn(
-            'size-4 shrink-0 md:size-5 xl:size-4.5',
-            activo ? 'text-orange-400' : 'text-slate-400',
+        <div className="relative flex items-center justify-center">
+          <Icono
+            className={cn(
+              'size-4 shrink-0 md:size-5 xl:size-4.5',
+              hayAlerta ? 'text-orange-400 animate-bounce' : activo ? 'text-orange-400' : 'text-slate-400',
+            )}
+            aria-hidden
+          />
+          {hayAlerta && (
+            <span className="absolute -top-1.5 -right-2 hidden size-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-black text-white shadow-sm md:flex xl:hidden">
+              {pedidosNuevos}
+            </span>
           )}
-          aria-hidden
-        />
-        <span className="whitespace-nowrap md:sr-only xl:not-sr-only">{item.titulo}</span>
+        </div>
+        <div className="flex flex-1 items-center justify-between min-w-0 md:sr-only xl:not-sr-only">
+          <span className="whitespace-nowrap truncate">{item.titulo}</span>
+          {hayAlerta && (
+            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-sm shadow-orange-500/40">
+              🔔 {pedidosNuevos}
+            </span>
+          )}
+        </div>
+        {hayAlerta && (
+          <span className="inline-flex size-2 rounded-full bg-orange-400 md:hidden animate-ping" />
+        )}
       </Link>
     );
   }

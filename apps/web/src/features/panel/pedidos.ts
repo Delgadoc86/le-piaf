@@ -37,6 +37,7 @@ import {
   type TipoPedido,
 } from '@app/shared';
 import { firebase } from '@/lib/firebase/client';
+import { sonarPedidoNuevo } from './sonido';
 
 export type PedidoConId = Pedido & { id: string };
 
@@ -128,6 +129,58 @@ export function usePedidosJornada(zonaHoraria: string | undefined) {
   }, [zonaHoraria, jornada]);
 
   return { ...estado, jornada, cancelacion };
+}
+
+/**
+ * Alerta global en tiempo real de pedidos pendientes (nuevos) en la jornada actual.
+ * Detecta cuando entra un pedido web o externo y dispara el timbre si el usuario está en otra pantalla.
+ */
+export function useAlertaPedidosPendientes(zonaHoraria: string | undefined, rutaActual?: string) {
+  const [nuevosCount, setNuevosCount] = useState(0);
+  const prevCount = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!zonaHoraria) return;
+    const desde = Timestamp.fromDate(inicioJornada(new Date(), zonaHoraria));
+    const q = query(
+      collection(firebase().db, 'pedidos'),
+      where('estado', '==', 'pendiente'),
+      where('creadoEn', '>=', desde),
+      orderBy('creadoEn', 'desc'),
+    );
+
+    return onSnapshot(
+      q,
+      (snap) => {
+        const count = snap.size;
+        setNuevosCount(count);
+
+        // Si la cantidad aumentó y no estamos directamente en la pantalla de pedidos:
+        if (prevCount.current !== null && count > prevCount.current) {
+          if (rutaActual !== '/panel/pedidos') {
+            sonarPedidoNuevo();
+          }
+        }
+        prevCount.current = count;
+      },
+      () => {
+        // En caso de corte de red momentáneo, silenciar
+      },
+    );
+  }, [zonaHoraria, rutaActual]);
+
+  // Si hay pedidos pendientes y estamos en otra pantalla, actualizar el título de la pestaña del navegador
+  useEffect(() => {
+    if (nuevosCount > 0 && rutaActual !== '/panel/pedidos') {
+      const prevTitle = document.title;
+      document.title = `(${nuevosCount}) 🔔 Pedidos nuevos`;
+      return () => {
+        document.title = prevTitle;
+      };
+    }
+  }, [nuevosCount, rutaActual]);
+
+  return nuevosCount;
 }
 
 /** El mozo solo opera pedidos de salón y los que cargó él (firestore.rules). */
@@ -309,24 +362,24 @@ export const ETAPAS: {
 }[] = [
   {
     id: 'nuevos',
-    titulo: 'Nuevos',
+    titulo: 'Nuevos (Aceptar)',
     corto: 'Nuevos',
     estados: ['pendiente', 'aceptado'],
-    vacio: 'Sin pedidos nuevos. Cuando entre uno, suena y aparece acá.',
+    vacio: 'Sin pedidos nuevos. Cuando entre uno nuevo, suena el timbre y entra acá.',
   },
   {
     id: 'preparacion',
-    titulo: 'En preparación',
-    corto: 'Preparando',
+    titulo: 'En Cocina (Preparando)',
+    corto: 'En Cocina',
     estados: ['en_preparacion'],
-    vacio: 'Nada en preparación.',
+    vacio: 'Nada en la plancha ni en preparación.',
   },
   {
     id: 'listos',
-    titulo: 'Listos para entregar',
+    titulo: 'Listos para Despacho',
     corto: 'Listos',
     estados: ['listo', 'en_camino'],
-    vacio: 'Nada esperando entrega.',
+    vacio: 'Nada esperando entrega en mostrador.',
   },
 ];
 
@@ -346,17 +399,17 @@ export const COLOR_ETAPA: Record<
     encabezado: 'bg-[#2563eb] text-white font-black',
     fondo: 'bg-blue-950/20',
     borde: 'border-2 border-blue-500 shadow-blue-500/10',
-    boton: 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-bold',
+    boton: 'bg-[#2563eb] hover:bg-[#1d4ed8] text-white font-black',
     punto: 'bg-blue-500',
-    textoBoton: 'Marcar Listo',
+    textoBoton: '¡Marcar Plato Listo!',
   },
   listos: {
     encabezado: 'bg-[#059669] text-white font-black',
     fondo: 'bg-emerald-950/20',
     borde: 'border-2 border-emerald-500 shadow-emerald-500/10',
-    boton: 'bg-[#059669] hover:bg-[#047857] text-white font-bold',
+    boton: 'bg-[#059669] hover:bg-[#047857] text-white font-black',
     punto: 'bg-emerald-500',
-    textoBoton: 'Entregar y Cerrar',
+    textoBoton: 'Entregar Pedido',
   },
 };
 

@@ -35,7 +35,6 @@ import { Button } from '@/components/ui/button';
 import { TarjetaPedido } from '@/components/panel/pedidos/tarjeta-pedido';
 import { DetallePedido } from '@/components/panel/pedidos/detalle-pedido';
 import { DialogoCobro } from '@/components/panel/pedidos/dialogo-cobro';
-import { NuevoPedido } from '@/components/panel/pedidos/nuevo-pedido';
 import { useSesion } from '@/features/auth/sesion';
 import { useCajaAbierta } from '@/features/panel/caja';
 import { mensajeError, useDocumento } from '@/features/panel/firestore';
@@ -60,6 +59,7 @@ import {
   habilitarSonido,
   sonarPedidoNuevo,
   sonidoGuardado,
+  sonidoHabilitado,
 } from '@/features/panel/sonido';
 import { cn } from '@/lib/utils';
 
@@ -97,17 +97,30 @@ export default function PedidosPage() {
   const [cobroId, setCobroId] = useState<string | null>(null);
   // El cobro se abrió al tocar "Entregado": al confirmar, se cobra y se entrega.
   const [entregando, setEntregando] = useState(false);
-  const [nuevoAbierto, setNuevoAbierto] = useState(false);
   const [ocupados, setOcupados] = useState<ReadonlySet<string>>(new Set());
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [pestana, setPestana] = useState<IdEtapa>('nuevos');
   const [verTerminados, setVerTerminados] = useState(false);
   // El panel se renderiza solo en el navegador: se puede leer localStorage al iniciar el estado.
   const [verTip, setVerTip] = useState(() => leerLocal(CLAVE_TIP_PANTALLA) !== '1');
-  // Si el sonido estaba activado, el navegador igual pide un toque para habilitarlo.
+  // Sonido activado por defecto: si el navegador lo tiene listo queda activo, sino se activa al primer click
   const [sonido, setSonido] = useState<'apagado' | 'bloqueado' | 'activo'>(() =>
-    sonidoGuardado() ? 'bloqueado' : 'apagado',
+    sonidoGuardado() ? (sonidoHabilitado() ? 'activo' : 'bloqueado') : 'apagado',
   );
+
+  useEffect(() => {
+    if (!sonidoGuardado() || sonidoHabilitado()) return;
+
+    const desbloquear = () => {
+      if (sonidoHabilitado()) setSonido('activo');
+    };
+    window.addEventListener('click', desbloquear, { once: true, passive: true });
+    window.addEventListener('touchstart', desbloquear, { once: true, passive: true });
+    return () => {
+      window.removeEventListener('click', desbloquear);
+      window.removeEventListener('touchstart', desbloquear);
+    };
+  }, []);
 
   const uid = sesion.estado === 'lista' ? sesion.usuario.uid : '';
   const rol = sesion.estado === 'lista' ? sesion.rol : null;
@@ -244,8 +257,8 @@ export default function PedidosPage() {
   ) as Record<IdEtapa, PedidoConId[]>;
 
   return (
-    <div className="rounded-3xl bg-[#0b1120] text-slate-100 p-4 md:p-6 shadow-2xl border border-slate-800/80 space-y-5">
-      {/* Encabezado KDS idéntico al Mockup 2 con iconos de ayuda rápida */}
+    <div className="max-w-6xl mx-auto rounded-3xl bg-[#0b1120] text-slate-100 p-4 md:p-6 shadow-2xl border border-slate-800/80 space-y-5">
+      {/* Encabezado gastronómico en lenguaje del local */}
       <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
         <div className="flex items-center gap-3">
           <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-xl shadow-lg shadow-orange-500/20">
@@ -253,14 +266,14 @@ export default function PedidosPage() {
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black tracking-tight text-white">Tablero KDS</h1>
+              <h1 className="text-xl md:text-2xl font-black tracking-tight text-white">Pantalla de Cocina</h1>
               <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-300 border border-slate-700">
-                Cocina &amp; Barra
+                Comandas en vivo
               </span>
             </div>
             <p className="flex items-center gap-1.5 text-xs text-slate-400">
               <Activity className="size-3 text-emerald-400" />
-              <span>Control de pedidos en vivo</span>
+              <span>Control de despacho y cocina en tiempo real</span>
             </p>
           </div>
         </div>
@@ -290,34 +303,35 @@ export default function PedidosPage() {
           <Button
             variant="outline"
             className={cn(
-              'h-10 rounded-xl font-bold border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white flex items-center gap-2',
+              'h-11 rounded-xl font-bold border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white flex items-center gap-2',
               sonido === 'activo'
                 ? 'border-emerald-500/50 text-emerald-400 bg-slate-900/90'
                 : 'animate-pulse bg-amber-500 text-slate-950 hover:bg-amber-400 border-none',
             )}
             onClick={() => void alternarSonido()}
             aria-pressed={sonido === 'activo'}
-            title={sonido === 'activo' ? 'Tocá para silenciar' : undefined}
+            title={sonido === 'activo' ? 'Tocá para silenciar el timbre' : undefined}
           >
             {sonido === 'activo' ? (
               <>
                 <Volume2 className="size-4 text-emerald-400" />
-                <span>Sonido ON</span>
+                <span>Timbre ON</span>
               </>
             ) : (
               <>
                 <VolumeX className="size-4" />
-                <span>Activar sonido</span>
+                <span>Activar timbre</span>
               </>
             )}
           </Button>
-          <Button
-            size="lg"
-            className="h-10 rounded-xl bg-blue-600 hover:bg-blue-500 text-white font-black shadow-lg shadow-blue-600/30 transition-transform active:scale-[0.98] flex items-center gap-1.5"
-            onClick={() => setNuevoAbierto(true)}
-          >
-            <Plus className="size-4" /> Nuevo pedido
-          </Button>
+          <Link href="/panel/mostrador">
+            <Button
+              size="lg"
+              className="h-11 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black shadow-lg shadow-orange-600/30 transition-transform active:scale-[0.98] flex items-center gap-1.5"
+            >
+              <Plus className="size-4" /> Cargar en Mostrador
+            </Button>
+          </Link>
         </div>
       </header>
 
@@ -331,8 +345,8 @@ export default function PedidosPage() {
           <BellRing className="size-5 shrink-0 animate-bounce" aria-hidden />
           <span className="flex-1">
             {porAceptar.length === 1
-              ? '¡Entró 1 pedido nuevo! Aceptalo para que comience la preparación.'
-              : `¡Hay ${porAceptar.length} pedidos nuevos esperando confirmación!`}
+              ? '🔔 ¡Entró 1 pedido nuevo! Aceptalo para empezar a cocinar.'
+              : `🔔 ¡Hay ${porAceptar.length} pedidos nuevos esperando para entrar a cocinar!`}
           </span>
           <span className="rounded-lg bg-black/20 px-3 py-1 text-xs uppercase tracking-wider font-extrabold">
             Ver ahora →
@@ -624,16 +638,6 @@ export default function PedidosPage() {
           void ejecutar(p.id, () => cambiarEstado(p, 'entregado', uid), {
             texto: `#${p.numero} entregado sin cobrar: queda en "Por cobrar"`,
           });
-        }}
-      />
-      <NuevoPedido
-        abierto={nuevoAbierto}
-        tipos={local.datos?.pedidos.tipos ?? { takeAway: true, delivery: false, salon: false }}
-        onCerrar={() => setNuevoAbierto(false)}
-        onCreado={(numero) => {
-          setNuevoAbierto(false);
-          setPestana('preparacion');
-          setAviso({ tipo: 'ok', texto: `Pedido #${numero} cargado: está en preparación` });
         }}
       />
     </div>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useSesion } from '@/features/auth/sesion';
 import { BarraLateral } from '@/components/panel/barra-lateral';
+import { inicializarAudioAutomatico } from '@/features/panel/sonido';
 
 function Cargando() {
   return (
@@ -21,6 +22,10 @@ function Cargando() {
 export function MarcoPanel({ children }: { children: ReactNode }) {
   const sesion = useSesion();
   const router = useRouter();
+
+  useEffect(() => {
+    inicializarAudioAutomatico();
+  }, []);
 
   useEffect(() => {
     if (sesion.estado === 'anonimo') router.replace('/login');

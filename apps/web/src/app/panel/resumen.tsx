@@ -49,7 +49,7 @@ export default function ResumenPage() {
   const zona = local.datos?.zonaHoraria;
 
   return (
-    <div className="max-w-6xl space-y-6">
+    <div className="max-w-5xl mx-auto space-y-6">
       {/* Título idéntico al mockup con ícono de identidad gastronómica */}
       <header className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
@@ -212,7 +212,7 @@ function Numeros({ zona }: { zona: string }) {
                 <UtensilsCrossed className="size-5 text-orange-500" />
                 <div>
                   <h2 className="text-xl font-bold tracking-tight text-slate-900 dark:text-white">
-                    Live orders
+                    Comandas en vivo
                   </h2>
                   <p className="text-xs text-slate-500 dark:text-slate-400">
                     Comandas activas en preparación y despacho
@@ -223,20 +223,20 @@ function Numeros({ zona }: { zona: string }) {
                 asChild
                 className="h-10 rounded-xl bg-orange-500 font-bold text-white shadow-sm hover:bg-orange-600 active:scale-[0.98]"
               >
-                <Link href="/panel/pedidos">
-                  <Plus className="size-4" /> Nuevo Pedido
+                <Link href="/panel/mostrador">
+                  <Plus className="size-4" /> Tomar pedido
                 </Link>
               </Button>
             </div>
 
-            {/* Lista de tarjetas Live orders */}
+            {/* Lista de tarjetas Comandas en vivo */}
             <div className="mt-2 space-y-3">
               {activos.length === 0 ? (
                 <div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm font-medium text-slate-400 dark:border-slate-800">
                   <UtensilsCrossed className="mx-auto size-8 text-slate-300 dark:text-slate-600 mb-2" />
-                  <p>No hay pedidos en curso en este momento.</p>
+                  <p>No hay comandas en curso en este momento.</p>
                   <Button variant="outline" size="sm" className="mt-3 rounded-xl font-semibold" asChild>
-                    <Link href="/panel/pedidos">Abrir tablero KDS</Link>
+                    <Link href="/panel/pedidos">Ver pantalla de cocina</Link>
                   </Button>
                 </div>
               ) : (
@@ -316,7 +316,7 @@ function Numeros({ zona }: { zona: string }) {
               href="/panel/pedidos"
               className="inline-flex items-center gap-1.5 text-xs font-bold text-orange-600 hover:text-orange-700 dark:text-orange-400"
             >
-              Ver todos los pedidos en tablero KDS <ArrowRight className="size-3.5" />
+              Ver todas las comandas en cocina <ArrowRight className="size-3.5" />
             </Link>
           </div>
         </section>
@@ -367,7 +367,7 @@ function Numeros({ zona }: { zona: string }) {
                   <div key={item.hora} className="flex flex-1 flex-col items-center gap-1.5 h-full justify-end">
                     <div
                       style={{ height: `${item.alt}%` }}
-                      className="w-full max-w-[14px] rounded-t-md bg-[#1e293b] transition-all hover:bg-orange-500 dark:bg-slate-600 dark:hover:bg-orange-400"
+                      className="w-full max-w-[28px] rounded-t-md bg-[#1e293b] transition-all hover:bg-orange-500 dark:bg-slate-600 dark:hover:bg-orange-400"
                     />
                     <span className="text-[10px] font-medium text-slate-400 tabular-nums">
                       {item.hora}
