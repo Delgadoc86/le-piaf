@@ -14,12 +14,10 @@ import { Bloque, Campo, EncabezadoPagina } from '@/components/panel/ui-panel';
 import { useDocumento } from '@/features/panel/firestore';
 import { cn } from '@/lib/utils';
 
-/** El logo pasa por el optimizador de Next (mismo origen: así el canvas se puede exportar). Next 16 solo acepta q=75 por defecto. */
-const logoMismoOrigen = (url: string) => `/_next/image?url=${encodeURIComponent(url)}&w=384&q=75`;
-
 function cargarImagen(src: string): Promise<HTMLImageElement> {
   return new Promise((ok, mal) => {
     const img = new Image();
+    img.crossOrigin = 'anonymous';
     img.onload = () => ok(img);
     img.onerror = mal;
     img.src = src;
@@ -40,7 +38,7 @@ async function generarQR(
   });
   if (opciones.logo) {
     try {
-      const img = await cargarImagen(logoMismoOrigen(opciones.logo));
+      const img = await cargarImagen(opciones.logo);
       const ctx = canvas.getContext('2d')!;
       const caja = opciones.lado * 0.26;
       const x = (opciones.lado - caja) / 2;
@@ -111,7 +109,7 @@ export default function QrPage() {
         {local.marca.logoUrl && (
           // eslint-disable-next-line @next/next/no-img-element -- se imprime: img simple, sin optimizador
           <img
-            src={logoMismoOrigen(local.marca.logoUrl)}
+            src={local.marca.logoUrl}
             alt={local.nombre}
             className={chica ? 'h-10' : 'h-20'}
           />

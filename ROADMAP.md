@@ -460,7 +460,7 @@ Firestore cobra por lectura. Estas reglas mantienen la factura baja y la app rá
 
 - **Web pública:** Server Components leen con el Admin SDK una sola vez y cachean (`unstable_cache` / `"use cache"` con `cacheTag('carta')`). Las visitas no generan lecturas. La cache se invalida sola con `revalidarWeb`.
 - **Carrito y checkout** son la única parte "client" de la web pública. El resto es HTML del servidor, con Lighthouse móvil ≥ 90 como objetivo.
-- **Imágenes:** se comprimen en el navegador antes de subir (webp, máximo 1600 px, ~200 KB) y se sirven con `next/image`.
+- **Imágenes:** se comprimen en el navegador antes de subir (WebP, máximo 1600 px, ~250 KB) y se sirven con `next/image` con `unoptimized: true` (`next.config.ts`), descargándose directamente desde la CDN de Firebase Storage sin pasar por Vercel ni consumir cuotas de Image Optimization.
 - **Listeners acotados:** el panel escucha solo pedidos activos (`estado in [...]`, `limit`). El historial es paginado y sin tiempo real.
 - **Reportes:** leen `statsDiarias` (un documento por día), así que un mes cuesta unas 30 lecturas.
 - **Panel offline:** `initializeFirestore(app, { localCache: persistentLocalCache({ tabManager: persistentMultipleTabManager() }) })`. Si se corta internet, el mozo sigue viendo y cargando datos, y se sincroniza al volver.

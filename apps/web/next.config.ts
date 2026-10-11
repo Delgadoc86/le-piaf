@@ -10,7 +10,9 @@ const nextConfig: NextConfig = {
   // de Vercel puede quedar sin firebase-admin y todo lo que lee la base falla en tiempo de ejecución.
   outputFileTracingRoot: path.join(process.cwd(), '../..'),
   images: {
-    formats: ['image/avif', 'image/webp'],
+    // Las imágenes ya se comprimen a WebP en el navegador antes de subir (máx 1600 px, ~250 KB).
+    // Con unoptimized: true, se sirven directo desde Firebase Storage CDN sin consumir cuota de Vercel Image Optimization.
+    unoptimized: true,
     remotePatterns: [
       // Fotos del local en Firebase Storage (producción).
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/**' },
