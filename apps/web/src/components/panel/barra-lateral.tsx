@@ -95,6 +95,9 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
     );
   }
 
+  const nombreMostrar = local.datos?.nombreCorto || local.datos?.nombre || NOMBRE_LOCAL;
+  const inicial = nombreMostrar.trim().charAt(0).toUpperCase() || 'L';
+
   return (
     <aside className="shrink-0 border-b border-slate-800 bg-[#0f172a] text-slate-300 md:sticky md:top-0 md:flex md:h-dvh md:w-16 md:flex-col md:border-r md:border-b-0 xl:w-64">
       {/* Cabecera del Sidebar: Logo estilo mockup */}
@@ -102,10 +105,10 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
         <div className="min-w-0 md:hidden xl:block">
           <div className="flex items-center gap-2.5">
             <span className="flex size-8 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 text-base font-black text-white shadow-sm">
-              S
+              {inicial}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-base font-bold tracking-tight text-white">Silverio</p>
+              <p className="truncate text-base font-bold tracking-tight text-white">{nombreMostrar}</p>
               <p className="text-[10px] font-medium text-slate-400">{NOMBRE_ROL[rol]}</p>
             </div>
           </div>
@@ -145,9 +148,9 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
         {/* Logo compacto para tablet */}
         <span
           className="hidden size-9 items-center justify-center rounded-xl border border-slate-700 bg-slate-800 font-bold text-white shadow-sm md:inline-flex xl:hidden"
-          title={`${NOMBRE_LOCAL} · ${NOMBRE_ROL[rol]}`}
+          title={`${nombreMostrar} · ${NOMBRE_ROL[rol]}`}
         >
-          S
+          {inicial}
         </span>
 
         <button

@@ -5,7 +5,7 @@ Web de pedidos + panel de gestión ("semi-FUDO") para **un** local de comida. Es
 un proyecto de Firebase y un proyecto de Vercel por local.
 
 - **Web pública:** carta tipo app, carrito, pedido online (retiro o delivery), seguimiento en vivo.
-- **Panel:** mostrador POS táctil (carga rápida de mostrador/delivery/salón, calculadora de vuelto en efectivo y exclusión ágil de ingredientes), pantalla de cocina con comandas en vivo, caja y turnos, ventas y reportes diarios, carta, promos, banner de fecha especial, QR y configuración.
+- **Panel:** mostrador POS táctil (carga rápida de mostrador/delivery/salón, calculadora de vuelto en efectivo y exclusión ágil de ingredientes), pantalla de cocina con comandas en vivo de alto contraste (estilo ticket de papel), caja y turnos, ventas y reportes diarios, carta, promos, banner de fecha especial, QR y configuración.
 
 | Documento | Para qué |
 |---|---|
@@ -138,7 +138,7 @@ Copiá `silverio/` a `<local>/` y reemplazá su contenido:
   El script valida todo con los esquemas de `packages/shared` y avisa si algo está mal.
 - `assets/`: logo, portada y fotos (WebP).
 - `<LOCAL>.md`: marca, tono y datos de referencia.
-- En `scripts/entorno.ts`, cambiá el `KIT` por defecto a `<local>` (o usá `--kit <local>`).
+- Al renombrar o crear `<local>/seed.json` y borrar `silverio/`, los scripts (`seed`, `subirAssets`) detectan la carpeta del kit automáticamente (o podés pasar `--kit <local>`).
 - Borrá `silverio/` cuando el kit nuevo esté completo.
 
 ### 4. Variables y secretos

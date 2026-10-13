@@ -4,7 +4,7 @@
 > **Este repo es la web de Silverio Food Truck Beer** (ver [`silverio/SILVERIO.md`](silverio/SILVERIO.md)) **y la base que se copia para cada local nuevo**: un repo, un proyecto de Firebase y un proyecto de Vercel por local (ver [§16](#16-cómo-crear-la-web-de-un-local-nuevo)).
 > **Objetivo:** que funcione de verdad en Silverio y después venderla a otros locales con un abono mensual.
 
-Versión del documento: 1.14, del 2026-10-11.
+Versión del documento: 1.15, del 2026-10-13.
 
 ---
 
@@ -900,5 +900,9 @@ Este repo (Silverio Club) es la **base**. La guía paso a paso, con comandos, es
 - **1.12 (2026-10-11):** **Fase 4.6 anexada**: Experiencia táctil gastronómica para personal de cocina y mostrador (rediseño visual de Caja con atajos de cambio y métricas claras de cajón vs banco, POS de carga rápida con tabs superiores tipo Fudo, KDS con notas de exclusión de alto impacto y separación de cobro para cocina). Se preservan los pasos manuales de duplicación para conservar la personalización de cada local.
 - **1.13 (2026-10-11):** **Mostrador POS dedicado y Calculadora de Vuelto estilo Fudo**: Pantalla completa independiente en `/panel/mostrador`, calculadora de billetes y vuelto en efectivo con botones rápidos y aviso visual de cambio a entregar, edición directa al tocar cualquier renglón del ticket, y botón de exclusión rápida de ingredientes tanto desde la carta como desde la comanda (por defecto completo, con chips para quitar ingredientes en 1 toque).
 - **1.14 (2026-10-11):** **Alineación, centrado y jerarquía visual en todas las pestañas del panel**: Centrado armónico del contenedor principal con `mx-auto` y anchos proporcionados (`max-w-5xl` / `max-w-6xl` / `max-w-4xl` / `max-w-xl`) en todas las vistas (`Resumen`, `Caja`, `Ventas`, `Cocina / Pedidos`, `Carta`, `Promos`, `QR`, `Configuración`, `Mi cuenta`), eliminando el efecto de quedar pegado al margen izquierdo sin sobredimensionar los componentes en pantalla. Rediseño de las tarjetas KPI de Ventas con iconos representativos, armonización de contrastes y eliminación de términos técnicos en inglés ("Live orders", "KDS") reemplazados por vocabulario gastronómico auténtico ("Comandas en vivo", "Cocina", "Caja", "Mostrador").
+- **1.15 (2026-10-13):** **Comandas de Cocina estilo papel de alto contraste, imágenes directas desde CDN y plantilla 100% genérica para duplicación**:
+  - **Cocina / Comandas:** Rediseño completo de `/panel/pedidos` y tarjetas de comanda a positivo puro (fondo blanco `bg-white`, tipografía negra profunda `text-slate-950 font-black`), eliminando el fondo oscuro que causaba reflejos y fatiga visual bajo la luz de cocina. Cantidades destacadas en pastillas oscuras sólidas (`2x`), notas de exclusión de ingredientes fluorescentes (`bg-amber-300 text-amber-950 font-black`) y etapas luminosas (`bg-amber-50`, `bg-blue-50`, `bg-emerald-50`).
+  - **Imágenes directas y fix responsive:** Activación de `unoptimized: true` en `next.config.ts` para servir WebP directamente desde Firebase Storage CDN sin pasar por Vercel ni consumir créditos de Image Optimization. Se corrigió el fallback en elementos `<picture>` (`srcSet={escritorio.srcSet || escritorio.src}`) en Portada y Banners, garantizando que en desktop siempre se cargue la imagen panorámica de PC (`heropc.webp`) y en móvil la vertical (`heromovil.webp`).
+  - **Plantilla base para duplicar:** Desacople dinámico del nombre e inicial del local en la barra lateral del panel (`BarraLateral`), tomando `nombreCorto`/`nombre` de Firestore o `NEXT_PUBLIC_NOMBRE_LOCAL` sin textos hardcodeados. Autodetección de la carpeta del kit en `scripts/entorno.ts` buscando cualquier directorio con `seed.json` para facilitar la clonación y personalización de nuevos locales gastronómicos sin tocar código interno.
 
 

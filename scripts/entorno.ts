@@ -53,5 +53,27 @@ export function destino(): string {
   return usaEmuladores ? `emuladores (${projectId})` : `proyecto REAL ${projectId}`;
 }
 
-/** Carpeta con el kit del local (seed.json, assets/, textos). En una copia del repo, se cambia acá. */
-export const KIT = arg('kit') ?? 'silverio';
+import { existsSync, readdirSync } from 'node:fs';
+import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const raiz = fileURLToPath(new URL('../', import.meta.url));
+
+function resolverKit(): string {
+  const porArg = arg('kit');
+  if (porArg) return porArg;
+  if (existsSync(join(raiz, 'silverio/seed.json'))) return 'silverio';
+  // Si se duplicó y renombró la carpeta del kit (ej. "roma/seed.json"), detectarlo automáticamente:
+  const entrada = readdirSync(raiz, { withFileTypes: true }).find(
+    (d) =>
+      d.isDirectory() &&
+      !['node_modules', '.git', 'apps', 'functions', 'packages', 'scripts', 'tests'].includes(
+        d.name,
+      ) &&
+      existsSync(join(raiz, d.name, 'seed.json')),
+  );
+  return entrada ? entrada.name : 'silverio';
+}
+
+/** Carpeta con el kit del local (seed.json, assets/, textos). Autodetectada o especificada con --kit. */
+export const KIT = resolverKit();
