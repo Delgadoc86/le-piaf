@@ -30,7 +30,7 @@ export async function BannerFecha({
   return (
     <section aria-label={banner.alt || 'Promoción especial'} className="px-4 pt-6 md:px-6 md:pt-8">
       <picture className="revelar borde-brillo mx-auto block max-w-6xl overflow-hidden rounded-[28px] border border-borde">
-        <source media="(min-width: 768px)" srcSet={pc.srcSet} sizes={comun.sizes} />
+        <source media="(min-width: 768px)" srcSet={pc.srcSet || pc.src} sizes={comun.sizes} />
         <img
           {...movil}
           alt={banner.alt}

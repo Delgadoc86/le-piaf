@@ -257,42 +257,42 @@ export default function PedidosPage() {
   ) as Record<IdEtapa, PedidoConId[]>;
 
   return (
-    <div className="max-w-6xl mx-auto rounded-3xl bg-[#0b1120] text-slate-100 p-4 md:p-6 shadow-2xl border border-slate-800/80 space-y-5">
+    <div className="max-w-6xl mx-auto rounded-3xl bg-white border border-slate-200/90 p-4 md:p-6 shadow-sm space-y-5 text-slate-900">
       {/* Encabezado gastronómico en lenguaje del local */}
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-800/80 pb-4">
+      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
         <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-gradient-to-br from-amber-500 to-orange-600 text-white font-black text-xl shadow-lg shadow-orange-500/20">
-            <ChefHat className="size-6 text-white" />
+          <div className="flex size-11 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600 border border-orange-500/20 shadow-sm">
+            <ChefHat className="size-6 text-orange-600" />
           </div>
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black tracking-tight text-white">Pantalla de Cocina</h1>
-              <span className="rounded-full bg-slate-800 px-2.5 py-0.5 text-xs font-bold text-slate-300 border border-slate-700">
+              <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Pantalla de Cocina</h1>
+              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">
                 Comandas en vivo
               </span>
             </div>
-            <p className="flex items-center gap-1.5 text-xs text-slate-400">
-              <Activity className="size-3 text-emerald-400" />
+            <p className="flex items-center gap-1.5 text-xs text-slate-500">
+              <Activity className="size-3 text-emerald-500" />
               <span>Control de despacho y cocina en tiempo real</span>
             </p>
           </div>
         </div>
 
         {/* Métrica de pedidos y ventas del día con iconos */}
-        <div className="flex items-center gap-2 rounded-2xl bg-slate-900 border border-slate-800 px-4 py-2 text-xs md:text-sm text-slate-300 shadow-inner">
-          <span className="text-slate-400">Hoy:</span>
-          <span className="inline-flex items-center gap-1 font-extrabold text-white tabular-nums">
+        <div className="flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200/80 px-4 py-2 text-xs md:text-sm text-slate-600">
+          <span className="text-slate-500">Hoy:</span>
+          <span className="inline-flex items-center gap-1 font-black text-slate-900 tabular-nums">
             <ShoppingBag className="size-3.5 text-slate-400" />
             {totales.pedidos} pedidos
           </span>
-          <span className="text-slate-600">·</span>
-          <span className="inline-flex items-center gap-1 font-extrabold text-emerald-400 tabular-nums">
-            <CircleDollarSign className="size-3.5 text-emerald-400" />
+          <span className="text-slate-300">·</span>
+          <span className="inline-flex items-center gap-1 font-black text-emerald-600 tabular-nums">
+            <CircleDollarSign className="size-3.5 text-emerald-600" />
             {formatARS(totales.vendido)}
           </span>
           {totales.porCobrar > 0 && (
-            <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-500/20 px-2 py-0.5 font-bold text-amber-300 text-xs">
-              <Coins className="size-3" />
+            <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-100 border border-amber-300 px-2 py-0.5 font-bold text-amber-900 text-xs">
+              <Coins className="size-3 text-amber-700" />
               Por cobrar {formatARS(totales.porCobrar)}
             </span>
           )}
@@ -303,9 +303,9 @@ export default function PedidosPage() {
           <Button
             variant="outline"
             className={cn(
-              'h-11 rounded-xl font-bold border-slate-700 bg-slate-900 text-slate-200 hover:bg-slate-800 hover:text-white flex items-center gap-2',
+              'h-11 rounded-xl font-bold border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950 flex items-center gap-2 shadow-xs',
               sonido === 'activo'
-                ? 'border-emerald-500/50 text-emerald-400 bg-slate-900/90'
+                ? 'border-emerald-300 text-emerald-700 bg-emerald-50/70'
                 : 'animate-pulse bg-amber-500 text-slate-950 hover:bg-amber-400 border-none',
             )}
             onClick={() => void alternarSonido()}
@@ -314,7 +314,7 @@ export default function PedidosPage() {
           >
             {sonido === 'activo' ? (
               <>
-                <Volume2 className="size-4 text-emerald-400" />
+                <Volume2 className="size-4 text-emerald-600" />
                 <span>Timbre ON</span>
               </>
             ) : (
@@ -327,7 +327,7 @@ export default function PedidosPage() {
           <Link href="/panel/mostrador">
             <Button
               size="lg"
-              className="h-11 rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-black shadow-lg shadow-orange-600/30 transition-transform active:scale-[0.98] flex items-center gap-1.5"
+              className="h-11 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md shadow-orange-500/20 transition-transform active:scale-[0.98] flex items-center gap-1.5"
             >
               <Plus className="size-4" /> Cargar en Mostrador
             </Button>
@@ -356,10 +356,10 @@ export default function PedidosPage() {
       {cancelacionActiva && (
         <div
           role="alert"
-          className="flex items-center justify-between gap-2 rounded-xl bg-rose-950/60 border border-rose-800/80 px-4 py-3 text-sm font-semibold text-rose-300"
+          className="flex items-center justify-between gap-2 rounded-2xl bg-rose-50 border border-rose-200 px-4 py-3 text-sm font-semibold text-rose-900 shadow-xs"
         >
           <span className="flex items-center gap-2">
-            <AlertTriangle className="size-4 text-rose-400 shrink-0" />
+            <AlertTriangle className="size-4 text-rose-600 shrink-0" />
             <span>
               {cancelacionActiva.por === 'cliente'
                 ? `El cliente canceló el pedido #${cancelacionActiva.numero}.`
@@ -368,7 +368,7 @@ export default function PedidosPage() {
           </span>
           <button
             type="button"
-            className="rounded-lg bg-rose-900/60 px-2.5 py-1 text-xs font-bold text-white hover:bg-rose-800"
+            className="rounded-xl bg-rose-600 px-3 py-1 text-xs font-bold text-white hover:bg-rose-700 shadow-xs"
             onClick={() => setCancelacionVista(cancelacionActiva.id)}
           >
             Entendido
@@ -376,8 +376,8 @@ export default function PedidosPage() {
         </div>
       )}
       {sinConfirmar > 0 && (
-        <p className="flex items-center gap-2 rounded-xl border border-dashed border-slate-700 bg-slate-900/60 px-4 py-2.5 text-sm text-slate-400">
-          <AlertTriangle className="size-4 text-amber-400 shrink-0" />
+        <p className="flex items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50/70 px-4 py-2.5 text-sm font-medium text-amber-900">
+          <AlertTriangle className="size-4 text-amber-600 shrink-0" />
           <span>
             ⏳ {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
             cliente lo confirme por WhatsApp. Si no confirma, se cancela solo.
@@ -385,22 +385,22 @@ export default function PedidosPage() {
         </p>
       )}
       {esGestor && !caja.cargando && !caja.turno && (
-        <div className="flex items-center justify-between gap-2 rounded-xl border border-amber-600/50 bg-amber-950/40 px-4 py-2.5 text-sm text-amber-200">
+        <div className="flex items-center justify-between gap-2 rounded-2xl border border-amber-300 bg-amber-50/80 px-4 py-2.5 text-sm font-medium text-amber-950">
           <span className="flex items-center gap-2">
-            <Wallet className="size-4 text-amber-400 shrink-0" />
+            <Wallet className="size-4 text-amber-600 shrink-0" />
             <span>La caja está cerrada: lo que cobres no va a sumar a ningún turno de caja.</span>
           </span>
-          <Link href="/panel/caja" className="font-bold underline text-amber-300 hover:text-amber-100">
+          <Link href="/panel/caja" className="font-bold underline text-amber-800 hover:text-amber-950">
             Abrir caja
           </Link>
         </div>
       )}
       {error && (
-        <p className="rounded-xl bg-destructive/20 border border-destructive/40 p-3 text-sm text-destructive">{error}</p>
+        <p className="rounded-2xl bg-destructive/10 border border-destructive/30 p-3 text-sm font-medium text-destructive">{error}</p>
       )}
       {verTip && (
-        <p className="flex items-start gap-2 rounded-xl border border-slate-800 bg-slate-900/80 px-3 py-2 text-sm text-slate-400 md:hidden">
-          <Monitor className="mt-0.5 size-4 shrink-0 text-slate-300" aria-hidden />
+        <p className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 md:hidden">
+          <Monitor className="mt-0.5 size-4 shrink-0 text-slate-500" aria-hidden />
           <span className="flex-1">
             Para el servicio conviene una <strong>compu o tablet</strong>: ves las 3 columnas
             juntas. En el celular, usá las pestañas.
@@ -424,7 +424,7 @@ export default function PedidosPage() {
 
       {/* Celular: pestañas fijas con contador de color; tablet y compu: columnas */}
       <div
-        className="sticky top-0 z-10 -mx-4 flex gap-1.5 bg-[#0b1120]/95 px-4 py-2.5 backdrop-blur md:hidden border-b border-slate-800"
+        className="sticky top-0 z-10 -mx-4 flex gap-1.5 bg-white/95 px-4 py-2.5 backdrop-blur md:hidden border-b border-slate-200"
         role="tablist"
       >
         {ETAPAS.map((e) => {
@@ -442,7 +442,7 @@ export default function PedidosPage() {
                 'flex flex-1 items-center justify-center gap-1.5 rounded-xl border px-2 py-2 text-xs font-bold uppercase tracking-wider whitespace-nowrap transition',
                 activa
                   ? cn(COLOR_ETAPA[e.id].encabezado, 'border-transparent shadow-md')
-                  : 'bg-slate-900 text-slate-400 border-slate-800',
+                  : 'bg-slate-50 text-slate-600 border-slate-200',
               )}
             >
               <IconoEtapa className="size-3.5 shrink-0" />
@@ -454,7 +454,7 @@ export default function PedidosPage() {
                     ? 'bg-black/20 text-white'
                     : n > 0
                       ? cn(COLOR_ETAPA[e.id].punto, 'text-white')
-                      : 'bg-slate-800 text-slate-500',
+                      : 'bg-slate-200 text-slate-600',
                 )}
               >
                 {n}
@@ -476,13 +476,13 @@ export default function PedidosPage() {
               key={e.id}
               aria-label={e.titulo}
               className={cn(
-                'min-w-0 rounded-2xl p-2.5 md:p-3 bg-slate-900/60 border border-slate-800/80 shadow-md transition-colors',
+                'min-w-0 rounded-2xl p-2.5 md:p-3 bg-slate-100/70 border border-slate-200 shadow-xs transition-colors',
                 pestana !== e.id && 'hidden md:block',
               )}
             >
               <div
                 className={cn(
-                  'mb-3 hidden items-center justify-between rounded-xl px-4 py-3 shadow-md md:flex',
+                  'mb-3 hidden items-center justify-between rounded-xl px-4 py-3 shadow-sm md:flex',
                   color.encabezado,
                 )}
               >
@@ -501,8 +501,8 @@ export default function PedidosPage() {
               </div>
               <div className="space-y-3">
                 {lista.length === 0 ? (
-                  <div className="rounded-2xl border border-dashed border-slate-800 bg-slate-900/40 p-8 text-center text-sm font-medium text-slate-500">
-                    <IconoEtapa className="mx-auto size-7 text-slate-600 mb-2" />
+                  <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-sm font-medium text-slate-500">
+                    <IconoEtapa className="mx-auto size-7 text-slate-400 mb-2" />
                     <p>{e.vacio}</p>
                   </div>
                 ) : (
@@ -515,20 +515,20 @@ export default function PedidosPage() {
       </div>
 
       {terminados.length > 0 && (
-        <section className="space-y-3 pt-4 border-t border-slate-800/80">
+        <section className="space-y-3 pt-4 border-t border-slate-200">
           <button
             type="button"
             onClick={() => setVerTerminados((v) => !v)}
-            className="flex items-center gap-2 text-sm font-bold text-slate-400 hover:text-slate-200 transition"
+            className="flex items-center gap-2 text-sm font-bold text-slate-600 hover:text-slate-900 transition"
             aria-expanded={verTerminados}
           >
             <ChevronDown
               className={cn('size-4 transition-transform', verTerminados && 'rotate-180')}
             />
-            <Archive className="size-4 text-slate-400" />
+            <Archive className="size-4 text-slate-500" />
             <span>Entregados y cancelados de hoy ({terminados.length})</span>
             {sinCobrar > 0 && (
-              <span className="rounded-full bg-rose-600 px-2 py-0.5 text-xs font-bold text-white shadow-sm">
+              <span className="rounded-full bg-rose-600 px-2.5 py-0.5 text-xs font-bold text-white shadow-sm">
                 {sinCobrar} sin cobrar
               </span>
             )}

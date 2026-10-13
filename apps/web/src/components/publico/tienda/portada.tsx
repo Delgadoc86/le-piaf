@@ -55,7 +55,7 @@ export function Portada(props: Props) {
         <div className="borde-brillo relative isolate overflow-hidden rounded-[32px] border border-borde bg-superficie">
           {movil && escritorio && (
             <picture>
-              <source media="(min-width: 768px)" srcSet={escritorio.srcSet} sizes={comun.sizes} />
+              <source media="(min-width: 768px)" srcSet={escritorio.srcSet || escritorio.src} sizes={comun.sizes} />
               <img
                 {...movil}
                 alt=""

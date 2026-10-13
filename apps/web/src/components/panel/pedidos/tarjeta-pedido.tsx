@@ -64,11 +64,11 @@ export function EtiquetaPago({ pedido, className }: { pedido: Pedido; className?
     return (
       <span
         className={cn(
-          'inline-flex items-center gap-1 rounded-full border border-rose-600 bg-rose-950 px-2.5 py-0.5 text-xs font-bold text-rose-300',
+          'inline-flex items-center gap-1 rounded-full border border-rose-300 bg-rose-50 px-2.5 py-0.5 text-xs font-bold text-rose-800 shadow-xs',
           className,
         )}
       >
-        <AlertCircle className="size-3 shrink-0" />
+        <AlertCircle className="size-3 shrink-0 text-rose-600" />
         {pedido.estadoPago === 'parcial' ? 'Entregado · pago parcial' : 'Entregado sin cobrar'}
       </span>
     );
@@ -82,17 +82,17 @@ export function EtiquetaPago({ pedido, className }: { pedido: Pedido; className?
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold',
+        'inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-bold shadow-xs',
         pedido.estadoPago === 'pagado'
-          ? 'border border-emerald-700/60 bg-emerald-950/80 text-emerald-400'
-          : 'border border-amber-700/60 bg-amber-950/80 text-amber-300',
+          ? 'border border-emerald-300 bg-emerald-50 text-emerald-800'
+          : 'border border-amber-300 bg-amber-50 text-amber-900',
         className,
       )}
     >
       {pedido.estadoPago === 'pagado' ? (
-        <CheckCircle2 className="size-3 shrink-0" />
+        <CheckCircle2 className="size-3 shrink-0 text-emerald-600" />
       ) : (
-        <Coins className="size-3 shrink-0" />
+        <Coins className="size-3 shrink-0 text-amber-600" />
       )}
       <span>{texto}</span>
     </span>
@@ -123,8 +123,8 @@ function VenceEn({ pedido, ahora }: { pedido: Pedido; ahora: number }) {
   if (!vence) return null;
   const min = Math.max(0, Math.ceil((vence - ahora) / 60_000));
   return (
-    <span className="inline-flex items-center gap-1 rounded-full border border-zinc-700 bg-zinc-800 px-2.5 py-0.5 text-xs font-semibold text-zinc-300">
-      <Clock className="size-3 shrink-0 text-amber-400" />
+    <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2.5 py-0.5 text-xs font-bold text-amber-900 shadow-xs">
+      <Clock className="size-3 shrink-0 text-amber-600" />
       Sin confirmar · {min > 0 ? `vence en ${min} min` : 'vencido'}
     </span>
   );
@@ -147,8 +147,8 @@ function Transcurrido({ pedido, ahora }: { pedido: Pedido; ahora: number }) {
       className={cn(
         'inline-flex items-center gap-1.5 rounded-xl px-2.5 py-1 text-xs font-bold tabular-nums',
         urgente
-          ? 'border border-red-500/60 bg-red-950/60 text-red-300 animate-pulse'
-          : 'border border-slate-700 bg-slate-800/80 text-slate-300',
+          ? 'border-2 border-red-500 bg-red-50 text-red-700 animate-pulse shadow-xs'
+          : 'border border-slate-200 bg-slate-100 text-slate-700',
       )}
       title={
         sinAceptar
@@ -159,9 +159,9 @@ function Transcurrido({ pedido, ahora }: { pedido: Pedido; ahora: number }) {
       }
     >
       {urgente ? (
-        <AlertTriangle className="size-3.5 text-red-400 shrink-0" aria-hidden />
+        <AlertTriangle className="size-3.5 text-red-600 shrink-0" aria-hidden />
       ) : (
-        <Clock className="size-3.5 shrink-0" aria-hidden />
+        <Clock className="size-3.5 text-slate-400 shrink-0" aria-hidden />
       )}
       {min < 1 ? 'recién' : `hace ${min} min`}
     </span>
@@ -199,10 +199,10 @@ export function TarjetaPedido({
   return (
     <article
       className={cn(
-        'rounded-2xl border-2 bg-[#111827] text-white p-4 shadow-lg transition-all hover:shadow-xl',
-        etapa ? COLOR_ETAPA[etapa].borde : 'border-slate-800',
-        sinConfirmar && 'border-dashed border-zinc-600 bg-slate-900/60',
-        anulado && 'opacity-60',
+        'rounded-2xl border-2 bg-white text-slate-950 p-4 shadow-sm transition-all hover:shadow-md',
+        etapa ? COLOR_ETAPA[etapa].borde : 'border-slate-200',
+        sinConfirmar && 'border-dashed border-amber-300 bg-amber-50/40',
+        anulado && 'opacity-60 bg-slate-50',
       )}
     >
       <button
@@ -214,17 +214,17 @@ export function TarjetaPedido({
         {/* Encabezado: número bien grande (#104) y origen como chip redondeado con icono */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex flex-wrap items-center gap-2">
-            <span className="display-comanda text-3xl leading-none font-black text-white">
+            <span className="display-comanda text-3xl leading-none font-black text-slate-950">
               #{pedido.numero}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-700 bg-slate-800 px-2.5 py-0.5 text-xs font-semibold text-slate-300">
-              <Icono className="size-3 text-orange-400" aria-label={ETIQUETA_TIPO[pedido.tipo]} />
+            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
+              <Icono className="size-3 text-orange-600" aria-label={ETIQUETA_TIPO[pedido.tipo]} />
               <span>{ORIGEN[pedido.origen]}</span>
             </span>
           </div>
           {terminado ? (
-            <span className="flex items-center gap-1 text-xs font-medium text-slate-400 tabular-nums">
-              <Clock className="size-3 text-slate-500" />
+            <span className="flex items-center gap-1 text-xs font-semibold text-slate-500 tabular-nums">
+              <Clock className="size-3 text-slate-400" />
               {horaDe(pedido.creadoEn, zonaHoraria)}
             </span>
           ) : sinConfirmar ? (
@@ -236,76 +236,76 @@ export function TarjetaPedido({
 
         {/* Nombre del cliente */}
         {pedido.cliente?.nombre && (
-          <p className="mt-2.5 flex items-center gap-1.5 truncate text-base font-bold text-white">
-            <User className="size-4 text-slate-400 shrink-0" />
+          <p className="mt-2.5 flex items-center gap-1.5 truncate text-base font-extrabold text-slate-900">
+            <User className="size-4 text-slate-500 shrink-0" />
             <span className="truncate">{pedido.cliente.nombre}</span>
           </p>
         )}
 
         {pedido.tipo === 'delivery' && (
-          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-400">
+          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
             <span className="flex items-center gap-1 truncate font-medium">
-              <MapPin className="size-3.5 text-cyan-400 shrink-0" />
+              <MapPin className="size-3.5 text-blue-600 shrink-0" />
               {pedido.entrega?.direccion}
             </span>
             {pedido.costoEnvio === 0 && (
-              <span className="rounded-full border border-amber-800/60 bg-amber-950/60 px-2 py-0.5 font-bold text-amber-300">
+              <span className="rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 font-bold text-amber-900 shadow-xs">
                 Envío a confirmar
               </span>
             )}
           </p>
         )}
 
-        {/* Lista de comanda con cantidades en blanco nítido y notas de cocina de alto impacto */}
-        <ul className="mt-2.5 space-y-1.5 text-sm text-slate-200">
+        {/* Lista de comanda con cantidades nítidas y notas de cocina fluorescentes */}
+        <ul className="mt-2.5 space-y-1.5 text-sm text-slate-800">
           {visibles.map((i) => (
             <li key={i.id} className="leading-snug">
               <div className="flex items-start">
-                <span className="inline-flex items-center justify-center min-w-7 h-6 px-1.5 rounded-lg bg-white text-slate-950 font-black text-sm tabular-nums mr-2 shrink-0 shadow-xs">
+                <span className="inline-flex items-center justify-center min-w-7 h-6 px-1.5 rounded-lg bg-slate-900 text-white font-black text-sm tabular-nums mr-2 shrink-0 shadow-xs">
                   {i.cantidad}x
                 </span>
                 <div className="min-w-0 flex-1">
-                  <span className="font-bold text-base text-white">{i.nombre}</span>
+                  <span className="font-black text-base text-slate-950">{i.nombre}</span>
                   {i.varianteNombre && (
-                    <span className="text-slate-300 font-semibold text-xs"> · {i.varianteNombre}</span>
+                    <span className="text-slate-600 font-bold text-xs"> · {i.varianteNombre}</span>
                   )}
                   {i.extras.length > 0 && (
-                    <span className="block text-xs font-semibold text-slate-300">
+                    <span className="block text-xs font-bold text-slate-600">
                       + {i.extras.map((e) => e.nombre).join(', ')}
                     </span>
                   )}
                 </div>
               </div>
               {i.nota && (
-                <div className="mt-1 ml-9 flex items-center gap-1.5 rounded-lg bg-amber-400 text-slate-950 px-2 py-0.5 text-xs font-black shadow-xs">
-                  <AlertTriangle className="size-3.5 shrink-0" />
+                <div className="mt-1 ml-9 flex items-center gap-1.5 rounded-lg bg-amber-300 border border-amber-400 text-amber-950 px-2.5 py-1 text-xs font-black shadow-xs">
+                  <AlertTriangle className="size-3.5 shrink-0 text-amber-950" />
                   <span>⚠️ COCINA: “{i.nota}”</span>
                 </div>
               )}
             </li>
           ))}
-          {ocultos > 0 && <li className="pl-9 text-xs font-bold text-slate-400">y {ocultos} más…</li>}
+          {ocultos > 0 && <li className="pl-9 text-xs font-bold text-slate-500">y {ocultos} más…</li>}
         </ul>
 
         {pedido.nota && (
-          <div className="mt-2.5 rounded-xl border-2 border-amber-400 bg-amber-400/20 px-3 py-2 text-xs font-black text-amber-200 flex items-start gap-2 shadow-sm">
-            <AlertCircle className="size-4 text-amber-400 shrink-0 mt-0.5" />
+          <div className="mt-2.5 rounded-xl border-2 border-amber-300 bg-amber-50 px-3 py-2 text-xs font-black text-amber-950 flex items-start gap-2 shadow-xs">
+            <AlertCircle className="size-4 text-amber-600 shrink-0 mt-0.5" />
             <div>
-              <span className="uppercase tracking-wider text-amber-300 font-black">
+              <span className="uppercase tracking-wider text-amber-800 font-black">
                 Aclaración de Comanda:
               </span>
-              <p className="text-white text-sm font-bold mt-0.5">“{pedido.nota}”</p>
+              <p className="text-slate-950 text-sm font-bold mt-0.5">“{pedido.nota}”</p>
             </div>
           </div>
         )}
 
         {/* Total y etiqueta de pago */}
-        <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-800 pt-2.5">
-          <span className="display-dinero text-xl font-black text-white tabular-nums">
+        <div className="mt-3.5 flex flex-wrap items-center justify-between gap-2 border-t border-slate-200 pt-2.5">
+          <span className="display-dinero text-xl font-black text-slate-950 tabular-nums">
             {formatARS(pedido.total)}
           </span>
           {anulado ? (
-            <span className="text-xs font-bold text-rose-400">
+            <span className="text-xs font-bold text-rose-600">
               {ETIQUETA_ESTADO[pedido.estado]}
             </span>
           ) : (
@@ -317,7 +317,7 @@ export function TarjetaPedido({
       {/* Acciones */}
       {operable && sinConfirmar && (
         <div className="mt-3 space-y-1.5">
-          <p className="text-xs text-slate-400">
+          <p className="text-xs text-slate-500 font-medium">
             Cliente nuevo: esperá su WhatsApp confirmando el #{pedido.numero}.
           </p>
           <Button
@@ -332,7 +332,7 @@ export function TarjetaPedido({
             <Button
               variant="ghost"
               size="sm"
-              className="w-full text-xs font-medium text-slate-400 hover:text-white"
+              className="w-full text-xs font-medium text-slate-500 hover:text-slate-900"
               onClick={onAvanzar}
               disabled={ocupado}
             >
@@ -347,7 +347,7 @@ export function TarjetaPedido({
           {siguiente && (
             <Button
               className={cn(
-                'h-14 w-full rounded-2xl text-base md:text-lg font-black shadow-lg transition-transform active:scale-[0.99] flex items-center justify-center gap-2',
+                'h-14 w-full rounded-2xl text-base md:text-lg font-black shadow-md transition-transform active:scale-[0.99] flex items-center justify-center gap-2',
                 etapa && COLOR_ETAPA[etapa].boton,
               )}
               onClick={onAvanzar}
@@ -375,19 +375,19 @@ export function TarjetaPedido({
                   key={m}
                   size="sm"
                   variant="outline"
-                  className="h-12 flex-1 rounded-xl border-slate-700 bg-slate-800 text-xs md:text-sm font-black text-slate-200 hover:bg-slate-700 hover:text-white flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98]"
+                  className="h-12 flex-1 rounded-xl border-slate-200 bg-slate-100 text-xs md:text-sm font-black text-slate-800 hover:bg-slate-200 hover:text-slate-950 flex items-center justify-center gap-1.5 transition-transform active:scale-[0.98] shadow-xs"
                   onClick={() => onCobrarRapido(m)}
                   disabled={ocupado}
                   title={`Cobrar ${formatARS(falta)} en ${m}`}
                 >
                   {m === 'efectivo' ? (
                     <>
-                      <Banknote className="size-4 text-emerald-400" />
+                      <Banknote className="size-4 text-emerald-600" />
                       <span>Efectivo</span>
                     </>
                   ) : (
                     <>
-                      <Building2 className="size-4 text-blue-400" />
+                      <Building2 className="size-4 text-blue-600" />
                       <span>Transf.</span>
                     </>
                   )}
@@ -396,22 +396,22 @@ export function TarjetaPedido({
               <Button
                 size="sm"
                 variant="ghost"
-                className="h-12 rounded-xl px-2.5 text-xs font-bold text-slate-400 hover:text-white flex items-center gap-1"
+                className="h-12 rounded-xl px-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1 border border-slate-200"
                 onClick={onCobrarOtro}
                 disabled={ocupado}
               >
-                <CreditCard className="size-4" />
+                <CreditCard className="size-4 text-slate-500" />
                 <span>Otro</span>
               </Button>
             </div>
           )}
 
           {falta > 0 && pedido.pagoElegido.medio === 'efectivo' && cambio > 0 && (
-            <p className="flex items-center gap-1 text-xs text-slate-400">
-              <Coins className="size-3 text-amber-400 shrink-0" />
+            <p className="flex items-center gap-1 text-xs text-slate-600">
+              <Coins className="size-3 text-amber-600 shrink-0" />
               <span>
                 Paga con {formatARS(pedido.pagoElegido.pagaCon ?? 0)} → vuelto{' '}
-                <strong className="text-white">{formatARS(cambio)}</strong>
+                <strong className="text-slate-950 font-black">{formatARS(cambio)}</strong>
               </span>
             </p>
           )}
