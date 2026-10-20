@@ -1,17 +1,19 @@
 'use client';
 
 /**
- * Promos en mosaico (bento): la primera vigente es la protagonista. En celular, la destacada
- * ocupa el ancho y el resto se desliza; en escritorio, grilla 4×2. Agregan directo al carrito.
+ * Carrusel de Promociones:
+ * Otorga protagonismo individual a cada promo sin scroll vertical infinito.
+ * Desplazable horizontalmente en celular (swipe con snap) y con controles flecha en PC.
  */
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Check, Plus } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Plus, Sparkles } from 'lucide-react';
 import { formatARS, promoVigente } from '@app/shared';
 import type { PromoPublica } from '@/features/sitio/datos';
 import { useCarrito, useTiendaUI } from '@/features/carrito/store';
 import { useTienda } from '@/features/carrito/tienda';
 import { cn } from '@/lib/utils';
+import { PromoComboSvg } from './ilustracion';
 
 export function PromosBento({
   promos,
@@ -20,8 +22,10 @@ export function PromosBento({
   promos: PromoPublica[];
   zonaHoraria: string;
 }) {
-  // Se renderizan todas en el servidor; en el navegador se ocultan las que no rigen ahora.
   const [vigentes, setVigentes] = useState(promos);
+  const [indiceActivo, setIndiceActivo] = useState(0);
+  const carruselRef = useRef<HTMLUListElement>(null);
+
   useEffect(() => {
     const calcular = () =>
       setVigentes(promos.filter((p) => promoVigente(p, new Date(), zonaHoraria)));
@@ -30,17 +34,87 @@ export function PromosBento({
     return () => clearInterval(id);
   }, [promos, zonaHoraria]);
 
+  // Actualizar índice activo al desplazarse
+  const alScrollear = () => {
+    const el = carruselRef.current;
+    if (!el) return;
+    const scrollLeft = el.scrollLeft;
+    const cardWidth = el.firstElementChild ? (el.firstElementChild as HTMLElement).offsetWidth + 16 : 380;
+    const index = Math.round(scrollLeft / cardWidth);
+    setIndiceActivo(Math.min(Math.max(0, index), vigentes.length - 1));
+  };
+
+  const deslizar = (direccion: 'izq' | 'der') => {
+    const el = carruselRef.current;
+    if (!el) return;
+    const paso = (el.firstElementChild as HTMLElement)?.offsetWidth || 380;
+    el.scrollBy({
+      left: direccion === 'izq' ? -paso - 16 : paso + 16,
+      behavior: 'smooth',
+    });
+  };
+
   if (vigentes.length === 0) {
     return <p className="text-tinta-2">No hay promociones disponibles en este momento.</p>;
   }
-  const [destacada, ...resto] = vigentes;
 
   return (
-    <div className="grid gap-3 md:grid-cols-4 md:grid-rows-2 md:gap-4">
-      <TarjetaPromo promo={destacada!} grande className="md:col-span-2 md:row-span-2" />
-      <ul className="carrusel -mx-4 flex gap-3 overflow-x-auto px-4 md:contents">
-        {resto.slice(0, 4).map((p) => (
-          <li key={p.id} className="w-[72%] shrink-0 sm:w-[46%] md:w-auto">
+    <div className="relative">
+      {/* Controles de navegación y contador en escritorio / tablet */}
+      <div className="mb-3 flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          {vigentes.map((_, i) => (
+            <button
+              key={i}
+              type="button"
+              onClick={() => {
+                const el = carruselRef.current;
+                if (!el?.children[i]) return;
+                (el.children[i] as HTMLElement).scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+              }}
+              aria-label={`Ir a promo ${i + 1}`}
+              className={cn(
+                'h-1.5 rounded-full transition-all duration-300',
+                i === indiceActivo ? 'w-6 bg-marca' : 'w-2 bg-white/20 hover:bg-white/40',
+              )}
+            />
+          ))}
+          <span className="ml-2 text-xs font-semibold tabular-nums text-tinta-2">
+            {indiceActivo + 1} / {vigentes.length}
+          </span>
+        </div>
+
+        <div className="hidden items-center gap-2 md:flex">
+          <button
+            type="button"
+            onClick={() => deslizar('izq')}
+            aria-label="Promoción anterior"
+            className="inline-flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-tinta transition-all hover:border-marca/40 hover:bg-white/10 hover:text-marca active:scale-90"
+          >
+            <ChevronLeft className="size-4" aria-hidden />
+          </button>
+          <button
+            type="button"
+            onClick={() => deslizar('der')}
+            aria-label="Siguiente promoción"
+            className="inline-flex size-9 items-center justify-center rounded-full border border-white/10 bg-white/5 text-tinta transition-all hover:border-marca/40 hover:bg-white/10 hover:text-marca active:scale-90"
+          >
+            <ChevronRight className="size-4" aria-hidden />
+          </button>
+        </div>
+      </div>
+
+      {/* Riel horizontal con snap para swipe fluido y protagonismo */}
+      <ul
+        ref={carruselRef}
+        onScroll={alScrollear}
+        className="carrusel -mx-4 flex gap-4 overflow-x-auto px-4 pb-4 pt-1 snap-x snap-mandatory scroll-smooth md:-mx-2 md:px-2 md:gap-5"
+      >
+        {vigentes.map((p) => (
+          <li
+            key={p.id}
+            className="w-[84vw] max-w-[380px] shrink-0 snap-center sm:w-[360px] md:w-[390px]"
+          >
             <TarjetaPromo promo={p} />
           </li>
         ))}
@@ -49,15 +123,7 @@ export function PromosBento({
   );
 }
 
-function TarjetaPromo({
-  promo: p,
-  grande = false,
-  className,
-}: {
-  promo: PromoPublica;
-  grande?: boolean;
-  className?: string;
-}) {
+function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
   const agregar = useCarrito((e) => e.agregar);
   const avisar = useTiendaUI((e) => e.avisarAgregado);
   const [listo, setListo] = useState(false);
@@ -71,72 +137,78 @@ function TarjetaPromo({
   }
 
   return (
-    <article
-      className={cn(
-        'revelar elevar borde-brillo group relative isolate flex h-full flex-col justify-end overflow-hidden rounded-[28px] border border-borde bg-superficie',
-        grande ? 'min-h-[22rem] md:min-h-0' : 'min-h-[15rem] md:min-h-[13rem]',
-        className,
-      )}
-    >
-      {p.fotoUrl && (
+    <article className="group relative isolate flex h-[22rem] md:h-[24rem] flex-col justify-end overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-t from-black via-[#181A22]/90 to-[#22252F] p-5 shadow-lg transition-all duration-300 hover:border-marca/40">
+      {/* Imagen real del combo o ilustración gastronómica si no hay foto */}
+      {p.fotoUrl ? (
         <Image
           src={p.fotoUrl}
           alt={p.titulo}
           fill
-          sizes={grande ? '(min-width: 768px) 560px, 92vw' : '(min-width: 768px) 280px, 72vw'}
-          className="zoom -z-10 object-cover"
+          sizes="(min-width: 768px) 400px, 84vw"
+          className="zoom -z-10 object-cover transition-transform duration-500 group-hover:scale-105"
         />
+      ) : (
+        <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#241E15] via-[#16171E] to-[#0E0F14]">
+          <div className="absolute inset-0 bg-radial from-amber-500/20 via-transparent to-transparent opacity-80" />
+          <PromoComboSvg className="size-36 opacity-85 drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-110" />
+        </div>
       )}
+
+      {/* Degradé protector para legibilidad del texto */}
       <div
-        className="absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/55 to-black/0"
+        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/65 to-transparent"
         aria-hidden
       />
 
-      <span className="absolute top-3 left-3 rounded-full bg-marca px-2.5 py-1 text-[10px] font-bold tracking-wider text-black uppercase">
-        Promo
-      </span>
+      {/* Badge de Promo */}
+      <div className="absolute top-4 left-4 flex items-center gap-1.5 rounded-full bg-marca px-3 py-1 text-[11px] font-bold tracking-wider text-black uppercase shadow-md">
+        <Sparkles className="size-3" aria-hidden />
+        Promo Exclusiva
+      </div>
 
-      <div className={cn('flex items-end gap-3', grande ? 'p-5 md:p-7' : 'p-4')}>
-        <div className="min-w-0 flex-1">
-          <h3
-            className={cn(
-              'font-semibold text-balance',
-              grande ? 'text-2xl md:text-3xl' : 'text-base',
-            )}
-          >
-            {p.titulo}
-          </h3>
-          {grande && p.descripcion && (
-            <p className="mt-1 line-clamp-2 text-sm text-white/75">{p.descripcion}</p>
-          )}
-          <p
-            className={cn(
-              'mt-2 font-bold text-marca tabular-nums',
-              grande ? 'text-2xl' : 'text-lg',
-            )}
-          >
-            {formatARS(p.precio)}
+      {/* Contenido de la promo con protagonismo */}
+      <div className="relative">
+        <h3 className="font-titulos text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-3xl text-balance">
+          {p.titulo}
+        </h3>
+        {p.descripcion && (
+          <p className="mt-1.5 line-clamp-2 text-sm text-tinta-2 drop-shadow-sm">
+            {p.descripcion}
           </p>
-        </div>
-        {conCarrito && (
-          <button
-            type="button"
-            onClick={sumar}
-            aria-label={`Agregar ${p.titulo}`}
-            className={cn(
-              'inline-flex shrink-0 items-center justify-center gap-2 rounded-full font-semibold text-black shadow-lg transition-[background-color,transform] duration-300 active:scale-90',
-              listo ? 'bg-emerald-400' : 'bg-marca hover:bg-marca-hover',
-              grande ? 'h-12 px-5' : 'size-11',
-            )}
-          >
-            {listo ? (
-              <Check key="ok" className="tilde size-5" aria-hidden />
-            ) : (
-              <Plus className="size-5" aria-hidden />
-            )}
-            {grande && <span>{listo ? 'Listo' : 'Agregar'}</span>}
-          </button>
         )}
+
+        <div className="mt-4 flex items-center justify-between gap-3 pt-2">
+          <div>
+            <span className="block text-[11px] font-semibold tracking-wider text-tinta-2 uppercase">Precio promo</span>
+            <span className="font-titulos text-3xl font-bold text-marca tabular-nums">
+              {formatARS(p.precio)}
+            </span>
+          </div>
+
+          {conCarrito && (
+            <button
+              type="button"
+              onClick={sumar}
+              aria-label={`Agregar ${p.titulo}`}
+              className={cn(
+                'inline-flex h-12 items-center justify-center gap-2 rounded-full px-5 font-semibold text-black shadow-lg transition-all duration-300 active:scale-90',
+                listo ? 'bg-emerald-400' : 'bg-marca hover:bg-marca-hover hover:scale-105',
+              )}
+            >
+              {listo ? (
+                <>
+                  <Check className="tilde size-5" aria-hidden />
+                  <span>Listo</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="size-5" aria-hidden />
+                  <span>Agregar</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

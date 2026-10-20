@@ -1,6 +1,6 @@
-# Silverio: cliente piloto (kit de personalización)
+# Le Piaf: kit de personalización
 
-Todo lo que hace falta para que la web de Silverio (repo `silverio-club`) se vea y se lea como la actual, pero mejor. Es el **kit del local**: en una copia del repo para otro local, esta carpeta se reemplaza (ROADMAP §16).
+Todo lo que hace falta para que la web de Le Piaf se vea y se lea con su identidad oficial. Es el **kit del local**: en una copia del repo para otro local, esta carpeta se reemplaza (ROADMAP §16).
 Extraído del proyecto viejo (React + Vite + Firebase, repo `Silverio-FoodTruck`) el 2026-09-28.
 
 - Datos estructurados (local, marca, categorías, productos, promos): [`seed.json`](seed.json)

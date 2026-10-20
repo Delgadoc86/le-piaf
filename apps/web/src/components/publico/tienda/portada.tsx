@@ -1,6 +1,5 @@
 import type { CSSProperties } from 'react';
-import { getImageProps } from 'next/image';
-import { Clock, MapPin, ShoppingBag } from 'lucide-react';
+import { Clock, Flame, MapPin, ShoppingBag, UtensilsCrossed } from 'lucide-react';
 import type { ConfigPedidos, DatosHorario } from '@app/shared';
 import { EstadoLocal } from '../estado-local';
 
@@ -9,119 +8,117 @@ interface Props {
   bajada: string;
   descripcion: string;
   localidad: string;
-  heroDesktopUrl: string;
-  heroMovilUrl: string;
+  heroDesktopUrl?: string;
+  heroMovilUrl?: string;
   horario: DatosHorario;
   pedidos: ConfigPedidos;
 }
 
 /**
- * Portada tipo "ficha del local" de una app: tarjeta con la ilustración de la marca + datos
- * rápidos (estado, cómo pedir, tiempo). Ocupa media pantalla: la carta se ve enseguida.
+ * Portada nocturna con ambientación de leña y brasas:
+ * Destaca la personalidad única de Le Piaf, alejándose de formatos rígidos
+ * o plantillas prefabricadas.
  */
 export function Portada(props: Props) {
-  const comun = { alt: '', sizes: '(min-width: 1152px) 1152px, 100vw', quality: 75 };
-  const escritorio = props.heroDesktopUrl
-    ? getImageProps({ ...comun, src: props.heroDesktopUrl, width: 1920, height: 1080 }).props
-    : null;
-  const movil = props.heroMovilUrl
-    ? getImageProps({
-        ...comun,
-        src: props.heroMovilUrl,
-        width: 1080,
-        height: 1920,
-        loading: 'eager',
-        fetchPriority: 'high',
-      }).props
-    : null;
-
   const formas = [
-    props.pedidos.tipos.takeAway && 'Retiro',
+    props.pedidos.tipos.takeAway && 'Retiro en local',
     props.pedidos.tipos.delivery && 'Delivery',
-    props.pedidos.tipos.salon && 'En el local',
+    props.pedidos.tipos.salon && 'En el salón',
   ].filter(Boolean);
 
-  const chip =
-    'inline-flex h-8 items-center gap-1.5 rounded-full border border-borde bg-white/5 px-3 text-xs font-medium text-tinta-2';
   const i = (n: number) => ({ '--i': n }) as CSSProperties;
 
   return (
     <section
       id="inicio"
       aria-label={props.titulo}
-      className="resplandor px-4 pt-20 md:px-6 md:pt-28"
+      className="relative overflow-hidden px-4 pt-28 pb-8 md:px-6 md:pt-36 md:pb-16"
     >
-      <div className="mx-auto max-w-6xl">
-        <div className="borde-brillo relative isolate overflow-hidden rounded-[32px] border border-borde bg-superficie">
-          {movil && escritorio && (
-            <picture>
-              <source media="(min-width: 768px)" srcSet={escritorio.srcSet || escritorio.src} sizes={comun.sizes} />
-              <img
-                {...movil}
-                alt=""
-                className="asentar aspect-[5/4] w-full object-cover object-[50%_18%] md:aspect-[12/5] md:object-center"
-              />
-            </picture>
-          )}
-          <div
-            className="pointer-events-none absolute inset-0 bg-gradient-to-t from-superficie via-transparent to-transparent md:bg-gradient-to-r md:from-superficie md:via-superficie/60"
-            aria-hidden
-          />
+      {/* Resplandor ambiental de horno de barro / brasas cálidas */}
+      <div
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_80%_60%_at_50%_-10%,rgba(245,158,11,0.18),rgba(234,88,12,0.06)_50%,transparent_80%)]"
+        aria-hidden
+      />
 
-          {/* Escritorio: texto sobre la zona libre de la ilustración. */}
-          <div className="absolute inset-y-0 left-0 hidden max-w-lg flex-col justify-center p-12 md:flex">
-            <p
-              className="entrar text-xs font-semibold tracking-[0.35em] text-marca uppercase"
-              style={i(0)}
-            >
-              {props.bajada}
-            </p>
-            <h1 className="entrar mt-3 font-titulos text-7xl leading-none" style={i(1)}>
-              {props.titulo}
-            </h1>
-            <p className="entrar mt-4 text-lg text-pretty text-tinta-2" style={i(2)}>
-              {props.descripcion}
-            </p>
-          </div>
+      <div className="mx-auto max-w-4xl text-center">
+        {/* Sello artesanal de especialidad */}
+        <div
+          className="entrar inline-flex items-center gap-2 rounded-full border border-amber-500/30 bg-amber-500/10 px-4 py-1.5 text-xs font-bold tracking-[0.25em] text-marca uppercase shadow-[0_0_20px_rgba(245,158,11,0.2)] backdrop-blur-md"
+          style={i(0)}
+        >
+          <Flame className="size-3.5 text-amber-400 animate-pulse" aria-hidden />
+          <span>{props.bajada || 'Pizzas a la piedra · Lomos · Hamburguesas'}</span>
         </div>
 
-        {/* Celular: título tipo app debajo de la tarjeta (la ilustración ya dice "Silverio"). */}
-        <div className="mt-5 md:hidden">
-          <p
-            className="entrar text-[11px] font-semibold tracking-[0.3em] text-marca uppercase"
-            style={i(0)}
-          >
-            {props.bajada}
-          </p>
-          <p className="entrar mt-1 font-titulos text-4xl leading-tight" style={i(1)} aria-hidden>
-            ¿Qué pedimos hoy?
-          </p>
-          {/* Un solo h1 visible para lectores de pantalla según el tamaño (el otro está oculto con display:none). */}
-          <h1 className="sr-only">{props.titulo}</h1>
-        </div>
+        {/* Título de Marca Le Piaf con jerarquía gastronómica */}
+        <h1
+          className="entrar mt-5 font-titulos text-6xl tracking-tight text-white sm:text-7xl md:text-8xl lg:text-9xl drop-shadow-[0_4px_30px_rgba(0,0,0,0.8)]"
+          style={i(1)}
+        >
+          {props.titulo}
+        </h1>
 
-        <ul
-          className="entrar mt-4 flex flex-wrap gap-2 md:mt-5"
+        {/* Descripción / Bajada */}
+        <p
+          className="entrar mx-auto mt-4 max-w-xl text-base text-pretty text-tinta-2 sm:text-lg md:text-xl font-light leading-relaxed"
+          style={i(2)}
+        >
+          {props.descripcion}
+        </p>
+
+        {/* 3 Pilares distintivos de Le Piaf (Diferenciales frente a rotiserías genéricas) */}
+        <div
+          className="entrar mt-6 flex flex-wrap items-center justify-center gap-2 sm:gap-3 text-xs sm:text-sm text-tinta-2"
           style={i(3)}
-          aria-label="Información rápida"
+        >
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 backdrop-blur-sm">
+            🪵 Masa madre & cocción a la piedra
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 backdrop-blur-sm">
+            🥩 Lomos de primera calidad
+          </span>
+          <span className="inline-flex items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.03] px-3.5 py-1.5 backdrop-blur-sm">
+            🍕 Calzones & barrolucos
+          </span>
+        </div>
+
+        {/* Botones de acción con resplandor cálido */}
+        <div className="entrar mt-8 flex flex-wrap items-center justify-center gap-3.5" style={i(4)}>
+          <a
+            href="#carta"
+            className="brillo inline-flex h-12 items-center justify-center gap-2 rounded-full bg-gradient-to-r from-amber-500 to-amber-600 px-8 font-semibold text-black shadow-[0_4px_28px_rgba(245,158,11,0.4)] transition-all duration-300 hover:scale-105 hover:from-amber-400 hover:to-amber-500 active:scale-95"
+          >
+            <UtensilsCrossed className="size-4" aria-hidden />
+            Ver la carta
+          </a>
+          <a
+            href="#promos"
+            className="inline-flex h-12 items-center justify-center rounded-full border border-white/15 bg-white/[0.05] px-6 font-medium text-white backdrop-blur-sm transition-all duration-300 hover:border-amber-500/40 hover:bg-white/[0.09] active:scale-95"
+          >
+            Promociones del día
+          </a>
+        </div>
+
+        {/* Información rápida en píldoras minimalistas */}
+        <ul
+          className="entrar mt-8 flex flex-wrap items-center justify-center gap-2"
+          style={i(5)}
+          aria-label="Información rápida del local"
         >
           <li>
             <EstadoLocal local={props.horario} />
           </li>
+          <li className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 text-xs font-medium text-tinta-2 backdrop-blur-md">
+            <MapPin className="size-3.5 text-marca" aria-hidden /> {props.localidad}
+          </li>
+          <li className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 text-xs font-medium text-tinta-2 backdrop-blur-md">
+            <Clock className="size-3.5 text-marca" aria-hidden /> Mar a Dom 19:00 a 01:00 hs
+          </li>
           {formas.length > 0 && (
-            <li className={chip}>
+            <li className="inline-flex h-8 items-center gap-1.5 rounded-full border border-white/10 bg-white/[0.04] px-3.5 text-xs font-medium text-tinta-2 backdrop-blur-md">
               <ShoppingBag className="size-3.5 text-marca" aria-hidden /> {formas.join(' · ')}
             </li>
           )}
-          {props.pedidos.tiempoEstimadoMin > 0 && (
-            <li className={chip}>
-              <Clock className="size-3.5 text-marca" aria-hidden /> ~
-              {props.pedidos.tiempoEstimadoMin} min
-            </li>
-          )}
-          <li className={chip}>
-            <MapPin className="size-3.5 text-marca" aria-hidden /> {props.localidad}
-          </li>
         </ul>
       </div>
     </section>

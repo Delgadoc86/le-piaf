@@ -1,8 +1,9 @@
 'use client';
 
 /**
- * Carta estilo app: buscador, chips de categoría fijos que siguen el scroll, y filas de producto
- * con miniatura y botón "+". Todo se renderiza en el servidor (SEO); el cliente agrega interacción.
+ * Carta estilo Bistró:
+ * Buscador integrado, selector de categorías moderno con acentos de leña,
+ * y tarjetas de platillos con diseño visual-first (foto protagonista + botón cápsula).
  */
 import { useEffect, useMemo, useRef, useState, type MouseEvent } from 'react';
 import { Check, Plus, Search, X } from 'lucide-react';
@@ -70,7 +71,7 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
       .filter((g) => g.productos.length > 0);
   }, [busqueda, grupos]);
 
-  // Categoría activa = la última cuyo título ya pasó por debajo de la barra fija (scroll pasivo + rAF).
+  // Categoría activa según scroll
   useEffect(() => {
     let pendiente = false;
     const calcular = () => {
@@ -114,36 +115,39 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
 
   return (
     <div>
+      {/* Barra de búsqueda y categorías sticky con diseño de vidrio ahumado */}
       <div
         ref={barra}
-        className="sticky top-[4.25rem] z-30 -mx-4 border-b border-borde bg-fondo/92 px-4 pt-3 pb-3 backdrop-blur-xl md:top-[4.75rem] md:-mx-6 md:px-6"
+        className="sticky top-[4rem] z-30 -mx-4 border-b border-white/10 bg-[#0C0D12]/92 px-4 pt-3.5 pb-3.5 shadow-md backdrop-blur-2xl md:top-[4rem] md:-mx-6 md:px-6"
       >
         <label className="relative block">
           <span className="sr-only">Buscar en la carta</span>
           <Search
-            className="pointer-events-none absolute top-1/2 left-4 size-5 -translate-y-1/2 text-tinta-2"
+            className="pointer-events-none absolute top-1/2 left-4 size-4.5 -translate-y-1/2 text-tinta-2"
             aria-hidden
           />
           <input
             type="search"
             value={busqueda}
             onChange={(e) => setBusqueda(e.target.value)}
-            placeholder="Buscar lomo, pizza, papas…"
-            className="h-12 w-full rounded-full border border-borde bg-superficie pr-12 pl-12 text-base placeholder:text-tinta-2/70 focus:border-marca/60 focus:outline-none [&::-webkit-search-cancel-button]:hidden"
+            placeholder="Buscar pizza, lomo, calzone, papas…"
+            className="h-11 w-full rounded-2xl border border-white/10 bg-white/[0.04] pr-12 pl-11 text-sm text-white placeholder:text-tinta-2/70 focus:border-amber-500/60 focus:bg-white/[0.07] focus:outline-none focus:ring-1 focus:ring-amber-500/40 transition-all [&::-webkit-search-cancel-button]:hidden"
           />
           {busqueda && (
             <button
               type="button"
               onClick={() => setBusqueda('')}
               aria-label="Borrar búsqueda"
-              className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1.5 text-tinta-2 hover:bg-white/10"
+              className="absolute top-1/2 right-3 -translate-y-1/2 rounded-full p-1 text-tinta-2 hover:bg-white/10 hover:text-white"
             >
               <X className="size-4" aria-hidden />
             </button>
           )}
         </label>
-        <nav aria-label="Categorías">
-          <div ref={fila} className="carrusel mt-3 flex gap-2 overflow-x-auto">
+
+        {/* Selector de categorías rediseñado en tabs elegantes */}
+        <nav aria-label="Categorías de la carta">
+          <div ref={fila} className="carrusel mt-3 flex items-center gap-2 overflow-x-auto py-0.5">
             {visibles.map((g) => {
               const on = activa === g.categoria.id;
               return (
@@ -154,21 +158,17 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
                   onClick={() => irA(g.categoria.id)}
                   aria-current={on ? 'true' : undefined}
                   className={cn(
-                    'inline-flex shrink-0 items-center gap-2 rounded-full border py-1.5 pr-4 pl-1.5 text-sm font-medium transition-[background-color,color,border-color] duration-300',
+                    'inline-flex shrink-0 items-center gap-2 rounded-xl px-3.5 py-2 text-xs font-semibold tracking-wide transition-all duration-300',
                     on
-                      ? 'border-marca bg-marca text-black'
-                      : 'border-borde bg-superficie text-tinta-2 hover:text-tinta',
+                      ? 'bg-gradient-to-r from-amber-500 to-amber-600 text-black shadow-[0_4px_16px_rgba(245,158,11,0.35)]'
+                      : 'border border-white/5 bg-white/[0.04] text-tinta-2 hover:border-white/10 hover:bg-white/[0.08] hover:text-white',
                   )}
                 >
-                  <span
-                    className={cn(
-                      'inline-flex size-7 items-center justify-center rounded-full transition-colors',
-                      on ? 'bg-black/15' : 'bg-marca/12 text-marca',
-                    )}
-                  >
-                    <IconoCategoria icono={g.categoria.icono} className="size-4" />
-                  </span>
-                  {g.categoria.nombre}
+                  <IconoCategoria
+                    icono={g.categoria.icono}
+                    className={cn('size-4 transition-transform', on && 'scale-110 drop-shadow-sm')}
+                  />
+                  <span>{g.categoria.nombre}</span>
                 </button>
               );
             })}
@@ -182,17 +182,24 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
         </p>
       )}
 
+      {/* Secciones de platos */}
       {visibles.map((g) => (
         <section
           key={g.categoria.id}
           id={`cat-${g.categoria.id}`}
           aria-labelledby={`t-${g.categoria.id}`}
-          className="scroll-mt-[13rem] pt-8 md:scroll-mt-[14rem]"
+          className="scroll-mt-[13rem] pt-10 md:scroll-mt-[14rem]"
         >
-          <h3 id={`t-${g.categoria.id}`} className="mb-3 font-titulos text-2xl md:text-3xl">
-            {g.categoria.nombre}
-          </h3>
-          <ul className="grid gap-3 md:grid-cols-2">
+          <div className="mb-4 flex items-baseline justify-between border-b border-white/5 pb-2">
+            <h3 id={`t-${g.categoria.id}`} className="font-titulos text-2xl font-bold tracking-tight text-white md:text-3xl">
+              {g.categoria.nombre}
+            </h3>
+            <span className="text-xs font-medium text-tinta-2 tabular-nums">
+              {g.productos.length} {g.productos.length === 1 ? 'opción' : 'opciones'}
+            </span>
+          </div>
+
+          <ul className="grid gap-3.5 md:grid-cols-2 md:gap-4">
             {g.productos.map((p) => (
               <li key={p.id}>
                 <FilaProducto producto={p} icono={g.categoria.icono} />
@@ -201,11 +208,17 @@ export function Menu({ grupos, nota }: { grupos: GrupoCarta[]; nota?: string | u
           </ul>
         </section>
       ))}
-      {nota && <p className="mt-10 text-sm text-tinta-2">{nota}</p>}
+
+      {nota && <p className="mt-10 text-sm text-tinta-2 text-center md:text-left">{nota}</p>}
     </div>
   );
 }
 
+/**
+ * Fila de Producto rediseñada:
+ * Miniatura destacada a la izquierda (visual-first), nombre y descripción
+ * con tipografía gourmet y botón cápsula de acción directa.
+ */
 function FilaProducto({
   producto: p,
   icono,
@@ -233,70 +246,91 @@ function FilaProducto({
   return (
     <article
       className={cn(
-        'elevar group relative flex h-full gap-4 rounded-3xl border border-borde bg-superficie p-3 pl-4',
+        'group relative flex h-full items-center gap-3.5 sm:gap-4 rounded-2xl border border-white/5 bg-gradient-to-br from-white/[0.04] to-white/[0.01] p-3 sm:p-3.5 shadow-sm backdrop-blur-md transition-all duration-300 hover:border-amber-500/30 hover:from-white/[0.07] hover:to-white/[0.03] hover:shadow-[0_8px_24px_rgba(0,0,0,0.5)]',
         agotado && 'opacity-55',
       )}
     >
-      {/* Toda la fila abre la hoja de producto; el "+" agrega directo. */}
+      {/* Toda la fila abre la hoja de producto */}
       <button
         type="button"
         onClick={() => abrir(p.id)}
-        className="absolute inset-0 z-0 rounded-3xl"
+        className="absolute inset-0 z-0 rounded-2xl"
         aria-label={`Ver ${p.nombre}`}
       />
-      <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col py-1">
-        <h4 className="font-semibold text-pretty">{p.nombre}</h4>
-        {p.descripcion && p.descripcion.replace(/\.$/, '') !== p.nombre && (
-          <p className="mt-1 line-clamp-2 text-sm text-tinta-2">{p.descripcion}</p>
-        )}
-        <div className="mt-auto flex flex-wrap items-center gap-x-2 gap-y-1 pt-3">
-          <span className="font-bold text-marca tabular-nums">{precioVisible(p)}</span>
-          {agotado && (
-            <span className="rounded-full bg-white/12 px-2 py-0.5 text-[10px] font-bold tracking-wide uppercase">
-              Agotado
-            </span>
-          )}
-          {p.etiquetas?.map((e) => (
-            <span
-              key={e}
-              className={cn(
-                'rounded-full px-2 py-0.5 text-[10px] font-semibold',
-                e === 'recomendado' ? 'bg-marca/15 text-marca' : 'bg-white/8 text-tinta-2',
-              )}
-            >
-              {ETIQUETAS[e]}
-            </span>
-          ))}
-          {(p.variantes?.length ?? 0) > 0 && (
-            <span className="text-[11px] text-tinta-2">{p.variantes!.length} opciones</span>
-          )}
-        </div>
-      </div>
+
+      {/* Miniatura protagonista a la izquierda */}
       <div className="relative shrink-0">
         <Miniatura
           fotoUrl={p.fotoUrl}
           alt={p.nombre}
           icono={icono}
-          sizes="112px"
-          className="pointer-events-none size-24 rounded-2xl md:size-28"
+          sizes="(min-width: 640px) 120px, 104px"
+          className="pointer-events-none size-24 sm:size-28 rounded-2xl"
+          iconoClassName="size-16 sm:size-18"
         />
-        {!agotado && conCarrito && (
-          <button
-            type="button"
-            onClick={mas}
-            aria-label={directo ? `Agregar ${p.nombre}` : `Elegir opciones de ${p.nombre}`}
-            className={cn(
-              'absolute -right-1 -bottom-1 z-10 inline-flex size-10 items-center justify-center rounded-full border-4 border-superficie text-black shadow-lg transition-[background-color,transform] duration-300 active:scale-90',
-              listo ? 'bg-emerald-400' : 'bg-marca hover:bg-marca-hover',
-            )}
-          >
-            {listo ? (
-              <Check key="ok" className="tilde size-5" aria-hidden />
-            ) : (
-              <Plus className="size-5" aria-hidden />
-            )}
-          </button>
+      </div>
+
+      {/* Información del plato */}
+      <div className="pointer-events-none relative flex min-w-0 flex-1 flex-col py-0.5">
+        <h4 className="font-semibold text-white text-pretty group-hover:text-amber-400 transition-colors sm:text-lg">
+          {p.nombre}
+        </h4>
+        {p.descripcion && p.descripcion.replace(/\.$/, '') !== p.nombre && (
+          <p className="mt-1 line-clamp-2 text-xs sm:text-sm text-tinta-2 leading-relaxed">
+            {p.descripcion}
+          </p>
         )}
+
+        <div className="mt-auto flex flex-wrap items-center justify-between gap-2 pt-3">
+          <div className="flex items-baseline gap-1.5">
+            <span className="font-bold text-marca tabular-nums sm:text-lg">
+              {precioVisible(p)}
+            </span>
+            {agotado && (
+              <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-bold tracking-wide uppercase text-tinta-2">
+                Agotado
+              </span>
+            )}
+            {p.etiquetas?.map((e) => (
+              <span
+                key={e}
+                className={cn(
+                  'rounded-full px-2 py-0.5 text-[9px] font-semibold',
+                  e === 'recomendado' ? 'bg-amber-500/15 text-amber-400' : 'bg-white/8 text-tinta-2',
+                )}
+              >
+                {ETIQUETAS[e]}
+              </span>
+            ))}
+          </div>
+
+          {/* Botón de acción cápsula */}
+          {!agotado && conCarrito && (
+            <button
+              type="button"
+              onClick={mas}
+              aria-label={directo ? `Agregar ${p.nombre}` : `Elegir opciones de ${p.nombre}`}
+              className={cn(
+                'relative z-10 inline-flex h-8 items-center gap-1 rounded-full px-3 text-xs font-semibold text-black shadow-sm transition-all duration-300 hover:scale-105 active:scale-95',
+                listo
+                  ? 'bg-emerald-400'
+                  : 'bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500',
+              )}
+            >
+              {listo ? (
+                <>
+                  <Check className="size-3.5" aria-hidden />
+                  <span>Listo</span>
+                </>
+              ) : (
+                <>
+                  <Plus className="size-3.5" aria-hidden />
+                  <span className="hidden sm:inline">Agregar</span>
+                </>
+              )}
+            </button>
+          )}
+        </div>
       </div>
     </article>
   );

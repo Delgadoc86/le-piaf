@@ -1,6 +1,6 @@
 {
   "projects": {
     "default": "demo-local",
-    "prod": "silverio-club"
+    "prod": "le-piaf"
   }
 }

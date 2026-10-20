@@ -62,7 +62,7 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 function resolverKit(): string {
   const porArg = arg('kit');
   if (porArg) return porArg;
-  if (existsSync(join(raiz, 'silverio/seed.json'))) return 'silverio';
+  if (existsSync(join(raiz, 'lepiaf/seed.json'))) return 'lepiaf';
   // Si se duplicó y renombró la carpeta del kit (ej. "roma/seed.json"), detectarlo automáticamente:
   const entrada = readdirSync(raiz, { withFileTypes: true }).find(
     (d) =>

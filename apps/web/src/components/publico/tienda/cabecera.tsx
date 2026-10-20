@@ -11,45 +11,61 @@ interface Props {
   conCarrito: boolean;
 }
 
-/** Barra "isla": píldora flotante con desenfoque, separada de los bordes. */
+/**
+ * Cabecera estilo Bistró & Pizzería Gourmet:
+ * Barra superior integrada con desenfoque de vidrio ahumado (smoked glass),
+ * línea inferior tenue en degradé ámbar y acceso directo a carrito y secciones.
+ */
 export function Cabecera({ nombre, logoUrl, horario, anclas, conCarrito }: Props) {
   return (
-    <header className="fixed inset-x-3 top-3 z-40 md:inset-x-6">
-      <div className="mx-auto flex h-14 max-w-6xl items-center gap-3 rounded-full border border-borde bg-fondo/70 pr-1.5 pl-4 shadow-[0_12px_30px_-18px_rgb(0_0_0/0.9)] backdrop-blur-xl md:h-16 md:pl-6">
+    <header className="fixed inset-x-0 top-0 z-40 border-b border-amber-500/15 bg-[#0C0D12]/85 shadow-[0_8px_32px_rgba(0,0,0,0.6)] backdrop-blur-2xl transition-all duration-300">
+      <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-4 sm:px-6">
+        {/* Identidad de marca Le Piaf */}
         <a
           href="#inicio"
-          className="shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-marca focus-visible:outline-none"
+          className="group flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca"
+          aria-label={`Ir al inicio de ${nombre}`}
         >
           {logoUrl ? (
             <Image
               src={logoUrl}
               alt={nombre}
-              width={300}
-              height={200}
-              className="h-9 w-auto md:h-11"
-              preload
+              width={260}
+              height={70}
+              className="h-9 w-auto md:h-11 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_10px_rgba(245,158,11,0.25)]"
+              priority
             />
           ) : (
-            <span className="font-titulos text-xl">{nombre}</span>
+            <span className="font-titulos text-2xl font-bold tracking-wider text-white group-hover:text-marca transition-colors">
+              {nombre}
+            </span>
           )}
         </a>
-        <nav aria-label="Secciones" className="ml-2 hidden items-center md:flex">
+
+        {/* Navegación central con micro-interacción */}
+        <nav aria-label="Secciones del sitio" className="hidden items-center gap-1 md:flex">
           {anclas.map((a) => (
             <a
               key={a.href}
               href={a.href}
-              className="rounded-full px-4 py-2 text-sm text-tinta-2 transition-colors hover:bg-white/5 hover:text-tinta focus-visible:ring-2 focus-visible:ring-marca focus-visible:outline-none"
+              className="relative rounded-lg px-4 py-2 text-sm font-medium text-tinta-2 transition-all duration-200 hover:bg-white/[0.06] hover:text-white"
             >
               {a.texto}
             </a>
           ))}
         </nav>
-        <div className="ml-auto flex items-center gap-2">
+
+        {/* Estado y Carrito a la derecha */}
+        <div className="flex items-center gap-3">
           <EstadoLocal
             local={horario}
-            className="hidden border-transparent bg-white/5 sm:inline-flex"
+            className="hidden sm:inline-flex border border-white/10 bg-white/[0.04] text-xs font-semibold backdrop-blur-md"
           />
-          {conCarrito && <BotonCarrito />}
+          {conCarrito && (
+            <div className="transition-transform duration-200 hover:scale-105 active:scale-95">
+              <BotonCarrito />
+            </div>
+          )}
         </div>
       </div>
     </header>

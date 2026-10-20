@@ -92,26 +92,34 @@ export default async function Inicio() {
         <BannerFecha banner={local.banner} zonaHoraria={local.zonaHoraria} />
 
         {visible('promos') && promos.length > 0 && (
-          <section aria-labelledby="titulo-promos" className="px-4 pt-12 md:px-6 md:pt-16">
+          <section aria-labelledby="titulo-promos" className="px-4 pt-14 md:px-6 md:pt-20">
             <div id="promos" className="mx-auto max-w-6xl scroll-mt-28">
-              <div className="mb-5 flex items-end justify-between">
-                <h2 id="titulo-promos" className="font-titulos text-3xl md:text-4xl">
-                  Promos del día
-                </h2>
-                <span className="text-xs font-semibold tracking-[0.25em] text-marca uppercase">
-                  Ofertas
-                </span>
+              <div className="mb-6 flex flex-col gap-1 sm:flex-row sm:items-end sm:justify-between border-b border-white/5 pb-3">
+                <div>
+                  <span className="text-xs font-bold tracking-[0.25em] text-amber-400 uppercase">
+                    Combos & Ahorro
+                  </span>
+                  <h2 id="titulo-promos" className="font-titulos text-3xl md:text-5xl font-bold tracking-tight text-white mt-1">
+                    Promociones de la casa
+                  </h2>
+                </div>
+                <p className="text-xs text-tinta-2 hidden sm:block">Deslizá para descubrir todas las opciones</p>
               </div>
               <PromosBento promos={promos} zonaHoraria={local.zonaHoraria} />
             </div>
           </section>
         )}
 
-        <section aria-labelledby="titulo-carta" className="px-4 pt-12 md:px-6 md:pt-20">
+        <section aria-labelledby="titulo-carta" className="px-4 pt-14 md:px-6 md:pt-20">
           <div id="carta" className="mx-auto max-w-6xl scroll-mt-24">
-            <h2 id="titulo-carta" className="mb-2 font-titulos text-3xl md:text-4xl">
-              La carta
-            </h2>
+            <div className="mb-2">
+              <span className="text-xs font-bold tracking-[0.25em] text-amber-400 uppercase">
+                Menú Artesanal
+              </span>
+              <h2 id="titulo-carta" className="font-titulos text-3xl md:text-5xl font-bold tracking-tight text-white mt-1">
+                Nuestra carta
+              </h2>
+            </div>
             <Menu grupos={grupos} nota={local.web.notaCarta} />
           </div>
         </section>

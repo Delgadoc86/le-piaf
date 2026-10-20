@@ -1,0 +1,740 @@
+{
+  "_nota": "Datos oficiales de Le Piaf (ROADMAP_LE_PIAF_ANTIGRAVITY.md).",
+  "local": {
+    "slug": "le-piaf",
+    "nombre": "Le Piaf",
+    "nombreCorto": "Le Piaf",
+    "bajada": "Pizzas, lomos, hamburguesas, calzones y más en Maipú.",
+    "descripcionCorta": "Carta y pedidos de Le Piaf. Ozamis y Vergara, Maipú, Mendoza. Martes a domingo de 19 a 01 h.",
+    "moneda": "ARS",
+    "zonaHoraria": "America/Argentina/Mendoza",
+    "contacto": {
+      "whatsapp": "5492615745326",
+      "telefono": "0261 574-5326"
+    },
+    "direccion": {
+      "calle": "Ozamis y Vergara",
+      "localidad": "Maipú",
+      "departamento": "Maipú",
+      "provincia": "Mendoza",
+      "codigoPostal": "M5515",
+      "pais": "AR",
+      "googleMapsUrl": "https://www.google.com/maps/place/Le+Piaf/@-32.9840519,-68.7907384,19z/data=!4m6!3m5!1s0x967e0cbec4b998bd:0xea46e474f29337a7!8m2!3d-32.9840519!4d-68.7907384!16s%2Fg%2F11b6d1_6v7",
+      "geo": {
+        "lat": -32.984052,
+        "lng": -68.790738
+      }
+    },
+    "horarios": [
+      {
+        "dias": [2, 3, 4, 5, 6, 0],
+        "desde": "19:00",
+        "hasta": "01:00"
+      }
+    ],
+    "marca": {
+      "colorPrimario": "#F59E0B",
+      "colorPrimarioHover": "#EA580C",
+      "colorFondo": "#0C0D12",
+      "colorSuperficie": "#15161F",
+      "colorSuperficieAlt": "#101117",
+      "colorNavbar": "#0C0D12",
+      "colorTexto": "#F4F4F5",
+      "colorTextoSecundario": "#A1A1AA",
+      "colorTextoTenue": "#71717A",
+      "fuenteTitulos": "Bebas Neue",
+      "fuenteTexto": "Roboto",
+      "logo": "assets/marca/logo.png",
+      "logoSvg": "assets/marca/logo.png",
+      "ogImage": "assets/marca/logo.png",
+      "heroDesktop": "assets/marca/logo.png",
+      "heroMovil": "assets/marca/logo.png"
+    },
+    "web": {
+      "secciones": [
+        {
+          "tipo": "hero",
+          "visible": true,
+          "orden": 1
+        },
+        {
+          "tipo": "promos",
+          "visible": true,
+          "orden": 2
+        },
+        {
+          "tipo": "carta",
+          "visible": true,
+          "orden": 3
+        },
+        {
+          "tipo": "nosotros",
+          "visible": true,
+          "orden": 4
+        },
+        {
+          "tipo": "galeria",
+          "visible": false,
+          "orden": 5
+        },
+        {
+          "tipo": "ubicacion",
+          "visible": true,
+          "orden": 6
+        }
+      ],
+      "hero": {
+        "bajada": "PIZZAS A LA PIEDRA · LOMOS · HAMBURGUESAS",
+        "titulo": "LE PIAF",
+        "textoBoton": "Ver Carta"
+      },
+      "nosotros": {
+        "titulo": "Le Piaf · Sabor a la Leña en Maipú",
+        "parrafos": [
+          "Ubicados en la esquina de Ozamis y Vergara, Maipú, Le Piaf es el punto de encuentro para disfrutar de pizzas a la piedra recién horneadas, lomos completos en pan árabe casero y calzones gratinados.",
+          "Elaboramos cada especialidad con masa madre, ingredientes frescos y cocción artesanal para que disfrutes en nuestro salón, retires por mostrador o recibas caliente con delivery en Maipú."
+        ],
+        "fotoUrl": "assets/fotos/local.webp",
+        "frase": "Auténticas pizzas a la piedra y lomos gourmet en Maipú, Mendoza",
+        "tarjetas": [
+          {
+            "icono": "flame",
+            "titulo": "Cocción a la Piedra",
+            "texto": "Masa madre horneada al calor del fuego."
+          },
+          {
+            "icono": "utensils",
+            "titulo": "Carne Seleccionada",
+            "texto": "Cortes de lomo de primera calidad."
+          },
+          {
+            "icono": "bike",
+            "titulo": "Delivery & Take Away",
+            "texto": "Envíos en Maipú y retiro por mostrador."
+          }
+        ],
+        "cierre": "Te esperamos de martes a domingo de 19:00 a 01:00 hs en Ozamis y Vergara, Maipú."
+      },
+      "galeria": [],
+      "mensajeWhatsApp": "Hola Le Piaf, quiero hacer una consulta sobre la carta.",
+      "notaCarta": "*Precios sujetos a confirmación. Consultar por delivery según zona y disponibilidad.",
+      "seo": {
+        "titulo": "Le Piaf | Pizzas a la Piedra, Lomos y Hamburguesas en Maipú",
+        "descripcion": "Pedí online en Le Piaf (Ozamis y Vergara, Maipú, Mendoza). Pizzas a la piedra, lomos completos, hamburguesas caseras, calzones y delivery. Abierto de martes a domingo de 19 a 01 hs.",
+        "keywords": [
+          "Le Piaf",
+          "pizzería en Maipú",
+          "pizzas a la piedra Maipú Mendoza",
+          "lomos en Maipú",
+          "hamburguesas Maipú",
+          "calzones Maipú",
+          "delivery comida Maipú",
+          "Ozamis y Vergara Maipú",
+          "restaurante abierto hoy Maipú"
+        ]
+      }
+    },
+    "pedidos": {
+      "habilitados": true,
+      "tipos": {
+        "takeAway": true,
+        "delivery": false,
+        "salon": false
+      },
+      "tiempoEstimadoMin": 30,
+      "pedidoMinimo": 0,
+      "requiereConfirmacionMozoQR": false,
+      "confirmacion": {
+        "clientesNuevos": true,
+        "aceptarSinConfirmar": false
+      }
+    },
+    "pagos": {
+      "efectivo": true,
+      "transferencia": {
+        "habilitado": false,
+        "alias": "",
+        "titular": ""
+      },
+      "mercadoPago": {
+        "habilitado": false
+      }
+    }
+  },
+  "categorias": [
+    {
+      "id": "pizzas",
+      "nombre": "Pizzas",
+      "orden": 1,
+      "icono": "pizza"
+    },
+    {
+      "id": "lomos",
+      "nombre": "Lomos",
+      "orden": 2,
+      "icono": "sandwich"
+    },
+    {
+      "id": "hamburguesas",
+      "nombre": "Hamburguesas",
+      "orden": 3,
+      "icono": "burger"
+    },
+    {
+      "id": "calzones",
+      "nombre": "Calzones",
+      "orden": 4,
+      "icono": "calzone"
+    },
+    {
+      "id": "tostados",
+      "nombre": "Tostados",
+      "orden": 5,
+      "icono": "sandwich"
+    },
+    {
+      "id": "panchos",
+      "nombre": "Panchos",
+      "orden": 6,
+      "icono": "hotdog"
+    },
+    {
+      "id": "empanadas",
+      "nombre": "Empanadas",
+      "orden": 7,
+      "icono": "empanada"
+    },
+    {
+      "id": "picadas",
+      "nombre": "Picadas",
+      "orden": 8,
+      "icono": "sausage"
+    },
+    {
+      "id": "papas-fritas",
+      "nombre": "Papas Fritas",
+      "orden": 9,
+      "icono": "fries"
+    },
+    {
+      "id": "menu-del-dia",
+      "nombre": "Menú del Día",
+      "orden": 10,
+      "icono": "set-meal"
+    }
+  ],
+  "productos": [
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Mozzarella",
+      "descripcion": "masa, salsa, mozzarella, orégano, aceitunas",
+      "precio": 11000,
+      "foto": "assets/fotos/muzza.jfif",
+      "orden": 1
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Doble queso",
+      "descripcion": "masa, salsa, doble mozzarella, orégano, aceitunas",
+      "precio": 11500,
+      "foto": "assets/fotos/doble muzza.jfif",
+      "orden": 2
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Especial",
+      "descripcion": "masa, salsa, mozzarella, jamón cocido, orégano, aceitunas",
+      "precio": 12000,
+      "foto": "assets/fotos/especial.webp",
+      "orden": 3
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Napolitana",
+      "descripcion": "masa, mozzarella, rodajas de tomate natural, orégano, aceitunas",
+      "precio": 11500,
+      "foto": "assets/fotos/napolitana.jfif",
+      "orden": 4
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Tres quesos",
+      "descripcion": "masa, salsa de tomate, provolone, parmesano, mozzarella, orégano, aceitunas",
+      "precio": 11000,
+      "orden": 5
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Fugazzeta",
+      "descripcion": "masa, salsa de tomate, cebolla salteada, mozzarella, orégano, aceitunas",
+      "precio": 12500,
+      "orden": 6
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Con huevo",
+      "descripcion": "masa, salsa de tomate, mozzarella, huevo, orégano, aceitunas",
+      "precio": 13000,
+      "orden": 7
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Viena",
+      "descripcion": "masa, salsa de tomate, mozzarella, salchichas, orégano, aceitunas",
+      "precio": 12500,
+      "orden": 8
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Super especial",
+      "descripcion": "masa, salsa de tomate, mozzarella, jamón cocido, morrones, anchoas, orégano, aceitunas",
+      "precio": 14000,
+      "foto": "assets/fotos/especial.webp",
+      "orden": 9
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Palmitos",
+      "descripcion": "masa, salsa de tomate, mozzarella, palmitos, salsa golf, orégano, aceitunas",
+      "precio": 13000,
+      "orden": 10
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Tropical",
+      "descripcion": "masa, salsa de tomate, mozzarella, jamón, ananá, palmitos, salsa golf, orégano, aceitunas",
+      "precio": 14500,
+      "orden": 11
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Albahaca",
+      "descripcion": "masa, salsa de tomate, mozzarella, albahaca, orégano, aceitunas",
+      "precio": 12000,
+      "orden": 12
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Napolitana con jamón",
+      "descripcion": "masa, salsa de tomate, mozzarella, jamón cocido, rodajas de tomate natural, orégano, aceitunas",
+      "precio": 13500,
+      "foto": "assets/fotos/napolitana.jfif",
+      "orden": 13
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Especial Le Piaf",
+      "descripcion": "masa, salsa de tomate, mozzarella, jamón cocido, palmitos, champignones, orégano, aceitunas",
+      "precio": 14500,
+      "orden": 14
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Calabresa",
+      "descripcion": "masa, salsa de tomate, mozzarella, rodajas de salame, orégano, aceitunas",
+      "precio": 14500,
+      "orden": 15
+    },
+    {
+      "categoriaId": "pizzas",
+      "nombre": "Pizza de morrones",
+      "descripcion": "masa, salsa de tomate, mozzarella, morrones rojos y verdes, orégano, aceitunas",
+      "precio": 15000,
+      "orden": 16
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Completo",
+      "descripcion": "pan árabe, aderezos, tomate, lechuga, lomo, jamón, queso",
+      "precio": 25000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 1
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Lomo especial",
+      "descripcion": "pan árabe, aderezos, cebolla salteada, pimiento morrón, tomate, lomo, jamón, queso",
+      "precio": 26000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 2
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Lomo Le Piaf",
+      "descripcion": "pan árabe, mayonesa casera, cebolla salteada, panceta, tomate, lomo, queso",
+      "precio": 27000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 3
+    },
+    {
+      "categoriaId": "lomos",
+      "nombre": "Lomo individual",
+      "descripcion": "a elección: completo, especial o Le Piaf",
+      "precio": 19500,
+      "foto": "assets/fotos/medio lomo.jfif",
+      "orden": 4,
+      "_variantesSugeridas": ["Completo", "Especial", "Le Piaf"]
+    },
+    {
+      "categoriaId": "hamburguesas",
+      "nombre": "Hamburguesa común",
+      "descripcion": "pan árabe, aderezos, tomate, lechuga, hamburguesa, jamón, queso",
+      "precio": 7500,
+      "foto": "assets/fotos/burguer.jfif",
+      "orden": 1
+    },
+    {
+      "categoriaId": "hamburguesas",
+      "nombre": "Super hamburguesa",
+      "descripcion": "pan de hamburguesa o árabe, aderezos, tomate, lechuga, hamburguesa, jamón, queso",
+      "precio": 11000,
+      "foto": "assets/fotos/burguer.jfif",
+      "orden": 2
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Calzone de pollo",
+      "descripcion": "masa cerrada, mozzarella, pollo, pimiento morrón, jamón cocido, huevo, aceitunas",
+      "precio": 23500,
+      "foto": "assets/fotos/calzon.jfif",
+      "orden": 1,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 23500 },
+        { "id": "medio", "nombre": "Medio", "precio": 14500 }
+      ]
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Calzone cuatro quesos",
+      "descripcion": "masa cerrada, mozzarella, parmesano, roquefort, sardo, pimiento morrón, huevo, aceitunas",
+      "precio": 23000,
+      "foto": "assets/fotos/calzon.jfif",
+      "orden": 2,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 23000 },
+        { "id": "medio", "nombre": "Medio", "precio": 13500 }
+      ]
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Calzone napolitano",
+      "descripcion": "masa cerrada, tomate natural, mozzarella, jamón cocido, huevo, aceitunas",
+      "precio": 22500,
+      "foto": "assets/fotos/calzon.jfif",
+      "orden": 3,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 22500 },
+        { "id": "medio", "nombre": "Medio", "precio": 13500 }
+      ]
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Calzone atún",
+      "descripcion": "masa cerrada, atún, mozzarella, jamón cocido, aceitunas",
+      "precio": 21500,
+      "orden": 4,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 21500 },
+        { "id": "medio", "nombre": "Medio", "precio": 13500 }
+      ]
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Calzone calabresa",
+      "descripcion": "masa cerrada, salame, mozzarella, pimiento morrón, huevo, aceitunas",
+      "precio": 23000,
+      "orden": 5,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 23000 },
+        { "id": "medio", "nombre": "Medio", "precio": 14500 }
+      ]
+    },
+    {
+      "categoriaId": "calzones",
+      "nombre": "Lomo pizza",
+      "descripcion": "masa cerrada, carne de lomo, tomate natural, mozzarella, jamón cocido, huevo, aceitunas",
+      "precio": 36000,
+      "foto": "assets/fotos/lomopizza.jpg",
+      "orden": 6,
+      "variantes": [
+        { "id": "entero", "nombre": "Entero", "precio": 36000 },
+        { "id": "medio", "nombre": "Medio", "precio": 24000 },
+        { "id": "entero-gratinado", "nombre": "Entero Gratinado", "precio": 40000 },
+        { "id": "medio-gratinado", "nombre": "Medio Gratinado", "precio": 28000 }
+      ]
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Barroluco",
+      "descripcion": "pan de miga, lechuga, tomate, lomo doble, jamón, queso, huevo, aderezos, aceitunas",
+      "precio": 32000,
+      "foto": "assets/fotos/barroluco.jfif",
+      "orden": 1
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Barroluco gratinado",
+      "descripcion": "pan de miga, lechuga, tomate, jamón, queso, huevo, aderezos, aceitunas, gratinado de queso",
+      "precio": 35000,
+      "foto": "assets/fotos/barroluco.jfif",
+      "orden": 2
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Carlito simple",
+      "descripcion": "pan de miga, jamón, queso, aderezos",
+      "precio": 6500,
+      "foto": "assets/fotos/tostado.jfif",
+      "orden": 3
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Carlito triple",
+      "descripcion": "pan de miga, jamón, queso, aderezos",
+      "precio": 8500,
+      "foto": "assets/fotos/tostado.jfif",
+      "orden": 4
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Carlito napolitano",
+      "descripcion": "pan de miga, queso, tomate al natural en rodajas, aderezos",
+      "precio": 8000,
+      "foto": "assets/fotos/tostado.jfif",
+      "orden": 5
+    },
+    {
+      "categoriaId": "tostados",
+      "nombre": "Carlito primavera",
+      "descripcion": "pan de miga, lechuga, tomate, jamón, queso, aderezos",
+      "precio": 10000,
+      "foto": "assets/fotos/tostado.jfif",
+      "orden": 6
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Pancho común",
+      "descripcion": "masa cerrada, salchicha, aderezos",
+      "precio": 2500,
+      "foto": "assets/fotos/pancho.jpg",
+      "orden": 1
+    },
+    {
+      "categoriaId": "panchos",
+      "nombre": "Pancho especial",
+      "descripcion": "masa cerrada, salchicha, aderezos; a elección: jamón y queso, cuatro quesos, napolitano o fugazzeta",
+      "precio": 3500,
+      "foto": "assets/fotos/pancho.jpg",
+      "orden": 2,
+      "_variantesSugeridas": ["Jamón y queso", "Cuatro quesos", "Napolitano", "Fugazzeta"]
+    },
+    {
+      "categoriaId": "empanadas",
+      "nombre": "Empanada carne cortada a cuchillo",
+      "descripcion": "Carne cortada a cuchillo con condimentos tradicionales.",
+      "precio": 14000,
+      "foto": "assets/fotos/empandas carne.webp",
+      "orden": 1
+    },
+    {
+      "categoriaId": "empanadas",
+      "nombre": "Empanada jamón y queso",
+      "descripcion": "Jamón cocido y mozzarella fundida.",
+      "precio": 14000,
+      "foto": "assets/fotos/empanadas jamon y queso.jfif",
+      "orden": 2
+    },
+    {
+      "categoriaId": "empanadas",
+      "nombre": "Empanada caprese",
+      "descripcion": "Mozzarella, tomate y albahaca fresca.",
+      "precio": 14000,
+      "foto": "assets/fotos/empanadas jamon y queso.jfif",
+      "orden": 3
+    },
+    {
+      "categoriaId": "picadas",
+      "nombre": "Picada tradicional",
+      "descripcion": "jamón, queso, aceitunas",
+      "precio": 10000,
+      "foto": "assets/fotos/picada.jpg",
+      "orden": 1
+    },
+    {
+      "categoriaId": "picadas",
+      "nombre": "Picada especial",
+      "descripcion": "jamón, queso, jamón crudo, salame, aceitunas",
+      "precio": 14000,
+      "foto": "assets/fotos/picada.jpg",
+      "orden": 2
+    },
+    {
+      "categoriaId": "picadas",
+      "nombre": "Escabeche",
+      "descripcion": "a elección: pollo, berenjena o lengua. Consultar precio.",
+      "precio": 0,
+      "orden": 3,
+      "_variantesSugeridas": ["Pollo", "Berenjena", "Lengua"]
+    },
+    {
+      "categoriaId": "papas-fritas",
+      "nombre": "Papas porción chica",
+      "descripcion": "Porción chica de papas fritas crujientes.",
+      "precio": 5500,
+      "foto": "assets/fotos/papas fritas chicas.jpg",
+      "orden": 1
+    },
+    {
+      "categoriaId": "papas-fritas",
+      "nombre": "Papas porción mediana",
+      "descripcion": "Porción mediana de papas fritas crujientes.",
+      "precio": 6500,
+      "foto": "assets/fotos/papas fritas grandes.jfif",
+      "orden": 2
+    },
+    {
+      "categoriaId": "papas-fritas",
+      "nombre": "Papas porción grande",
+      "descripcion": "Porción grande de papas fritas crujientes.",
+      "precio": 8000,
+      "foto": "assets/fotos/papas fritas grandes.jfif",
+      "orden": 3
+    },
+    {
+      "categoriaId": "papas-fritas",
+      "nombre": "Papas Le Piaf",
+      "descripcion": "papas, jamón, queso, huevo frito",
+      "precio": 12000,
+      "foto": "assets/fotos/papas fritas grandes.jfif",
+      "orden": 4
+    },
+    {
+      "categoriaId": "papas-fritas",
+      "nombre": "Papas con cheddar",
+      "descripcion": "panceta, huevo, cheddar",
+      "precio": 12000,
+      "foto": "assets/fotos/papas fritas grandes.jfif",
+      "orden": 5
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Lunes",
+      "descripcion": "milanesa con ensalada o papas; tartas de jamón y queso, pollo o espinaca (guarnición: arroz primavera, ensalada o zanahoria glaseada)",
+      "precio": 13000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 1
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Martes",
+      "descripcion": "milanesa con ensalada o papas; merluza a la romana con papas; filet de gatuzo a la manteca negra con panache de vegetales",
+      "precio": 10000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 2
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Miércoles",
+      "descripcion": "milanesa con ensalada o papas; balotines de pollo con escalivada de verduras; cuarto de pollo al horno con papas",
+      "precio": 10000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 3
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Jueves",
+      "descripcion": "milanesa con ensalada o papas; canelones de espinaca con salsa blanca o bolognesa; lasagna de jamón y queso con bolognesa",
+      "precio": 10000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 4
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Viernes",
+      "descripcion": "milanesa con ensalada o papas; matambre a la pizza con ensalada o papas; colita de cuadril mechada con ensalada o papas",
+      "precio": 10000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 5
+    },
+    {
+      "categoriaId": "menu-del-dia",
+      "nombre": "Menú del día Sábado",
+      "descripcion": "milanesa con ensalada o papas; bondiola a la mostaza con batatas aplastadas; costeleta de cerdo a la riojana",
+      "precio": 10000,
+      "foto": "assets/fotos/plato.webp",
+      "orden": 6
+    }
+  ],
+  "promos": [
+    {
+      "titulo": "Lomo pizza gratinado + papas",
+      "descripcion": "Lomo pizza gratinado acompañado de papas fritas.",
+      "precio": 44000,
+      "foto": "assets/fotos/lomopizza.jpg",
+      "orden": 1
+    },
+    {
+      "titulo": "Lomo pizza + papas",
+      "descripcion": "Lomo pizza acompañado de papas fritas.",
+      "precio": 37000,
+      "foto": "assets/fotos/lomopizza.jpg",
+      "orden": 2
+    },
+    {
+      "titulo": "Barroluco gratinado + papas",
+      "descripcion": "Barroluco gratinado acompañado de papas fritas.",
+      "precio": 38000,
+      "foto": "assets/fotos/barroluco.jfif",
+      "orden": 3
+    },
+    {
+      "titulo": "Lomo + papas",
+      "descripcion": "Lomo completo acompañado de papas fritas.",
+      "precio": 28000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 4
+    },
+    {
+      "titulo": "2 lomos + 2 papas",
+      "descripcion": "2 lomos completos acompañados de 2 porciones de papas fritas.",
+      "precio": 50000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 5
+    },
+    {
+      "titulo": "3 lomos + 3 papas",
+      "descripcion": "3 lomos completos acompañados de 3 porciones de papas fritas.",
+      "precio": 71000,
+      "foto": "assets/fotos/lomo.webp",
+      "orden": 6
+    },
+    {
+      "titulo": "2 super hamburguesas + papas",
+      "descripcion": "2 super hamburguesas acompañadas de papas fritas.",
+      "precio": 24000,
+      "foto": "assets/fotos/burguer.jfif",
+      "orden": 7
+    },
+    {
+      "titulo": "Lomo individual + papas",
+      "descripcion": "Lomo individual a elección acompañado de papas fritas.",
+      "precio": 17000,
+      "foto": "assets/fotos/medio lomo.jfif",
+      "orden": 8
+    },
+    {
+      "titulo": "Muzza + papas",
+      "descripcion": "Pizza mozzarella acompañada de papas fritas.",
+      "precio": 14000,
+      "foto": "assets/fotos/muzza.jfif",
+      "orden": 9
+    },
+    {
+      "titulo": "Especial + papas",
+      "descripcion": "Pizza especial con jamón acompañada de papas fritas.",
+      "precio": 15000,
+      "foto": "assets/fotos/especial.webp",
+      "orden": 10
+    }
+  ]
+}

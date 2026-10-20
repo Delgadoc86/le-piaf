@@ -68,6 +68,7 @@ interface SeedJson {
     foto?: string;
     estacion?: 'cocina' | 'barra';
     _variantesSugeridas?: string[];
+    variantes?: { id: string; nombre: string; precio: number }[];
   }[];
   promos: { titulo: string; descripcion: string; precio: number; foto?: string; orden: number }[];
 }
@@ -238,11 +239,13 @@ async function seedLocal(): Promise<void> {
   );
 
   const productos = seed.productos.map((p) => {
-    const variantes = p._variantesSugeridas?.map((nombre) => ({
-      id: idDe(nombre),
-      nombre,
-      precio: p.precio,
-    }));
+    const variantes =
+      p.variantes ??
+      p._variantesSugeridas?.map((nombre) => ({
+        id: idDe(nombre),
+        nombre,
+        precio: p.precio,
+      }));
     return {
       id: idDe(p.nombre),
       categoriaId: p.categoriaId,
