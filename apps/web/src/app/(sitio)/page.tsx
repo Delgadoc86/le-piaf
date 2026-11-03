@@ -81,6 +81,9 @@ export default async function Inicio() {
           bajada={local.web.hero.bajada}
           descripcion={local.descripcionCorta}
           localidad={local.direccion.localidad}
+          logoUrl={local.marca.logoUrl}
+          telefono={local.contacto.whatsapp ? undefined : '0261 574-5326'}
+          whatsapp={local.contacto.whatsapp}
           heroDesktopUrl={local.marca.heroDesktopUrl}
           heroMovilUrl={local.marca.heroMovilUrl}
           horario={horario}

@@ -26,20 +26,14 @@ export function Cabecera({ nombre, logoUrl, horario, anclas, conCarrito }: Props
           className="group flex items-center gap-3 rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-marca"
           aria-label={`Ir al inicio de ${nombre}`}
         >
-          {logoUrl ? (
-            <Image
-              src={logoUrl}
-              alt={nombre}
-              width={260}
-              height={70}
-              className="h-9 w-auto md:h-11 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_10px_rgba(245,158,11,0.25)]"
-              priority
-            />
-          ) : (
-            <span className="font-titulos text-2xl font-bold tracking-wider text-white group-hover:text-marca transition-colors">
-              {nombre}
-            </span>
-          )}
+          <Image
+            src={logoUrl || '/marca/logo.webp'}
+            alt={nombre}
+            width={260}
+            height={70}
+            className="h-9 w-auto md:h-11 transition-transform duration-300 group-hover:scale-105 drop-shadow-[0_2px_10px_rgba(245,158,11,0.25)]"
+            priority
+          />
         </a>
 
         {/* Navegación central con micro-interacción */}

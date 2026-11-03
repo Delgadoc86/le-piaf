@@ -1,5 +1,5 @@
 import Image from 'next/image';
-import { Clock, Flame, MapPin, Navigation, Sparkles } from 'lucide-react';
+import { Clock, MapPin, Navigation } from 'lucide-react';
 import { resumirHorarios, type ContenidoWeb, type Direccion, type Horario } from '@app/shared';
 import { Mapa } from '../mapa';
 
@@ -37,26 +37,24 @@ export function InfoLocal(p: Props) {
           {/* Tarjeta del Local / Nosotros con foto y SEO */}
           {p.mostrarNosotros && (
             <article className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/[0.05] via-[#14151F] to-[#0D0E14] shadow-lg backdrop-blur-md md:col-span-2 md:row-span-2">
-              {p.nosotros.fotoUrl && (
-                <div className="relative aspect-[16/9] w-full overflow-hidden">
-                  <Image
-                    src={p.nosotros.fotoUrl}
-                    alt="Fachada del local Le Piaf en Ozamis y Vergara, Maipú, Mendoza - Pizzería a la leña y lomitería artesanal"
-                    title="Le Piaf - Ozamis y Vergara, Maipú, Mendoza"
-                    fill
-                    sizes="(min-width: 768px) 760px, 100vw"
-                    className="zoom object-cover"
-                    priority={false}
-                  />
-                  <div
-                    className="absolute inset-0 bg-gradient-to-t from-[#14151F] via-[#14151F]/40 to-transparent"
-                    aria-hidden
-                  />
-                  <span className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1 text-xs font-semibold text-white backdrop-blur-md border border-white/10">
-                    <Sparkles className="size-3 text-amber-400" /> Ozamis y Vergara · Maipú
-                  </span>
-                </div>
-              )}
+              <div className="relative aspect-[16/9] w-full overflow-hidden">
+                <Image
+                  src={p.nosotros.fotoUrl || '/fotos/local.webp'}
+                  alt="Fachada del local Le Piaf en Ozamis y Vergara, Maipú, Mendoza - Pizzería a la leña y lomitería artesanal"
+                  title="Le Piaf - Ozamis y Vergara, Maipú, Mendoza"
+                  fill
+                  sizes="(min-width: 768px) 760px, 100vw"
+                  className="zoom object-cover"
+                  priority={false}
+                />
+                <div
+                  className="absolute inset-0 bg-gradient-to-t from-[#14151F] via-[#14151F]/40 to-transparent"
+                  aria-hidden
+                />
+                <span className="absolute top-4 left-4 inline-flex items-center rounded-full bg-black/70 px-3.5 py-1 text-xs font-semibold text-white backdrop-blur-md border border-white/10">
+                  Ozamis y Vergara · Maipú
+                </span>
+              </div>
               <div className="-mt-6 relative z-10 space-y-4 p-6 sm:p-8">
                 <h3 className="font-titulos text-3xl font-bold text-white sm:text-4xl">
                   {p.nosotros.titulo}

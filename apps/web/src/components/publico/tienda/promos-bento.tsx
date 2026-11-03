@@ -7,7 +7,7 @@
  */
 import { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
-import { Check, ChevronLeft, ChevronRight, Plus, Sparkles } from 'lucide-react';
+import { Check, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
 import { formatARS, promoVigente } from '@app/shared';
 import type { PromoPublica } from '@/features/sitio/datos';
 import { useCarrito, useTiendaUI } from '@/features/carrito/store';
@@ -137,37 +137,38 @@ function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
   }
 
   return (
-    <article className="group relative isolate flex h-[22rem] md:h-[24rem] flex-col justify-end overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-t from-black via-[#181A22]/90 to-[#22252F] p-5 shadow-lg transition-all duration-300 hover:border-marca/40">
-      {/* Imagen real del combo o ilustración gastronómica si no hay foto */}
-      {p.fotoUrl ? (
-        <Image
-          src={p.fotoUrl}
-          alt={p.titulo}
-          fill
-          sizes="(min-width: 768px) 400px, 84vw"
-          className="zoom -z-10 object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-      ) : (
-        <div className="absolute inset-0 -z-10 flex items-center justify-center overflow-hidden bg-gradient-to-br from-[#241E15] via-[#16171E] to-[#0E0F14]">
-          <div className="absolute inset-0 bg-radial from-amber-500/20 via-transparent to-transparent opacity-80" />
-          <PromoComboSvg className="size-36 opacity-85 drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-110" />
-        </div>
-      )}
+    <article className="group relative flex h-[22rem] md:h-[24rem] flex-col justify-end overflow-hidden rounded-3xl border border-white/10 bg-[#12131A] p-5 shadow-lg transition-all duration-300 hover:border-marca/40">
+      {/* Capa de imagen de la promo (en z-0 con gradiente para legibilidad total) */}
+      <div className="absolute inset-0 z-0 overflow-hidden">
+        {p.fotoUrl ? (
+          <Image
+            src={p.fotoUrl}
+            alt={p.titulo}
+            fill
+            sizes="(min-width: 768px) 400px, 84vw"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gradient-to-br from-[#241E15] via-[#16171E] to-[#0E0F14]">
+            <div className="absolute inset-0 bg-radial from-amber-500/20 via-transparent to-transparent opacity-80" />
+            <PromoComboSvg className="size-36 opacity-85 drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-110" />
+          </div>
+        )}
 
-      {/* Degradé protector para legibilidad del texto */}
-      <div
-        className="pointer-events-none absolute inset-0 -z-10 bg-gradient-to-t from-black via-black/65 to-transparent"
-        aria-hidden
-      />
+        {/* Degradé protector inferior para que la comida se vea nítida y los textos contrasten */}
+        <div
+          className="pointer-events-none absolute inset-0 bg-gradient-to-t from-black via-black/65 via-45% to-transparent"
+          aria-hidden
+        />
+      </div>
 
       {/* Badge de Promo */}
-      <div className="absolute top-4 left-4 flex items-center gap-1.5 rounded-full bg-marca px-3 py-1 text-[11px] font-bold tracking-wider text-black uppercase shadow-md">
-        <Sparkles className="size-3" aria-hidden />
+      <div className="absolute top-4 left-4 z-10 rounded-full bg-marca px-3.5 py-1 text-[11px] font-bold tracking-wider text-black uppercase shadow-md">
         Promo Exclusiva
       </div>
 
       {/* Contenido de la promo con protagonismo */}
-      <div className="relative">
+      <div className="relative z-10">
         <h3 className="font-titulos text-2xl font-bold tracking-tight text-white drop-shadow-sm md:text-3xl text-balance">
           {p.titulo}
         </h3>
