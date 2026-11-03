@@ -44,11 +44,11 @@
       "colorTextoTenue": "#71717A",
       "fuenteTitulos": "Bebas Neue",
       "fuenteTexto": "Roboto",
-      "logo": "assets/marca/logo.png",
-      "logoSvg": "assets/marca/logo.png",
-      "ogImage": "assets/marca/logo.png",
-      "heroDesktop": "assets/marca/logo.png",
-      "heroMovil": "assets/marca/logo.png"
+      "logo": "assets/marca/logo.webp",
+      "logoSvg": "assets/marca/logo.webp",
+      "ogImage": "assets/marca/logo.webp",
+      "heroDesktop": "assets/marca/logo.webp",
+      "heroMovil": "assets/marca/logo.webp"
     },
     "web": {
       "secciones": [
@@ -347,7 +347,7 @@
       "nombre": "Completo",
       "descripcion": "pan árabe, aderezos, tomate, lechuga, lomo, jamón, queso",
       "precio": 25000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 1
     },
     {
@@ -355,7 +355,7 @@
       "nombre": "Lomo especial",
       "descripcion": "pan árabe, aderezos, cebolla salteada, pimiento morrón, tomate, lomo, jamón, queso",
       "precio": 26000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 2
     },
     {
@@ -363,7 +363,7 @@
       "nombre": "Lomo Le Piaf",
       "descripcion": "pan árabe, mayonesa casera, cebolla salteada, panceta, tomate, lomo, queso",
       "precio": 27000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 3
     },
     {
@@ -380,7 +380,7 @@
       "nombre": "Hamburguesa común",
       "descripcion": "pan árabe, aderezos, tomate, lechuga, hamburguesa, jamón, queso",
       "precio": 7500,
-      "foto": "assets/fotos/burguer.jfif",
+      "foto": "assets/fotos/burger.jfif",
       "orden": 1
     },
     {
@@ -388,7 +388,7 @@
       "nombre": "Super hamburguesa",
       "descripcion": "pan de hamburguesa o árabe, aderezos, tomate, lechuga, hamburguesa, jamón, queso",
       "precio": 11000,
-      "foto": "assets/fotos/burguer.jfif",
+      "foto": "assets/fotos/burger.jfif",
       "orden": 2
     },
     {
@@ -454,7 +454,7 @@
       "nombre": "Lomo pizza",
       "descripcion": "masa cerrada, carne de lomo, tomate natural, mozzarella, jamón cocido, huevo, aceitunas",
       "precio": 36000,
-      "foto": "assets/fotos/lomopizza.jpg",
+      "foto": "assets/fotos/lomopizza.jfif",
       "orden": 6,
       "variantes": [
         { "id": "entero", "nombre": "Entero", "precio": 36000 },
@@ -670,14 +670,14 @@
       "titulo": "Lomo pizza gratinado + papas",
       "descripcion": "Lomo pizza gratinado acompañado de papas fritas.",
       "precio": 44000,
-      "foto": "assets/fotos/lomopizza.jpg",
+      "foto": "assets/fotos/lomopizza.jfif",
       "orden": 1
     },
     {
       "titulo": "Lomo pizza + papas",
       "descripcion": "Lomo pizza acompañado de papas fritas.",
       "precio": 37000,
-      "foto": "assets/fotos/lomopizza.jpg",
+      "foto": "assets/fotos/lomopizza.jfif",
       "orden": 2
     },
     {
@@ -691,28 +691,28 @@
       "titulo": "Lomo + papas",
       "descripcion": "Lomo completo acompañado de papas fritas.",
       "precio": 28000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 4
     },
     {
       "titulo": "2 lomos + 2 papas",
       "descripcion": "2 lomos completos acompañados de 2 porciones de papas fritas.",
       "precio": 50000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 5
     },
     {
       "titulo": "3 lomos + 3 papas",
       "descripcion": "3 lomos completos acompañados de 3 porciones de papas fritas.",
       "precio": 71000,
-      "foto": "assets/fotos/lomo.webp",
+      "foto": "assets/fotos/lomo.jfif",
       "orden": 6
     },
     {
       "titulo": "2 super hamburguesas + papas",
       "descripcion": "2 super hamburguesas acompañadas de papas fritas.",
       "precio": 24000,
-      "foto": "assets/fotos/burguer.jfif",
+      "foto": "assets/fotos/burger.jfif",
       "orden": 7
     },
     {

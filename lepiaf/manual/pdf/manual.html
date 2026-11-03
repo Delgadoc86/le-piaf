@@ -1,0 +1,510 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Manual del panel · Le Piaf</title>
+<style>
+  @page { size: A4; margin: 15mm 15mm 18mm; }
+  :root {
+    --marca: #f59716;
+    --acento: #ea580c;
+    --tinta: #18181b;
+    --suave: #52525b;
+    --borde: #e4e4e7;
+    --fondo: #fafafa;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    color: var(--tinta);
+    font-size: 10.3pt;
+    line-height: 1.48;
+    margin: 0;
+  }
+  h1, h2, h3 { line-height: 1.2; margin: 0; }
+  h2 {
+    font-size: 18.5pt;
+    margin: 0 0 4mm;
+    padding-bottom: 2mm;
+    border-bottom: 3px solid var(--marca);
+    break-after: avoid;
+  }
+  h3 { font-size: 12pt; margin: 5mm 0 2mm; break-after: avoid; color: #09090B; }
+  p { margin: 0 0 2.5mm; }
+  ul, ol { margin: 0 0 3mm; padding-left: 6mm; }
+  li { margin-bottom: 1.2mm; }
+  section { break-before: page; }
+
+  /* Portada Obsidian Dark de Le Piaf */
+  .portada {
+    height: 256mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: flex-start;
+    padding: 14mm 12mm;
+    background:
+      radial-gradient(circle at 85% 18%, rgba(245, 151, 22, 0.16), transparent 45%),
+      radial-gradient(circle at 15% 85%, rgba(234, 88, 12, 0.14), transparent 45%),
+      linear-gradient(160deg, #09090B 0%, #121317 65%, #1c1917 100%);
+    color: #FAFAFA;
+    border-radius: 6mm;
+    border: 1px solid rgba(245, 151, 22, 0.28);
+  }
+  .portada-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+  }
+  .portada-logo {
+    height: 26mm;
+    width: auto;
+    object-fit: contain;
+    filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+  }
+  .portada-badge {
+    background: rgba(245, 151, 22, 0.14);
+    border: 1px solid rgba(245, 151, 22, 0.4);
+    color: var(--marca);
+    padding: 1.8mm 4mm;
+    border-radius: 999px;
+    font-size: 8.5pt;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+  }
+  .portada-centro { my: auto; }
+  .portada .etiqueta {
+    color: var(--marca);
+    letter-spacing: .28em;
+    font-size: 9.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 3mm;
+  }
+  .portada h1 {
+    font-size: 36pt;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin: 0 0 5mm;
+    line-height: 1.08;
+  }
+  .portada h1 span { color: var(--marca); }
+  .portada p.bajada {
+    font-size: 12.5pt;
+    color: #d4d4d8;
+    max-width: 148mm;
+    line-height: 1.55;
+  }
+  .portada-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2.5mm;
+    margin-top: 7mm;
+  }
+  .portada-chips span {
+    background: rgba(255, 255, 255, 0.06);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    color: #f4f4f5;
+    padding: 1.5mm 3.5mm;
+    border-radius: 2.5mm;
+    font-size: 9pt;
+    font-weight: 600;
+  }
+  .portada .pie {
+    width: 100%;
+    padding-top: 5mm;
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+    display: flex;
+    justify-content: space-between;
+    font-size: 9.5pt;
+    color: #a1a1aa;
+  }
+  .portada .pie strong { color: var(--marca); }
+
+  figure { margin: 2.5mm 0 3.8mm; break-inside: avoid; }
+  figure img {
+    display: block;
+    max-width: 100%;
+    max-height: 88mm;
+    width: auto;
+    margin: 0 auto;
+    border: 1px solid var(--borde);
+    border-radius: 3mm;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  }
+  figure.chica img { max-height: 58mm; }
+  .fila { display: flex; gap: 4mm; justify-content: center; align-items: flex-start; }
+  .fila figure { flex: 0 0 31%; margin: 1.5mm 0; }
+  .fila figure img { max-height: 78mm; }
+  figcaption {
+    text-align: center;
+    font-size: 8.5pt;
+    color: var(--suave);
+    margin-top: 1.5mm;
+  }
+  .caja {
+    border-radius: 3mm;
+    padding: 3mm 4mm;
+    margin: 3mm 0 4mm;
+    break-inside: avoid;
+  }
+  .tip { background: #fefce8; border-left: 4px solid var(--marca); }
+  .ojo { background: #fef2f2; border-left: 4px solid var(--acento); }
+  .ok { background: #f0fdf4; border-left: 4px solid #16a34a; }
+  .caja strong:first-child { display: block; margin-bottom: 1mm; }
+  .pasos { counter-reset: paso; list-style: none; padding: 0; }
+  .pasos li {
+    counter-increment: paso;
+    position: relative;
+    padding-left: 9.5mm;
+    margin-bottom: 2.3mm;
+  }
+  .pasos li::before {
+    content: counter(paso);
+    position: absolute;
+    left: 0;
+    top: -.2mm;
+    width: 6.8mm;
+    height: 6.8mm;
+    border-radius: 50%;
+    background: var(--marca);
+    color: #09090B;
+    font-weight: 800;
+    text-align: center;
+    line-height: 6.8mm;
+    font-size: 9pt;
+  }
+  .colores { display: flex; gap: 3mm; margin: 3mm 0 4mm; }
+  .colores div { flex: 1; border-radius: 3mm; padding: 3mm; font-size: 9.5pt; break-inside: avoid; }
+  .colores b { display: block; font-size: 10.5pt; margin-bottom: 1mm; }
+  .ambar { background: #fbbf24; color: #451a03; }
+  .azul { background: #0284c7; color: #fff; }
+  .verde { background: #059669; color: #fff; }
+  table { width: 100%; border-collapse: collapse; margin: 2mm 0 4mm; font-size: 9.5pt; break-inside: avoid; }
+  th, td { text-align: left; padding: 2mm 2.5mm; border-bottom: 1px solid var(--borde); vertical-align: top; }
+  th { background: var(--fondo); font-weight: 700; }
+  .indice { columns: 2; column-gap: 10mm; padding-left: 6mm; }
+  .indice li { break-inside: avoid; margin-bottom: 1.5mm; }
+  kbd {
+    font-family: inherit;
+    font-weight: 600;
+    background: var(--fondo);
+    border: 1px solid var(--borde);
+    border-radius: 1.5mm;
+    padding: 0 1.5mm;
+    white-space: nowrap;
+  }
+  .dos { display: grid; grid-template-columns: 1fr 1fr; gap: 4mm; align-items: start; }
+</style>
+</head>
+<body>
+
+<div class="portada">
+  <div class="portada-top">
+    <img src="../../assets/marca/logo.webp" alt="Le Piaf" class="portada-logo">
+    <span class="portada-badge">Ozamis y Vergara · Maipú, Mendoza</span>
+  </div>
+
+  <div class="portada-centro">
+    <span class="etiqueta">Guía Operativa Completa</span>
+    <h1>Manual del <span>Panel</span><br>y Tienda Online</h1>
+    <p class="bajada">Cómo recibir pedidos en vivo, cobrar, llevar la caja al centavo y actualizar precios, fotos y promos de <strong>Le Piaf</strong> en segundos.</p>
+    <div class="portada-chips">
+      <span>Pizzas a la Piedra</span>
+      <span>Lomos en Pan Árabe</span>
+      <span>Cocción a la Leña</span>
+      <span>10 Promos en Carrusel</span>
+      <span>Masa Madre Artesanal</span>
+    </div>
+  </div>
+
+  <div class="pie">
+    <span>Web: <strong>Sitio Oficial</strong> · Panel: <strong>/panel</strong></span>
+    <span>Octubre 2026 · Desarrollo y soporte: <strong>Cristian Delgado (delgadodev.com.ar · Tel. 261 747-8090)</strong></span>
+  </div>
+</div>
+
+<section>
+  <h2>Antes de empezar</h2>
+  <p>El sistema de <strong>Le Piaf</strong> está dividido en dos partes conectadas en tiempo real:</p>
+  <ul>
+    <li><strong>La web pública del local</strong>: donde los clientes miran las promos en carrusel, eligen pizzas a la piedra, lomos en pan árabe casero o calzones, y envían su pedido directo desde el celular.</li>
+    <li><strong>El panel de administración</strong> (<kbd>/panel</kbd>): el centro de control del local para aceptar pedidos, avisar por WhatsApp en un toque, manejar la caja ciega y actualizar la carta.</li>
+  </ul>
+
+  <div class="dos">
+    <figure><img src="../img/cel-web-inicio.png" alt="Web en celular" style="max-height:86mm"><figcaption>Así ven la portada los clientes desde su celular.</figcaption></figure>
+    <div>
+      <div class="caja tip"><strong>💡 Usá una compu o tablet en el mostrador</strong>En pantalla grande ves las tres columnas de pedidos juntas (<em>Nuevos</em>, <em>En preparación</em> y <em>Listos</em>). El celular sirve como respaldo o para cambiar un precio rápido.</div>
+      <h3>Qué vas a encontrar en este manual</h3>
+      <ol class="indice" style="columns: 1">
+        <li>Entrar al panel y tu contraseña</li>
+        <li>Un día de trabajo, paso a paso</li>
+        <li>Pedidos: el tablero y el detalle</li>
+        <li>Clientes nuevos y filtro anti-pedidos falsos</li>
+        <li>Cobrar y entregar</li>
+        <li>Cargar un pedido de mostrador o teléfono</li>
+        <li>Delivery y confirmación de envío</li>
+        <li>La caja: apertura, gastos y cierre</li>
+        <li>Resumen y estadísticas de ventas</li>
+        <li>La carta: productos, extras y aumentos</li>
+        <li>Promos y banner de fecha especial</li>
+        <li>QR de la carta para mostrador y flyers</li>
+        <li>Configuración del local y horarios</li>
+        <li>Cómo pide el cliente y problemas comunes</li>
+      </ol>
+    </div>
+  </div>
+
+  <h3>Permisos según el rol</h3>
+  <table>
+    <tr><th>Rol</th><th>Qué puede hacer en el sistema</th></tr>
+    <tr><td><strong>Dueño</strong></td><td>Acceso total: pedidos, caja, estadísticas de ventas, carta, promos, QR y configuración del local.</td></tr>
+    <tr><td><strong>Encargado</strong></td><td>Todo lo operativo (pedidos, caja, ventas, carta, promos y QR), excepto la configuración general.</td></tr>
+    <tr><td><strong>Mozo / Mostrador</strong></td><td>Ver el tablero, cargar pedidos manuales y gestionar los pedidos que cargó.</td></tr>
+  </table>
+</section>
+
+<section>
+  <h2>1. Entrar al panel y tu contraseña</h2>
+  <div class="dos">
+    <div>
+      <ol class="pasos">
+        <li>Abrí la dirección web del panel agregando <kbd>/panel</kbd> (o <kbd>/login</kbd>).</li>
+        <li>Escribí tu <strong>email</strong> y tu <strong>contraseña</strong>. El ícono del ojito te permite verificar lo que escribís.</li>
+        <li>Tocá <strong>Entrar</strong>.</li>
+      </ol>
+      <div class="caja ojo"><strong>🔒 Bloqueo automático tras 5 intentos</strong>Si ingresás mal la contraseña 5 veces seguidas, el acceso se bloquea durante <strong>10 minutos</strong> por seguridad. Podés esperar o tocar <strong>¿La olvidaste?</strong>.</div>
+    </div>
+    <figure><img src="../img/pc-login.png" alt="Login del panel"><figcaption>Pantalla de ingreso a Le Piaf.</figcaption></figure>
+  </div>
+
+  <h3>Me olvidé la contraseña</h3>
+  <ol class="pasos">
+    <li>En la pantalla de entrada tocá <strong>¿La olvidaste?</strong>.</li>
+    <li>Escribí tu email y tocá <strong>Enviarme el link</strong>.</li>
+    <li>Abrí el correo que te llega (revisá también <em>Spam</em> o <em>No deseado</em>), entrá al link y elegí una clave nueva.</li>
+  </ol>
+
+  <h3>Cambiar la contraseña desde adentro</h3>
+  <p>En el menú izquierdo entrá a <strong>Mi cuenta</strong>. Escribí tu contraseña actual, la nueva dos veces (mínimo 8 caracteres) y tocá <strong>Cambiar contraseña</strong>.</p>
+  <figure class="chica"><img src="../img/pc-cuenta.png" alt="Mi cuenta"><figcaption>Mi cuenta: datos de tu sesión y cambio de clave.</figcaption></figure>
+</section>
+
+<section>
+  <h2>2. Un día de trabajo, paso a paso</h2>
+  <ol class="pasos">
+    <li><strong>Abrí la caja</strong> antes del turno cargando el efectivo inicial para dar vuelto (<em>Caja → Abrir caja</em>).</li>
+    <li>Entrá a <strong>Pedidos</strong> y tocá el botón amarillo <strong>Activar timbre</strong> para que la compu suene cada vez que entra un pedido web.</li>
+    <li>Cuando entra un pedido nuevo, revisalo y tocá <strong>Aceptar Pedido</strong>: pasa a <em>En cocina (Preparando)</em> y el cliente lo ve en vivo en su celular.</li>
+    <li>Cuando sale del horno a la leña o la plancha, tocá <strong>¡Marcar Plato Listo!</strong> para pasarlo a <em>Listos para despacho</em>.</li>
+    <li>Al entregarlo en mostrador o enviarlo por delivery, tocá <strong>Cobrar y entregar</strong> y elegí si pagó en efectivo o transferencia.</li>
+    <li>Si sacás efectivo de la caja para pagar insumos, bolsas o mercadería, anotalo en <strong>Caja → Movimientos de efectivo</strong>.</li>
+    <li>Al terminar la noche, <strong>cerrá la caja</strong>: contás los billetes y el sistema calcula al instante si da justo, sobra o falta.</li>
+  </ol>
+  <figure><img src="../img/pc-resumen.png" alt="Resumen del día"><figcaption>Resumen diario: total vendido hoy, pedidos cobrados, ticket promedio y estado de la caja abierta.</figcaption></figure>
+</section>
+
+<section>
+  <h2>3. Pedidos: Pantalla de Cocina en vivo</h2>
+  <p>Los pedidos aparecen solos en pantalla apenas el cliente los envía, sin recargar la página. Cada columna representa una etapa del servicio:</p>
+  <div class="colores">
+    <div class="ambar"><b>Nuevos (Aceptar)</b>Recién entraron desde la web. Hay que aceptarlos.</div>
+    <div class="azul"><b>En Cocina (Preparando)</b>Están en cocina / horno a la leña.</div>
+    <div class="verde"><b>Listos para Despacho</b>Terminados, esperando que el cliente retire o salgan a delivery.</div>
+  </div>
+  <figure><img src="../img/pc-pedidos.png" alt="Tablero de pedidos"><figcaption>Pantalla de Cocina en vivo con pedidos de Le Piaf (Pizzas a la piedra, Lomos en pan árabe, Calzones y Promos).</figcaption></figure>
+
+  <h3>Cómo leer cada tarjeta</h3>
+  <ul>
+    <li><strong>#5, #4, #3</strong>: número correlativo del pedido en la jornada. Es el número que ve el cliente.</li>
+    <li><strong>Web / Mostrador / Teléfono</strong>: canal por el que ingresó.</li>
+    <li><strong>🕐 minutos</strong>: hace cuánto entró. Se pone <span style="color:#dc2626;font-weight:700">en rojo</span> si un pedido nuevo lleva más de 5 minutos sin aceptarse o si superó la demora estimada.</li>
+    <li>Detalle de productos, promos y <strong>notas resaltadas</strong> (ej. <em>“Sin cebolla en el Lomo”</em>).</li>
+    <li>El <strong>total</strong> y el estado del pago: <em>FALTA COBRAR</em> (con el medio elegido) o <em>PAGADO</em>.</li>
+  </ul>
+  <div class="caja tip"><strong>🔔 Importante sobre el timbre</strong>Por reglas de los navegadores web, el audio sólo se habilita después de hacer clic en la página. Apenas abras el panel al iniciar el turno, tocá <strong>Activar timbre</strong>.</div>
+</section>
+
+<section>
+  <h2>3. Pedidos: el detalle y WhatsApp en 1 clic</h2>
+  <p>Hacé clic sobre cualquier tarjeta del tablero para abrir su ficha completa:</p>
+  <figure><img src="../img/pc-detalle.png" alt="Detalle del pedido"><figcaption>Detalle completo del Pedido en el panel.</figcaption></figure>
+  <ul>
+    <li><strong>Avisar por WhatsApp</strong>: abre WhatsApp Web o la app con el mensaje ya redactado para ese cliente según la etapa (por ejemplo, para confirmarle que está en preparación o avisarle <em>“Tu pedido está listo para retirar 🙌”</em>).</li>
+    <li><strong>Demora estimada</strong>: con los botones <kbd>−</kbd> y <kbd>+</kbd> podés subirla o bajarla de a 5 minutos si la cocina está tranquila o con mucha demanda; el cambio se actualiza en vivo en el celular del cliente.</li>
+    <li><strong>Rechazar / Cancelar pedido</strong>: te pide escribir el motivo (ej. <em>“Nos quedamos sin masa de lomo”</em>) y se lo informa automáticamente al cliente en su pantalla de seguimiento.</li>
+  </ul>
+</section>
+
+<section>
+  <h2>4. Clientes nuevos y filtro anti-pedidos falsos</h2>
+  <p>Para proteger la cocina de pedidos en broma sin obligar a los clientes a crearse una cuenta con contraseña, la <strong>primera vez</strong> que un número de teléfono pide por la web debe <strong>confirmarlo por WhatsApp</strong>:</p>
+  <ol class="pasos">
+    <li>Cuando el cliente nuevo envía su pedido, su celular le muestra <strong>“Falta un paso”</strong> con un botón verde que abre tu WhatsApp con el texto listo (<em>“Hola Le Piaf, confirmo mi pedido #7…”</em>).</li>
+    <li>En tu tablero, ese pedido aparece con borde punteado y la etiqueta <strong>⏳ Sin confirmar · vence en 15 min</strong>.</li>
+    <li>Apenas recibís su mensaje de WhatsApp, tocás el botón verde <strong>✓ Ya confirmó por WhatsApp</strong> en la tarjeta y pasa a ser un pedido normal listo para aceptar.</li>
+    <li>Si pasan <strong>15 minutos</strong> y nunca mandó el WhatsApp, el sistema lo cancela solo automáticamente para que no cocines en vano.</li>
+  </ol>
+  <div class="dos">
+    <figure><img src="../img/pc-tarjeta-sin-confirmar.png" alt="Tarjeta sin confirmar"><figcaption>En el panel: pedido esperando el WhatsApp del cliente nuevo.</figcaption></figure>
+    <figure><img src="../img/cel-falta-confirmar.png" alt="Falta un paso en celular" style="max-height:88mm"><figcaption>En el celular del cliente nuevo: aviso de “Falta un paso”.</figcaption></figure>
+  </div>
+  <div class="caja ok"><strong>✓ Los clientes habituales piden directo</strong>Una vez que a ese número de teléfono se le entregó su primer pedido, el sistema lo recuerda como cliente verificado y en sus próximas compras ya no le pide confirmación adicional.</div>
+  <h3>Bloquear un número molesto</h3>
+  <p>Si algún número insiste con pedidos falsos, abrí el detalle del pedido y tocá <strong>Bloquear este número</strong>. Podés ver o desbloquear números cuando quieras desde <strong>Configuración → Pedidos falsos</strong>.</p>
+</section>
+
+<section>
+  <h2>5. Cobrar y entregar</h2>
+  <p>Tenés tres maneras prácticas de registrar el cobro según el momento del servicio:</p>
+  <table>
+    <tr><th>Forma de cobro</th><th>Cuándo conviene usarla</th></tr>
+    <tr><td>Botones rápidos <strong>💵 Efectivo</strong> o <strong>🏦 Transf.</strong> en la tarjeta</td><td>Registra el cobro exacto del total en un solo clic (por ejemplo, si te mandaron el comprobante de transferencia mientras el pedido está en el horno). Abajo aparece <strong>Deshacer</strong> por si tocaste sin querer.</td></tr>
+    <tr><td>Botón <strong>Otro</strong> en la tarjeta</td><td>Ideal si el cliente paga mitad en efectivo y mitad por transferencia, o para calcular el vuelto exacto.</td></tr>
+    <tr><td>Botón grande <strong>Cobrar y entregar</strong></td><td>Cuando el pedido ya está en la columna <em>Listos para entregar</em> y todavía no estaba pagado: al tocarlo te pregunta cómo pagó y en el mismo paso lo cobra y lo marca como entregado.</td></tr>
+  </table>
+  <figure><img src="../img/pc-cobrar-entregar.png" alt="Cobrar y entregar"><figcaption>Ventana al tocar “Cobrar y entregar” sobre un pedido listo.</figcaption></figure>
+  <div class="caja ojo"><strong>Entregar sin cobrar (cuenta pendiente)</strong>Si un cliente de confianza retira y te dice que transfiere al llegar a la casa, podés tocar <strong>Entregar sin cobrar</strong>. El pedido pasa al listado inferior con una alerta roja para que no te olvides de registrarlo cuando entre el pago.</div>
+</section>
+
+<section>
+  <h2>6. Cargar un pedido de mostrador o teléfono</h2>
+  <p>Para los clientes que se acercan directamente al mostrador de Ozamis y Vergara o llaman por teléfono, entrá a <strong>Mostrador</strong> en el menú izquierdo o tocá el botón <strong>+ Cargar en Mostrador</strong> arriba a la derecha en la pantalla de Pedidos:</p>
+  <ol class="pasos">
+    <li>Tocá las promos o productos a la izquierda para sumarlos al pedido (podés filtrar rápido con el buscador). Si elegís lomo o pizza con agregados, te permite marcarlos.</li>
+    <li>Ajustá las cantidades con <kbd>−</kbd> y <kbd>+</kbd> a la derecha.</li>
+    <li>Elegí la forma de entrega (<em>Para llevar</em> o <em>Para comer acá</em>) y el origen (<em>Mostrador</em> o <em>Teléfono</em>).</li>
+    <li>Escribí una referencia en <strong>Nombre</strong> (ej. <em>Carlos (Mostrador)</em>) y, si querés, su WhatsApp.</li>
+    <li>Seleccioná cómo paga, marcá <strong>Ya pagó</strong> si te abona en el momento y tocá <strong>Cargar pedido</strong>.</li>
+  </ol>
+  <figure><img src="../img/pc-nuevo-pedido.png" alt="Nuevo pedido manual"><figcaption>Carga rápida de mostrador o teléfono: entra directo a la columna “En Cocina (Preparando)”.</figcaption></figure>
+</section>
+
+<section>
+  <h2>7. Delivery y formas de entrega</h2>
+  <p>El local puede trabajar con <strong>Retiro en el local</strong> y <strong>Delivery</strong>. Cuando quieras habilitar envíos a domicilio (o deshabilitarlos una noche de lluvia o alta demanda), entrás a <strong>Configuración → Formas de entrega</strong>:</p>
+  <ol class="pasos">
+    <li>Al activar el interruptor de <strong>Delivery</strong>, la web le permite al cliente elegir envío a domicilio y escribir su calle, numeración y referencias en Maipú.</li>
+    <li>La web le avisa que el costo de envío se confirma según su ubicación en Maipú.</li>
+    <li>En el tablero de pedidos verás la dirección del cliente y la etiqueta <strong>Envío a confirmar</strong>.</li>
+    <li>Dentro del detalle del pedido ingresás el monto del envío y tocás <strong>Guardar envío</strong>: se suma automáticamente al total y el cliente lo ve reflejado en su seguimiento.</li>
+  </ol>
+  <figure class="chica"><img src="../img/pc-entrega.png" alt="Formas de entrega"><figcaption>Configuración → Formas de entrega (Retiro en el local y Delivery).</figcaption></figure>
+</section>
+
+<section>
+  <h2>8. La caja: apertura y movimientos</h2>
+  <h3>1. Abrir la caja al iniciar el turno</h3>
+  <p>Entrá a <strong>Caja</strong> en el menú izquierdo, ingresá el monto de efectivo con el que arrancás para dar cambio y tocá <strong>Abrir caja</strong>. A partir de ese momento, cada pedido que marques como cobrado se suma solo a tu turno.</p>
+  <figure class="chica"><img src="../img/pc-caja-cerrada.png" alt="Caja cerrada"><figcaption>Pantalla de Caja antes de abrir el turno del día.</figcaption></figure>
+
+  <h3>2. Control en vivo y movimientos de efectivo</h3>
+  <p>Mientras la caja está abierta, ves en grande el <strong>Efectivo en caja</strong> que tiene que haber en el cajón, el total de <strong>Transferencias</strong> y los <strong>Pedidos cobrados</strong>. Si sacás plata en efectivo para pagarle a un proveedor (cajas de pizza, mercadería, bebidas) o ingresás cambio, registrá el movimiento abajo eligiendo <strong>Sale plata</strong> o <strong>Entra plata</strong>, la categoría, el monto y el detalle.</p>
+  <figure><img src="../img/pc-caja-abierta.png" alt="Caja abierta"><figcaption>Caja abierta con el desglose de efectivo, transferencias y movimientos registrados.</figcaption></figure>
+</section>
+
+<section>
+  <h2>8. La caja: arqueo y cierre de turno</h2>
+  <ol class="pasos">
+    <li>Al terminar la jornada, tocá el botón <strong>Cerrar caja</strong> arriba a la derecha.</li>
+    <li>Contá los billetes reales del cajón y escribí el monto en <strong>Efectivo contado</strong>. El sistema compara al instante contra lo esperado y te indica en verde <strong>“Da justo”</strong> o te avisa si <strong>“Faltan $…”</strong> / <strong>“Sobran $…”</strong>.</li>
+    <li>Verificá el total de <strong>Transferencias recibidas</strong> contra tu billetera virtual o home banking.</li>
+    <li>Agregá una nota opcional si querés dejar una aclaración y confirmá con <strong>Cerrar caja</strong>.</li>
+  </ol>
+  <figure><img src="../img/pc-cierre.png" alt="Cerrar caja"><figcaption>Arqueo de cierre: compara el efectivo que debería haber contra lo que contaste.</figcaption></figure>
+  <p>Debajo de la pantalla de Caja siempre queda guardado el <strong>Historial de cierres</strong> con fecha, hora, responsable y si hubo alguna diferencia.</p>
+</section>
+
+<section>
+  <h2>9. Resumen y estadísticas de ventas</h2>
+  <p>En la sección <strong>Ventas</strong> tenés una radiografía clara de cómo rinde el negocio (contando únicamente los pedidos efectivamente cobrados; los cancelados o rechazados no distorsionan tus números):</p>
+  <ul>
+    <li><strong>Tarjetas superiores</strong>: vendido hoy, cantidad de pedidos, ticket promedio y desglose entre efectivo y transferencias, comparado en porcentaje contra el mismo día de la semana anterior.</li>
+    <li><strong>Últimos 7 o 30 días</strong>: gráfico de barras día por día para identificar tus noches más fuertes.</li>
+    <li><strong>Lo más vendido y horarios pico</strong>: ranking de tus productos/promos estrella (Pizzas, Lomos, Calzones) y las franjas horarias en que entran más pedidos.</li>
+  </ul>
+  <figure><img src="../img/pc-ventas.png" alt="Estadísticas de ventas"><figcaption>Panel de Ventas con historial de los últimos días, ranking de productos y horarios pico.</figcaption></figure>
+</section>
+
+<section>
+  <h2>10. La carta: productos, fotos y aumentos</h2>
+  <p>En <strong>Carta</strong> administrás las categorías y productos de Le Piaf. Cualquier cambio que guardes se publica en la web pública en cuestión de segundos.</p>
+  <figure><img src="../img/pc-carta.png" alt="Carta en el panel"><figcaption>Listado de productos con sus fotos reales, precios y botón de disponibilidad.</figcaption></figure>
+  <ul>
+    <li><strong>¿Se acabó un producto esta noche?</strong> Apagá su interruptor <strong>Disponible</strong>. En la web queda visible pero marcado como agotado para que nadie lo pueda pedir hasta que lo vuelvas a prender.</li>
+    <li><strong>Cambiar el orden</strong>: arrastrá las categorías o los productos desde los puntitos de la izquierda.</li>
+    <li><strong>Aumento masivo de precios</strong>: en la pestaña <strong>Aumento de precios</strong> podés aplicar un porcentaje a toda la carta o a una categoría puntual (ej. <em>Lomos</em> o <em>Pizzas</em>), redondeando automáticamente los números y viendo una vista previa antes de confirmar.</li>
+  </ul>
+
+  <h3>Editar un producto, foto o adicionales</h3>
+  <p>Tocando el ícono del lápiz abrís la ficha del producto para cambiar su nombre, descripción, precio, subir una foto nueva (se optimiza sola) o desplegar <strong>Más opciones</strong> para configurar variantes y agregados.</p>
+  <figure class="chica"><img src="../img/pc-producto.png" alt="Editar producto"><figcaption>Edición de producto con su foto, precio y opciones adicionales.</figcaption></figure>
+</section>
+
+<section>
+  <h2>11. Promos y banner de fecha especial</h2>
+  <p>En <strong>Promos</strong> gestionás las 10 promociones que aparecen en el carrusel interactivo de la web con sus fotos reales (1080×1080). Podés prenderlas o apagarlas con un clic, cambiarles el precio o configurar en qué días y horarios están vigentes.</p>
+  <p>Arriba de las promos también contás con el <strong>Banner de fecha especial</strong>, ideal para destacar un combo por el Día del Amigo, un partido importante o fin de año:</p>
+  <ol class="pasos">
+    <li>Subís una imagen horizontal (para compu) y una vertical (para celular).</li>
+    <li>Escribís el texto descriptivo y elegís <strong>Desde</strong> qué fecha y <strong>Hasta</strong> qué fecha se muestra.</li>
+    <li>Se publica debajo de la portada y se apaga solo cuando termina la fecha elegida.</li>
+  </ol>
+  <figure><img src="../img/pc-promos.png" alt="Promos en el panel"><figcaption>Administración del banner especial y de las promos de Le Piaf.</figcaption></figure>
+</section>
+
+<section>
+  <h2>12. QR de la carta y 13. Configuración</h2>
+  <div class="dos">
+    <div>
+      <h3>QR oficial con el logo</h3>
+      <p>En <strong>QR de la carta</strong> generás al instante el código QR con los colores oscuros y el logo oficial de <strong>Le Piaf</strong> en el centro, apuntando al enlace web oficial del local:</p>
+      <ul>
+        <li><strong>Descargar PNG</strong>: imagen en alta definición lista para subir a historias de Instagram, estados de WhatsApp o mandar a la imprenta para imanes y flyers.</li>
+        <li><strong>Imprimir o guardar PDF</strong>: en formato <em>1 grande</em> (para pegar en el mostrador o vidriera) o <em>4 por hoja</em> (para las mesas).</li>
+      </ul>
+    </div>
+    <figure><img src="../img/pc-qr.png" alt="QR de la carta"><figcaption>Generador de cartel QR listo para descargar o imprimir.</figcaption></figure>
+  </div>
+
+  <h3>Configuración general del local</h3>
+  <p>Exclusiva para el <strong>Dueño</strong>. Desde acá podés actualizar cuando quieras:</p>
+  <ul>
+    <li><strong>Contacto y redes</strong>: el número de WhatsApp que recibe los pedidos (<kbd>5492615745326</kbd>), teléfono e Instagram/Facebook.</li>
+    <li><strong>Horarios de atención</strong>: turnos para cada día de la semana, más <strong>Cierres especiales</strong> por feriados o vacaciones (fuera de horario la web muestra <em>“Cerrado”</em> y no permite enviar pedidos).</li>
+    <li><strong>Formas de entrega y Pedidos falsos</strong>: activar/desactivar retiro o delivery, el filtro de confirmación para clientes nuevos y la lista de números bloqueados.</li>
+  </ul>
+  <figure class="chica"><img src="../img/pc-configuracion.png" alt="Configuración del local"><figcaption>Configuración de WhatsApp, redes y horarios de atención.</figcaption></figure>
+</section>
+
+<section>
+  <h2>14. Así pide tu cliente y solución de problemas</h2>
+  <p>Conocer el recorrido en el celular del cliente te ayuda a asistirlo en segundos si te consulta:</p>
+  <ol class="pasos">
+    <li>Entra a la web, toca <strong>Hacer mi Pedido</strong> o elige una promo/producto con el botón <strong>+</strong>.</li>
+    <li>Abre su carrito, completa su nombre y WhatsApp, elige cómo paga y toca <strong>Confirmar pedido</strong>.</li>
+    <li>Ve su número de pedido (ej. <strong>#1</strong>) y desde <strong>Seguir mi pedido</strong> mira en vivo cuando pasa a <em>En preparación</em> y a <em>Listo para retirar</em> en Ozamis y Vergara, Maipú.</li>
+  </ol>
+  <div class="fila">
+    <figure><img src="../img/cel-web-carrito.png" alt="Carrito en celular"><figcaption>1. El carrito en el celular.</figcaption></figure>
+    <figure><img src="../img/cel-web-confirmado.png" alt="Pedido confirmado"><figcaption>2. Pedido recibido.</figcaption></figure>
+    <figure><img src="../img/cel-web-seguimiento.png" alt="Seguimiento en vivo"><figcaption>3. Seguimiento en vivo.</figcaption></figure>
+  </div>
+
+  <h3>Respuestas rápidas a dudas frecuentes</h3>
+  <table>
+    <tr><th>Situación</th><th>Cómo resolverla en segundos</th></tr>
+    <tr><td>No suena la alerta cuando entra un pedido</td><td>Tocá el botón amarillo <strong>Activar timbre</strong> arriba a la derecha al abrir el panel y verificá el volumen de la compu.</td></tr>
+    <tr><td>Un cliente dice que la web figura “Cerrado”</td><td>Revisá en <strong>Configuración → Horarios de atención</strong> que el turno del día actual cubra la hora actual.</td></tr>
+    <tr><td>Marqué un pedido como cobrado por error</td><td>Tocá <strong>Deshacer</strong> en el aviso inferior o abrí la tarjeta del pedido y tocá <strong>Deshacer cobro</strong>.</td></tr>
+    <tr><td>Un pedido nuevo se canceló solo a los 15 min</td><td>Era un cliente nuevo que no envió el WhatsApp de confirmación. Si igual te escribe, cargalo con <strong>+ Cargar en Mostrador</strong>.</td></tr>
+  </table>
+  <div class="caja ok"><strong>🤝 Soporte técnico directo · Cristian Delgado (DelgadoDev)</strong>Ante cualquier duda o si necesitás ajustar colores, textos de portada o secciones especiales, escribinos directamente por WhatsApp al <strong>261 747-8090</strong> o desde <strong>delgadodev.com.ar</strong>.</div>
+</section>
+
+</body>
+</html>

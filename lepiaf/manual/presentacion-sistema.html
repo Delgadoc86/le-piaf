@@ -1,0 +1,711 @@
+<!doctype html>
+<html lang="es-AR">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Por qué elegir este sistema — Le Piaf</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        --bg: #ffffff;
+        --paper: #ffffff;
+        --ink: #18181b;
+        --muted: #52525b;
+        --line: #e4e4e7;
+        --brand: #09090b;
+        --brand-ink: #f59716;
+        --accent: #ea580c;
+        --ok: #15803d;
+        --soft: #fefce8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      @page {
+        size: A4;
+        margin: 14mm 15mm 16mm;
+      }
+
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--ink);
+        font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        font-size: 10pt;
+        line-height: 1.45;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+
+      /* Portada idéntica en estilo al Manual del Usuario */
+      .portada {
+        height: 263mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 18mm 18mm 14mm;
+        background:
+          radial-gradient(circle at 82% 20%, rgba(246, 181, 10, 0.16), transparent 45%),
+          radial-gradient(circle at 15% 80%, rgba(216, 40, 31, 0.14), transparent 45%),
+          linear-gradient(155deg, #09090b 0%, #121317 60%, #191512 100%);
+        color: #fafaf9;
+        border-radius: 6mm;
+        page-break-after: always;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .portada-cabecera {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        border-bottom: 1px solid rgba(246, 181, 10, 0.25);
+        padding-bottom: 5mm;
+      }
+
+      .portada-logo {
+        height: 26mm;
+        width: auto;
+        object-fit: contain;
+        filter: drop-shadow(0 6px 16px rgba(0, 0, 0, 0.6));
+      }
+
+      .portada-badge {
+        background: rgba(246, 181, 10, 0.14);
+        border: 1px solid rgba(246, 181, 10, 0.45);
+        color: var(--brand-ink);
+        padding: 1.8mm 4mm;
+        border-radius: 999px;
+        font-size: 8.5pt;
+        font-weight: 700;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+      }
+
+      .portada .etiqueta {
+        color: var(--brand-ink);
+        letter-spacing: 0.24em;
+        font-size: 9pt;
+        font-weight: 700;
+        text-transform: uppercase;
+        display: block;
+        margin-bottom: 3mm;
+      }
+
+      .portada h1 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 800;
+        font-size: 31pt;
+        line-height: 1.08;
+        margin: 0 0 4.5mm 0;
+        letter-spacing: -0.02em;
+      }
+
+      .portada h1 em {
+        font-style: normal;
+        color: var(--brand-ink);
+      }
+
+      .portada-sub {
+        font-size: 11.8pt;
+        line-height: 1.5;
+        color: #d4d4d8;
+        max-width: 150mm;
+        margin: 0 0 7mm 0;
+      }
+
+      .portada-kpis {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 4mm;
+      }
+
+      .kpi-box {
+        background: rgba(255, 255, 255, 0.05);
+        border: 1px solid rgba(246, 181, 10, 0.35);
+        border-radius: 3.5mm;
+        padding: 4mm 4.5mm;
+      }
+
+      .kpi-box strong {
+        display: block;
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 19pt;
+        color: var(--brand-ink);
+        line-height: 1.1;
+        margin-bottom: 1.2mm;
+      }
+
+      .kpi-box span {
+        font-size: 8.8pt;
+        color: rgba(255, 255, 255, 0.84);
+      }
+
+      .portada-meta {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 6mm;
+        border-top: 1px solid rgba(255, 255, 255, 0.14);
+        padding-top: 5mm;
+        font-size: 9pt;
+        margin: 0;
+      }
+
+      .portada-meta dt {
+        color: var(--brand-ink);
+        font-weight: 700;
+        text-transform: uppercase;
+        font-size: 7.5pt;
+        letter-spacing: 0.08em;
+        margin-bottom: 1mm;
+      }
+
+      .portada-meta dd {
+        margin: 0;
+        color: #d4d4d8;
+      }
+
+      /* Secciones */
+      section.cap {
+        page-break-before: always;
+      }
+
+      section.cap.primera {
+        page-break-before: avoid;
+      }
+
+      .cap-num {
+        display: inline-block;
+        background: var(--brand);
+        color: var(--brand-ink);
+        font-weight: 700;
+        font-size: 8pt;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        padding: 1mm 3mm;
+        border-radius: 999px;
+      }
+
+      h2 {
+        font-family: 'Fraunces', Georgia, serif;
+        font-weight: 800;
+        font-size: 17.5pt;
+        line-height: 1.15;
+        margin: 2mm 0 1.5mm 0;
+        color: var(--brand);
+        letter-spacing: -0.015em;
+        padding-bottom: 1.8mm;
+        border-bottom: 2.5px solid var(--brand-ink);
+      }
+
+      .bajada {
+        font-size: 10pt;
+        color: var(--muted);
+        margin: 0 0 3.5mm 0;
+      }
+
+      h3 {
+        font-size: 11pt;
+        font-weight: 700;
+        margin: 2mm 0 1.5mm 0;
+        color: var(--brand);
+      }
+
+      p {
+        margin: 0 0 2mm 0;
+      }
+
+      /* Capturas */
+      figure.captura {
+        margin: 2.5mm 0 3mm 0;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 3mm;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        break-inside: avoid;
+      }
+
+      figure.captura img {
+        display: block;
+        max-width: 100%;
+        max-height: 82mm;
+        width: auto;
+        margin: 0 auto;
+      }
+
+      figure.captura.compacta img {
+        max-height: 66mm;
+      }
+
+      figure.captura figcaption {
+        padding: 1.8mm 3mm;
+        font-size: 8.4pt;
+        color: var(--muted);
+        background: #fafafa;
+        border-top: 1px solid var(--line);
+        text-align: center;
+      }
+
+      .dos-celulares {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 4mm;
+        align-items: start;
+        break-inside: avoid;
+      }
+
+      .dos-celulares figure.captura {
+        margin: 1.5mm 0;
+      }
+
+      .dos-celulares figure.captura img {
+        max-height: 86mm;
+        width: auto;
+        margin: 0 auto;
+      }
+
+      .dos-celulares.compactos figure.captura img {
+        max-height: 76mm;
+      }
+
+      .fila-cel {
+        display: grid;
+        grid-template-columns: 54mm 1fr;
+        gap: 5mm;
+        align-items: center;
+        break-inside: avoid;
+        margin: 2.5mm 0 0 0;
+        background: #fafafa;
+        border: 1px solid var(--line);
+        border-radius: 3mm;
+        padding: 3mm;
+      }
+
+      .fila-cel figure.captura {
+        margin: 0;
+      }
+
+      .fila-cel figure.captura img {
+        max-height: 78mm;
+      }
+
+      /* Tarjetas de ventajas */
+      .grilla-ventajas {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 3mm;
+        margin: 2.5mm 0;
+        break-inside: avoid;
+      }
+
+      .ventaja-card {
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-top: 3px solid var(--brand);
+        border-radius: 2.8mm;
+        padding: 2.8mm 3.5mm;
+        break-inside: avoid;
+      }
+
+      .ventaja-card.oro {
+        border-top-color: var(--brand-ink);
+      }
+
+      .ventaja-card.rojo {
+        border-top-color: var(--accent);
+      }
+
+      .ventaja-card h4 {
+        margin: 0 0 1mm 0;
+        font-size: 10pt;
+        color: var(--brand);
+      }
+
+      .ventaja-card p {
+        margin: 0;
+        font-size: 9pt;
+        color: var(--muted);
+      }
+
+      /* Avisos */
+      .aviso {
+        border-left: 4px solid var(--brand-ink);
+        background: var(--soft);
+        padding: 2.5mm 3.5mm;
+        border-radius: 0 2.5mm 2.5mm 0;
+        margin: 2.5mm 0;
+        font-size: 9.2pt;
+        break-inside: avoid;
+      }
+
+      .aviso strong {
+        color: var(--brand);
+      }
+
+      /* Tabla comparativa */
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2.5mm 0;
+        font-size: 8.9pt;
+        background: var(--paper);
+        border: 1px solid var(--line);
+        border-radius: 2.5mm;
+        overflow: hidden;
+        break-inside: avoid;
+      }
+
+      th,
+      td {
+        text-align: left;
+        padding: 2mm 2.8mm;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      th {
+        background: var(--brand);
+        color: #ffffff;
+        font-weight: 700;
+        font-size: 8.2pt;
+        text-transform: uppercase;
+        letter-spacing: 0.04em;
+      }
+
+      th.col-lepiaf {
+        color: var(--brand-ink);
+      }
+
+      td.col-lepiaf {
+        background: #fefce8;
+        font-weight: 600;
+        color: var(--ink);
+      }
+
+      tr:last-child td {
+        border-bottom: none;
+      }
+
+      ul.lista-check {
+        margin: 1.5mm 0 2.5mm 0;
+        padding-left: 4.5mm;
+        font-size: 9.2pt;
+      }
+
+      ul.lista-check li {
+        margin-bottom: 1.2mm;
+      }
+
+      .cierre-box {
+        margin-top: 3mm;
+        background: var(--brand);
+        color: #ffffff;
+        border-radius: 3.5mm;
+        padding: 4mm 5mm;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 4mm;
+        break-inside: avoid;
+      }
+
+      .cierre-box h3 {
+        color: var(--brand-ink);
+        margin: 0 0 1mm 0;
+        font-family: 'Fraunces', Georgia, serif;
+        font-size: 13pt;
+      }
+
+      .cierre-box p {
+        margin: 0;
+        font-size: 9pt;
+        color: rgba(255, 255, 255, 0.86);
+      }
+    </style>
+  </head>
+  <body>
+    <!-- PÁGINA 1: PORTADA -->
+    <div class="portada">
+      <div class="portada-cabecera">
+        <img class="portada-logo" src="../assets/marca/logo.webp" alt="Le Piaf" />
+        <span class="portada-badge">Presentación del Sistema</span>
+      </div>
+
+      <div>
+        <span class="etiqueta">Plataforma Gastronómica Propia</span>
+        <h1>Por qué este sistema es la <em>mejor opción</em> para Le Piaf</h1>
+        <p class="portada-sub">
+          Diseñado a medida para vender más en hora pico, eliminar el caos de mensajes en WhatsApp y quedarte con el <strong>100% de la ganancia de cada pedido</strong> sin pagar comisiones por venta.
+        </p>
+
+        <div class="portada-kpis">
+          <div class="kpi-box">
+            <strong>0% Comisión</strong>
+            <span>Toda la plata de cada venta entra directo a tu efectivo o a tu alias de transferencia.</span>
+          </div>
+          <div class="kpi-box">
+            <strong>10 seg</strong>
+            <span>Lo que tarda un pedido en llegar armado, sumado y claro a la pantalla de cocina.</span>
+          </div>
+          <div class="kpi-box">
+            <strong>24/7 Activo</strong>
+            <span>Tu carta digital con fotos reales (1080×1080), promos, mapa y horarios trabaja todo el día por vos.</span>
+          </div>
+        </div>
+      </div>
+
+      <dl class="portada-meta">
+        <div>
+          <dt>Plataforma Online</dt>
+          <dd>Sitio Web & Tienda Propia<br />Adaptada a celulares y PC</dd>
+        </div>
+        <div>
+          <dt>Ubicación del local</dt>
+          <dd>Ozamis y Vergara, Maipú<br />Mendoza (CP M5515)</dd>
+        </div>
+        <div>
+          <dt>Desarrollo y soporte</dt>
+          <dd>Cristian Delgado · DelgadoDev<br />delgadodev.com.ar · 261 747-8090</dd>
+        </div>
+      </dl>
+    </div>
+
+    <!-- PÁGINA 2: EL PROBLEMA VS LA SOLUCIÓN -->
+    <section class="cap primera">
+      <span class="cap-num">1 · El Problema vs. La Solución</span>
+      <h2>¿Por qué tener un sistema propio cambia la forma de trabajar?</h2>
+      <p class="bajada">
+        En una pizzería y lomitería, el viernes y sábado a la noche cada minuto cuenta. Cuando entran 15 consultas juntas por WhatsApp, responder precios a mano hace perder ventas y genera errores en la cocina.
+      </p>
+
+      <table>
+        <thead>
+          <tr>
+            <th>Aspecto clave</th>
+            <th>Apps de delivery tradicionales</th>
+            <th>Atender todo a mano por WhatsApp</th>
+            <th class="col-lepiaf">Sistema Propio Le Piaf</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Comisión por venta</strong></td>
+            <td>Te descuentan entre <strong>25% y 35%</strong> de cada pedido.</td>
+            <td>0%, pero perdés mucho tiempo respondiendo chats.</td>
+            <td class="col-lepiaf"><strong>0% de comisión siempre.</strong> El 100% de la venta es de Le Piaf.</td>
+          </tr>
+          <tr>
+            <td><strong>Toma del pedido en hora pico</strong></td>
+            <td>Automática, pero competís al lado de otros 50 locales.</td>
+            <td>Lenta: mandar lista, esperar respuesta, preguntar pago y sumar a mano.</td>
+            <td class="col-lepiaf"><strong>El cliente elige solo en la web</strong> y la comanda entra lista a cocina.</td>
+          </tr>
+          <tr>
+            <td><strong>Consultas de "¿Ya está mi pedido?"</strong></td>
+            <td>El cliente reclama por soporte.</td>
+            <td>El cliente manda mensajes cada 10 minutos al WhatsApp.</td>
+            <td class="col-lepiaf"><strong>Seguimiento en vivo</strong> desde el celular (Recibido → En cocina → Listo).</td>
+          </tr>
+          <tr>
+            <td><strong>Control de caja y ganancias</strong></td>
+            <td>Liquidaciones demoradas con descuentos confusos.</td>
+            <td>Cuaderno o planilla a mano al final de la noche, propenso a olvidos.</td>
+            <td class="col-lepiaf"><strong>Arqueo automático al instante</strong> de efectivo, transferencias y gastos.</td>
+          </tr>
+        </tbody>
+      </table>
+
+      <div class="aviso">
+        <strong>En resumen:</strong> Combinás la comodidad de las grandes aplicaciones (carta moderna, carrito automático y seguimiento en vivo) con la independencia y rentabilidad total de tu propio negocio.
+      </div>
+
+      <figure class="captura">
+        <img src="img/pc-pedidos.png" alt="Pantalla de gestión Le Piaf" />
+        <figcaption>
+          <strong>Primera impresión profesional:</strong> Portada inmersiva con fotografía real, estado del local en tiempo real (Abierto ahora), demora estimada y botón directo para pedir.
+        </figcaption>
+      </figure>
+    </section>
+
+    <!-- PÁGINA 3: EXPERIENCIA DEL CLIENTE EN EL CELULAR -->
+    <section class="cap">
+      <span class="cap-num">2 · Ventas desde el Celular</span>
+      <h2>Una carta que da hambre y toma el pedido sola</h2>
+      <p class="bajada">
+        El 90% de los vecinos de Maipú piden desde el celular. El sistema está optimizado para que en tres toques armen su pedido sin tener que descargar ninguna aplicación ni recordar contraseñas.
+      </p>
+
+      <div class="grilla-ventajas">
+        <div class="ventaja-card oro">
+          <h4>Carrusel de 10 Promos destacadas</h4>
+          <p>Las promos de pizzas a la piedra, hamburguesas y lomos en pan árabe casero aparecen arriba de todo con sus fotos reales (1080×1080) para impulsar el ticket promedio.</p>
+        </div>
+        <div class="ventaja-card rojo">
+          <h4>Adicionales y notas sin confusiones</h4>
+          <p>El cliente puede sumar ingredientes adicionales o aclarar "sin cebolla" antes de enviar el pedido.</p>
+        </div>
+        <div class="ventaja-card">
+          <h4>Especialidades a la Leña</h4>
+          <p>Además del pedido nocturno, la web destaca pizzas a la piedra, calzones y empanadas con botón directo a WhatsApp.</p>
+        </div>
+        <div class="ventaja-card">
+          <h4>Cobro directo a tu Alias o Efectivo</h4>
+          <p>Si eligen transferencia, la web les muestra tu alias oficial con botón para copiarlo en un toque.</p>
+        </div>
+      </div>
+
+      <div class="dos-celulares">
+        <figure class="captura">
+          <img src="img/cel-web-inicio.png" alt="Carta móvil de Le Piaf" />
+          <figcaption>
+            <strong>Vista en celular:</strong> Promos y categorías claras, diseñadas para tocar con el pulgar.
+          </figcaption>
+        </figure>
+        <figure class="captura">
+          <img src="img/cel-web-carrito.png" alt="Carrito móvil listo para confirmar" />
+          <figcaption>
+            <strong>Carrito inteligente:</strong> Calcula el total solo, recuerda los datos del cliente y pide medio de pago.
+          </figcaption>
+        </figure>
+      </div>
+    </section>
+
+    <!-- PÁGINA 4: FILTRO ANTI-BROMAS Y SEGUIMIENTO EN VIVO -->
+    <section class="cap">
+      <span class="cap-num">3 · Seguridad y Tranquilidad</span>
+      <h2>Filtro anti-pedidos falsos y seguimiento en vivo</h2>
+      <p class="bajada">
+        Uno de los mayores miedos al recibir pedidos por una página web es cocinar un pedido en broma. Este sistema lo resuelve de forma automática sin molestar a tus clientes de siempre.
+      </p>
+
+      <div class="dos-celulares compactos">
+        <figure class="captura">
+          <img src="img/cel-falta-confirmar.png" alt="Validación por WhatsApp para clientes nuevos" />
+          <figcaption>
+            <strong>1. Si es cliente nuevo:</strong> El sistema le pide tocar un botón para enviar un WhatsApp automático. Así ves su número real antes de cocinar.
+          </figcaption>
+        </figure>
+        <figure class="captura">
+          <img src="img/cel-web-confirmado.png" alt="Confirmación directa para clientes habituales" />
+          <figcaption>
+            <strong>2. Si ya es cliente de la casa:</strong> Como el sistema ya registró su teléfono en compras anteriores, su pedido entra directo sin pasos extra.
+          </figcaption>
+        </figure>
+      </div>
+
+      <div class="fila-cel">
+        <figure class="captura">
+          <img src="img/cel-web-seguimiento.png" alt="Seguimiento en vivo del pedido" />
+        </figure>
+        <div>
+          <h3>El cliente sigue su pedido en tiempo real</h3>
+          <p>
+            Apenas confirma la compra, el cliente recibe un enlace único donde ve el estado actualizado al instante:
+          </p>
+          <ul class="lista-check">
+            <li><strong>Recibido:</strong> El local ya tiene el pedido en pantalla.</li>
+            <li><strong>En preparación:</strong> Cuando tocás <em>"Aceptar Pedido"</em> en el panel, el celular del cliente pasa a <em>Lo estamos preparando</em>.</li>
+            <li><strong>¡Listo para retirar!:</strong> Cuando tocás <em>"¡Marcar Plato Listo!"</em>, la pantalla del cliente le avisa que ya puede pasar por Ozamis y Vergara, Maipú.</li>
+          </ul>
+          <p style="margin: 0">
+            <strong>Ventaja directa:</strong> Menos llamadas y mensajes preguntando cuánto falta mientras estás despachando.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PÁGINA 5: COCINA Y COMANDAS EN VIVO -->
+    <section class="cap">
+      <span class="cap-num">4 · Orden en la Cocina</span>
+      <h2>Pantalla de Cocina: comandas claras y timbre sonoro</h2>
+      <p class="bajada">
+        Se terminaron los papelitos manchados o los pedidos olvidados en el chat. Toda la noche se organiza en 3 columnas visuales a prueba de errores.
+      </p>
+
+      <figure class="captura">
+        <img src="img/pc-pedidos.png" alt="Pantalla de Cocina con comandas en vivo" />
+        <figcaption>
+          <strong>Tablero en tiempo real:</strong> Columna 1: <em>Nuevos (Aceptar)</em> · Columna 2: <em>En Cocina (Preparando)</em> · Columna 3: <em>Listos para Despacho</em>.
+        </figcaption>
+      </figure>
+
+      <div class="grilla-ventajas">
+        <div class="ventaja-card oro">
+          <h4>Timbre sonoro automático</h4>
+          <p>Activás el timbre al empezar el turno y cada vez que entra un pedido desde la web suena una campanita clara en la cocina o el mostrador.</p>
+        </div>
+        <div class="ventaja-card">
+          <h4>Carga en Mostrador en 10 segundos</h4>
+          <p>Si un vecino pide en persona o llama por teléfono, lo cargás desde <strong>Mostrador</strong> para que entre a la misma fila y sume a la caja.</p>
+        </div>
+        <div class="ventaja-card">
+          <h4>Botón de WhatsApp en 1 clic</h4>
+          <p>Cada comanda tiene un botón directo para abrir el chat del cliente con el mensaje ya escrito por si necesitás avisarle que su pedido está listo.</p>
+        </div>
+        <div class="ventaja-card rojo">
+          <h4>Control de cobro antes de entregar</h4>
+          <p>Las tarjetas indican claramente <strong>Efectivo · a cobrar</strong>, <strong>Transferencia · a cobrar</strong> o <strong>Pagado</strong>, y permiten dividir pagos.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- PÁGINA 6: CAJA, ESTADÍSTICAS Y AUTONOMÍA TOTAL -->
+    <section class="cap">
+      <span class="cap-num">5 · Control del Negocio</span>
+      <h2>Caja al centavo, estadísticas y control total de tu carta</h2>
+      <p class="bajada">
+        Sabé exactamente cuánto vendiste hoy, cuánto tiene que haber en el cajón de efectivo y cuáles son los platos estrella de la semana.
+      </p>
+
+      <figure class="captura compacta">
+        <img src="img/pc-caja-abierta.png" alt="Control de caja por turno en vivo" />
+        <figcaption>
+          <strong>Caja en vivo:</strong> Muestra el fondo inicial, los cobros en efectivo, las transferencias recibidas y los gastos del turno para un cierre exacto.
+        </figcaption>
+      </figure>
+
+      <figure class="captura compacta">
+        <img src="img/pc-ventas.png" alt="Estadísticas de ventas y ranking de productos" />
+        <figcaption>
+          <strong>Estadísticas claras:</strong> Facturación por día, ticket promedio, horas de mayor demanda y ranking de los productos y promos más pedidos.
+        </figcaption>
+      </figure>
+
+      <div class="grilla-ventajas">
+        <div class="ventaja-card oro">
+          <h4>Agotado en 1 toque y aumento de precios</h4>
+          <p>Desde <strong>Carta</strong> y <strong>Promos</strong> marcás cualquier plato como agotado al instante o actualizás precios por porcentaje sin depender de nadie.</p>
+        </div>
+        <div class="ventaja-card">
+          <h4>Cartel QR listo para imprimir</h4>
+          <p>Incluye un generador de cartel A4 con el código QR oficial y el logo de Le Piaf para pegar en el mostrador o imprimir en folletos.</p>
+        </div>
+      </div>
+
+      <div class="cierre-box">
+        <div>
+          <h3>Un sistema pensado para hacer crecer a Le Piaf</h3>
+          <p>
+            Rápido para el cliente, ordenado para la cocina y transparente para la caja.<br />
+            Desarrollado a medida por <strong>Cristian Delgado</strong> (DelgadoDev) · <strong>delgadodev.com.ar</strong> · Tel. <strong>261 747-8090</strong>
+          </p>
+        </div>
+        <div style="text-align: right; flex-shrink: 0">
+          <span class="portada-badge">100% Operativo</span>
+        </div>
+      </div>
+    </section>
+  </body>
+</html>
+

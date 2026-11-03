@@ -19,7 +19,10 @@ const cdp = (method, params = {}) => new Promise((r) => { const n = ++id; pend.s
 await cdp('Page.enable');
 await cdp('Page.navigate', { url: pathToFileURL(resolve(entrada)).href });
 await esperar(3000);
-const pie = '<div style="width:100%;font-size:8px;color:#78716c;padding:0 15mm;display:flex;justify-content:space-between;font-family:Segoe UI,sans-serif"><span>Manual del panel · Silverio Club</span><span><span class="pageNumber"></span> / <span class="totalPages"></span></span></div>';
+const tituloDoc = entrada.includes('comercial') || entrada.includes('presentacion')
+  ? 'Por qué elegir este sistema · Le Piaf · Cristian Delgado (delgadodev.com.ar · Tel. 2617478090)'
+  : 'Manual del panel · Le Piaf · Cristian Delgado (delgadodev.com.ar · Tel. 2617478090)';
+const pie = `<div style="width:100%;font-size:8px;color:#78716c;padding:0 12mm;display:flex;justify-content:space-between;font-family:Segoe UI,sans-serif"><span>${tituloDoc}</span><span>Página <span class="pageNumber"></span> de <span class="totalPages"></span></span></div>`;
 const r = await cdp('Page.printToPDF', { printBackground: true, preferCSSPageSize: true, displayHeaderFooter: true, headerTemplate: '<span></span>', footerTemplate: pie });
 if (!r.result) { console.error(JSON.stringify(r)); process.exit(1); }
 writeFileSync(salida, Buffer.from(r.result.data, 'base64'));
