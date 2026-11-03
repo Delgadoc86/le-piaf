@@ -17,6 +17,7 @@ const TIPOS: Record<string, string> = {
   '.png': 'image/png',
   '.jpg': 'image/jpeg',
   '.jpeg': 'image/jpeg',
+  '.jfif': 'image/jpeg',
   '.svg': 'image/svg+xml',
 };
 

@@ -15,8 +15,15 @@ export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
     name: local.nombre,
     description: local.web.seo.descripcion || local.descripcionCorta,
     ...(url ? { url, menu: `${url}/#carta` } : {}),
-    ...(local.marca.logoUrl
-      ? { logo: local.marca.logoUrl, image: local.marca.ogImageUrl || local.marca.logoUrl }
+    ...(local.marca.logoUrl || local.web.nosotros?.fotoUrl
+      ? {
+          logo: local.marca.logoUrl,
+          image: [
+            local.web.nosotros?.fotoUrl,
+            local.marca.ogImageUrl,
+            local.marca.logoUrl,
+          ].filter(Boolean),
+        }
       : {}),
     telephone: `+${local.contacto.whatsapp}`,
     servesCuisine: grupos.map((g) => g.categoria.nombre),
