@@ -42,6 +42,28 @@ export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
       opens: h.desde,
       closes: h.hasta,
     })),
+    hasMenu: {
+      '@type': 'Menu',
+      name: `Carta de ${local.nombre}`,
+      hasMenuSection: grupos.map((g) => ({
+        '@type': 'MenuSection',
+        name: g.categoria.nombre,
+        hasMenuItem: g.productos.map((p) => ({
+          '@type': 'MenuItem',
+          name: p.nombre,
+          description: p.descripcion,
+          ...(p.fotoUrl ? { image: p.fotoUrl } : {}),
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'ARS',
+            price: p.precio,
+            availability: p.disponible
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+          },
+        })),
+      })),
+    },
     ...(redes.length > 0 ? { sameAs: redes } : {}),
   };
 }

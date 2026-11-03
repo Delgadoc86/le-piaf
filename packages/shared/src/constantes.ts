@@ -118,6 +118,9 @@ export type SeccionWeb = (typeof SECCIONES_WEB)[number];
 
 /** Lista curada de fuentes (§11). Se precargan con next/font. */
 export const FUENTES = [
+  'Lilita One',
+  'Lobster Two',
+  'DM Sans',
   'Sriracha',
   'Bebas Neue',
   'Poppins',
