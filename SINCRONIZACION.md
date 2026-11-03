@@ -439,8 +439,8 @@ Las mejoras pendientes salen del análisis anterior (impresión de comanda, PWA 
 
 | Sesión | Fecha | Hash de `base/main` visto | Merge-base | Rama o tag resultante | Estado | Notas |
 |---|---|---|---|---|---|---|
-| 1 Le Piaf | | | | `aporte/le-piaf` | pendiente | |
-| 2 Bautista | | | | `aporte/bautista` | pendiente | |
+| 1 Le Piaf | 2026-11-03 | 4a1a6f8 | 4a1a6f8 | `aporte/le-piaf` (`4742fbe`) | completada | Aporte limpio subido a silverio-club sin tocar main |
+| 2 Bautista | 2026-11-03 | 4a1a6f8 | 4a1a6f8 | `aporte/bautista` | completada | Aporte limpio preparado sobre base/main (emuladores, fuentes, extras seed, menu SEO) |
 | 3 Silverio | | | | `base-sync-v1` | pendiente | |
 | 4 Retorno Le Piaf | | | | | pendiente | |
 | 5 Retorno Bautista | | | | | pendiente | |

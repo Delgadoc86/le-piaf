@@ -11,8 +11,9 @@ const nextConfig: NextConfig = {
   outputFileTracingRoot: path.join(process.cwd(), '../..'),
   images: {
     // Las imágenes ya se comprimen a WebP en el navegador antes de subir (máx 1600 px, ~250 KB).
-    // Con unoptimized: true, se sirven directo desde Firebase Storage CDN sin consumir cuota de Vercel Image Optimization.
-    unoptimized: true,
+    // En producción (unoptimized: true) se sirven directo desde Firebase Storage CDN sin consumir cuota de Vercel.
+    // En emuladores (unoptimized: false) Next las proxea por /_next/image para que se vean desde el celular en la red local.
+    unoptimized: !usaEmuladores,
     remotePatterns: [
       // Fotos del local en Firebase Storage (producción).
       { protocol: 'https', hostname: 'firebasestorage.googleapis.com', pathname: '/v0/b/**' },
