@@ -1,6 +1,6 @@
 {
   "version": 1,
-  "actualizado": "2026-11-04T00:31:41.383Z",
+  "actualizado": "2026-11-04T00:40:47.255Z",
   "totalArchivos": 173,
   "archivos": {
     ".editorconfig": "49e53afa4ae47ecc7446a8b471792dbbc91575262b3d3b161b063801aa096f5f",
@@ -13,7 +13,7 @@
     "CLAUDE.md": "14c0b0598ce4d547eb7ff99db21c3b33ddeb010e3274170a4d5fac52cb20114f",
     "README.md": "290645962150e71ed0dd5d349bbaae62e33cf68f884f236b8d79dfd49475e3eb",
     "ROADMAP.md": "167e53cd601c54a07b2ed7efb59a222ba5e42a150ae91ca6b44186661b0d70a9",
-    "SINCRONIZACION.md": "4e483f91424901d588d2d24c004a20b026e1f4cd651eeb966fb13428f56359ed",
+    "SINCRONIZACION.md": "826d4dc95b69fdf3adb82067038812535dcdbe14a1ad4c300cb4589ba90fa7d9",
     "apps/web/.gitignore": "2ba8c6ed74c2b4722afebaed60c44d4dc869b1e6be146266c5a1be306039702d",
     "apps/web/AGENTS.md": "63f2c50380ed6303237cce215ce27af1d620d094c215e28d1b1538a3c070e3bb",
     "apps/web/CLAUDE.md": "336cc4fbf19beaada7ccf9986414fa91851a8d7a07dfb3ccbe800a69eed0ab49",
