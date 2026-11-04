@@ -40,7 +40,7 @@ interface SeedJson {
     bajada: string;
     descripcionCorta: string;
     zonaHoraria: string;
-    contacto: { whatsapp: string; instagram?: string; facebook?: string };
+    contacto: { whatsapp: string; telefono?: string; instagram?: string; facebook?: string };
     direccion: {
       calle: string;
       localidad: string;
@@ -68,6 +68,8 @@ interface SeedJson {
     foto?: string;
     estacion?: 'cocina' | 'barra';
     _variantesSugeridas?: string[];
+    variantes?: { id: string; nombre: string; precio: number }[];
+    gruposExtras?: ProductoDatos['gruposExtras'];
   }[];
   promos: { titulo: string; descripcion: string; precio: number; foto?: string; orden: number }[];
 }
@@ -179,6 +181,7 @@ async function seedLocal(): Promise<void> {
     zonaHoraria: s.zonaHoraria,
     contacto: {
       whatsapp: s.contacto.whatsapp,
+      ...(s.contacto.telefono ? { telefono: s.contacto.telefono } : {}),
       ...(s.contacto.instagram ? { instagram: s.contacto.instagram } : {}),
       ...(s.contacto.facebook ? { facebook: s.contacto.facebook } : {}),
     },
@@ -238,11 +241,13 @@ async function seedLocal(): Promise<void> {
   );
 
   const productos = seed.productos.map((p) => {
-    const variantes = p._variantesSugeridas?.map((nombre) => ({
-      id: idDe(nombre),
-      nombre,
-      precio: p.precio,
-    }));
+    const variantes =
+      p.variantes ??
+      p._variantesSugeridas?.map((nombre) => ({
+        id: idDe(nombre),
+        nombre,
+        precio: p.precio,
+      }));
     return {
       id: idDe(p.nombre),
       categoriaId: p.categoriaId,
@@ -255,8 +260,9 @@ async function seedLocal(): Promise<void> {
       estacion: (p.estacion ?? (p.categoriaId === 'bebidas' ? 'barra' : 'cocina')) as
         | 'cocina'
         | 'barra',
-      ...(p.foto ? { fotoUrl: foto(p.foto) } : {}),
+      ...(p.foto && foto(p.foto) ? { fotoUrl: foto(p.foto) } : {}),
       ...(variantes ? { variantes } : {}),
+      ...(p.gruposExtras ? { gruposExtras: p.gruposExtras } : {}),
     };
   });
 
@@ -267,7 +273,7 @@ async function seedLocal(): Promise<void> {
     precio: p.precio,
     orden: p.orden,
     activa: true,
-    ...(p.foto ? { fotoUrl: foto(p.foto) } : {}),
+    ...(p.foto && foto(p.foto) ? { fotoUrl: foto(p.foto) } : {}),
   }));
 
   const categorias = seed.categorias.map((c) => ({

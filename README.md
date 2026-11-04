@@ -4,6 +4,9 @@ Web de pedidos + panel de gestión ("semi-FUDO") para **un** local de comida. Es
 **Silverio Food Truck Beer** y, a la vez, la **base que se copia** para cada local nuevo: un repo,
 un proyecto de Firebase y un proyecto de Vercel por local.
 
+> [!NOTE]
+> Este repositorio (`silverio-club`) es la **base neutra y unificada** del sistema. `silverio/` es el kit del local inicial. Todo cambio o funcionalidad genérica (stock, caja, comandas, etc.) se desarrolla aquí y luego se distribuye a las copias (`git merge base/main`).
+
 - **Web pública:** carta tipo app, carrito, pedido online (retiro o delivery), seguimiento en vivo.
 - **Panel:** mostrador POS táctil (carga rápida de mostrador/delivery/salón, calculadora de vuelto en efectivo y exclusión ágil de ingredientes), pantalla de cocina con comandas en vivo de alto contraste (estilo ticket de papel), caja y turnos, ventas y reportes diarios, carta, promos, banner de fecha especial, QR y configuración.
 
@@ -112,7 +115,15 @@ git clone https://github.com/Delgadoc86/silverio-club.git <local>
 cd <local>
 git remote rename origin base          # para traer arreglos de la base después
 git remote add origin https://github.com/<usuario>/<local>.git
+git remote set-url --push base DESACTIVADO   # bloquea pushes accidentales a la base
+git config merge.ours.driver true            # respeta .firebaserc y .env en futuros merges
 git push -u origin main
+```
+
+Creá el archivo `.repo-role` en la raíz (activa las barreras de protección de guardia):
+```ini
+rol=copia
+kit=<local>
 ```
 
 Cambiá el `name` de `package.json` raíz a `<local>`.
@@ -203,11 +214,17 @@ node <local>/manual/a-pdf.mjs <local>/manual/manual.html <local>/manual/manual-u
 
 ### Traer arreglos de la base
 
+En cada copia/clon, configurá una sola vez el driver para respetar las configs propias del local (`.firebaserc`, `.env.example` protegidos con `merge=ours` en `.gitattributes`):
+```bash
+git config merge.ours.driver true
+```
+
+Luego, para traer mejoras y arreglos de la base:
 ```bash
 git fetch base && git merge base/main
 ```
 
-Los conflictos solo deberían aparecer en archivos del local (kit, diseño, `.env`). Si aparecen en
+Los conflictos solo deberían aparecer en archivos del local (kit, diseño). Si aparecen en
 código genérico, ese cambio tenía que hacerse en la base.
 
 ## Costos (referencia)

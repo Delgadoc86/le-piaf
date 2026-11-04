@@ -15,8 +15,15 @@ export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
     name: local.nombre,
     description: local.web.seo.descripcion || local.descripcionCorta,
     ...(url ? { url, menu: `${url}/#carta` } : {}),
-    ...(local.marca.logoUrl
-      ? { logo: local.marca.logoUrl, image: local.marca.ogImageUrl || local.marca.logoUrl }
+    ...(local.marca.logoUrl || local.web.nosotros?.fotoUrl
+      ? {
+          logo: local.marca.logoUrl,
+          image: [
+            local.web.nosotros?.fotoUrl,
+            local.marca.ogImageUrl,
+            local.marca.logoUrl,
+          ].filter(Boolean),
+        }
       : {}),
     telephone: `+${local.contacto.whatsapp}`,
     servesCuisine: grupos.map((g) => g.categoria.nombre),
@@ -42,6 +49,28 @@ export function datosEstructurados(local: LocalPublico, grupos: GrupoCarta[]) {
       opens: h.desde,
       closes: h.hasta,
     })),
+    hasMenu: {
+      '@type': 'Menu',
+      name: `Carta de ${local.nombre}`,
+      hasMenuSection: grupos.map((g) => ({
+        '@type': 'MenuSection',
+        name: g.categoria.nombre,
+        hasMenuItem: g.productos.map((p) => ({
+          '@type': 'MenuItem',
+          name: p.nombre,
+          description: p.descripcion,
+          ...(p.fotoUrl ? { image: p.fotoUrl } : {}),
+          offers: {
+            '@type': 'Offer',
+            priceCurrency: 'ARS',
+            price: p.precio,
+            availability: p.disponible
+              ? 'https://schema.org/InStock'
+              : 'https://schema.org/OutOfStock',
+          },
+        })),
+      })),
+    },
     ...(redes.length > 0 ? { sameAs: redes } : {}),
   };
 }

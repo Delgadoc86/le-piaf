@@ -5,7 +5,10 @@
  */
 import {
   Bebas_Neue,
+  DM_Sans,
   Inter,
+  Lilita_One,
+  Lobster_Two,
   Montserrat,
   Oswald,
   Playfair_Display,
@@ -16,6 +19,15 @@ import {
 import type { FuenteId } from '@app/shared';
 
 // next/font analiza estas llamadas al compilar: las opciones tienen que ir literales (sin spread).
+const lilita = Lilita_One({ subsets: ['latin'], display: 'swap', preload: false, weight: '400' });
+const lobsterTwo = Lobster_Two({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: false,
+  weight: '700',
+  style: 'italic',
+});
+const dmSans = DM_Sans({ subsets: ['latin'], display: 'swap', preload: false });
 const sriracha = Sriracha({ subsets: ['latin'], display: 'swap', preload: false, weight: '400' });
 const bebas = Bebas_Neue({ subsets: ['latin'], display: 'swap', preload: false, weight: '400' });
 const poppins = Poppins({
@@ -31,6 +43,9 @@ const inter = Inter({ subsets: ['latin'], display: 'swap', preload: false });
 const montserrat = Montserrat({ subsets: ['latin'], display: 'swap', preload: false });
 
 const FUENTES: Record<FuenteId, string> = {
+  'Lilita One': lilita.style.fontFamily,
+  'Lobster Two': lobsterTwo.style.fontFamily,
+  'DM Sans': dmSans.style.fontFamily,
   Sriracha: sriracha.style.fontFamily,
   'Bebas Neue': bebas.style.fontFamily,
   Poppins: poppins.style.fontFamily,
