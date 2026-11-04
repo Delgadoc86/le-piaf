@@ -1,3 +1,8 @@
 * text=auto eol=lf
 *.webp binary
 *.png binary
+
+# Archivos propios de cada copia (no se pisan al mergear desde la base)
+.firebaserc merge=ours
+apps/web/.env.example merge=ours
+

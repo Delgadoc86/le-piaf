@@ -62,17 +62,30 @@ const raiz = fileURLToPath(new URL('../', import.meta.url));
 function resolverKit(): string {
   const porArg = arg('kit');
   if (porArg) return porArg;
-  if (existsSync(join(raiz, 'silverio/seed.json'))) return 'silverio';
-  // Si se duplicó y renombró la carpeta del kit (ej. "roma/seed.json"), detectarlo automáticamente:
-  const entrada = readdirSync(raiz, { withFileTypes: true }).find(
-    (d) =>
-      d.isDirectory() &&
-      !['node_modules', '.git', 'apps', 'functions', 'packages', 'scripts', 'tests'].includes(
-        d.name,
-      ) &&
-      existsSync(join(raiz, d.name, 'seed.json')),
+  if (process.env.KIT) return process.env.KIT;
+
+  const candidatos = readdirSync(raiz, { withFileTypes: true })
+    .filter(
+      (d) =>
+        d.isDirectory() &&
+        !['node_modules', '.git', '.githooks', 'apps', 'functions', 'packages', 'scripts', 'tests'].includes(
+          d.name,
+        ) &&
+        existsSync(join(raiz, d.name, 'seed.json')),
+    )
+    .map((d) => d.name);
+
+  if (candidatos.length === 1) return candidatos[0];
+  if (candidatos.length === 0) {
+    console.error(
+      '❌ No se encontró ninguna carpeta con seed.json. Especificá el kit con --kit <carpeta> o la variable KIT.',
+    );
+    process.exit(1);
+  }
+  console.error(
+    `❌ Múltiples kits detectados (${candidatos.join(', ')}). Especificá cuál usar con --kit <carpeta> o la variable KIT.`,
   );
-  return entrada ? entrada.name : 'silverio';
+  process.exit(1);
 }
 
 /** Carpeta con el kit del local (seed.json, assets/, textos). Autodetectada o especificada con --kit. */
