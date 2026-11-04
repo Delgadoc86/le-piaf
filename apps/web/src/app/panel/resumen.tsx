@@ -58,7 +58,7 @@ export default function ResumenPage() {
           </div>
           <div>
             <h1 className="text-2xl md:text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
-              Food Truck &amp; Beer
+              {local.datos?.nombreCorto || local.datos?.nombre || 'Mi Local'}
             </h1>
             <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500 dark:text-slate-400">
               <Activity className="size-3.5 text-emerald-500" />

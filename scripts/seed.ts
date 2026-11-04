@@ -40,7 +40,7 @@ interface SeedJson {
     bajada: string;
     descripcionCorta: string;
     zonaHoraria: string;
-    contacto: { whatsapp: string; instagram?: string; facebook?: string };
+    contacto: { whatsapp: string; telefono?: string; instagram?: string; facebook?: string };
     direccion: {
       calle: string;
       localidad: string;
@@ -69,6 +69,7 @@ interface SeedJson {
     estacion?: 'cocina' | 'barra';
     _variantesSugeridas?: string[];
     variantes?: { id: string; nombre: string; precio: number }[];
+    gruposExtras?: ProductoDatos['gruposExtras'];
   }[];
   promos: { titulo: string; descripcion: string; precio: number; foto?: string; orden: number }[];
 }
@@ -180,6 +181,7 @@ async function seedLocal(): Promise<void> {
     zonaHoraria: s.zonaHoraria,
     contacto: {
       whatsapp: s.contacto.whatsapp,
+      ...(s.contacto.telefono ? { telefono: s.contacto.telefono } : {}),
       ...(s.contacto.instagram ? { instagram: s.contacto.instagram } : {}),
       ...(s.contacto.facebook ? { facebook: s.contacto.facebook } : {}),
     },
@@ -260,6 +262,7 @@ async function seedLocal(): Promise<void> {
         | 'barra',
       ...(p.foto && foto(p.foto) ? { fotoUrl: foto(p.foto) } : {}),
       ...(variantes ? { variantes } : {}),
+      ...(p.gruposExtras ? { gruposExtras: p.gruposExtras } : {}),
     };
   });
 
