@@ -115,7 +115,15 @@ git clone https://github.com/Delgadoc86/silverio-club.git <local>
 cd <local>
 git remote rename origin base          # para traer arreglos de la base después
 git remote add origin https://github.com/<usuario>/<local>.git
+git remote set-url --push base DESACTIVADO   # bloquea pushes accidentales a la base
+git config merge.ours.driver true            # respeta .firebaserc y .env en futuros merges
 git push -u origin main
+```
+
+Creá el archivo `.repo-role` en la raíz (activa las barreras de protección de guardia):
+```ini
+rol=copia
+kit=<local>
 ```
 
 Cambiá el `name` de `package.json` raíz a `<local>`.

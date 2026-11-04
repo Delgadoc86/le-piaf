@@ -75,7 +75,7 @@ function resolverKit(): string {
     )
     .map((d) => d.name);
 
-  if (candidatos.length === 1) return candidatos[0];
+  if (candidatos.length === 1 && candidatos[0]) return candidatos[0];
   if (candidatos.length === 0) {
     console.error(
       '❌ No se encontró ninguna carpeta con seed.json. Especificá el kit con --kit <carpeta> o la variable KIT.',

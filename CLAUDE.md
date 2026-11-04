@@ -31,3 +31,14 @@ Este repo es también la **base que se copia** para cada local nuevo (un repo, u
 - `pnpm test` (unitarios de shared) · `pnpm test:reglas` (reglas contra emuladores) · `pnpm lint` · `pnpm typecheck` · `pnpm build`.
 - `pnpm deploy:functions` / `pnpm deploy:reglas`: deploy a producción (**solo con OK explícito**). Las Functions se empaquetan con esbuild (`functions/empaquetar.mjs`).
 - TypeScript fijado en 6.0.x hasta que typescript-eslint soporte TS 7.
+
+## Copia vs base (§8b)
+- Antes de comenzar a trabajar, leer `.repo-role` en la raíz.
+- Si dice `rol=copia`, este repositorio es una **copia de local** (ej. Le Piaf, Bautista). Solo está permitido tocar las rutas propias del local:
+  - Su kit (`<kit>/`: textos, fotos, `seed.json`, manual)
+  - Diseño y maquetación web (`apps/web/src/components/publico/**` y `apps/web/src/app/(sitio)/**`)
+  - Assets públicos de la copia (`apps/web/public/**`)
+  - Configuración del proyecto local (`.firebaserc`, `functions/.env.*`, `apps/web/.env*`, `ROADMAP_<LOCAL>*.md`, `PENDIENTES_BASE.md`)
+- Está **terminantemente prohibido** modificar archivos genéricos (panel, Functions, reglas, `packages/shared`, scripts, configs raíz, guardia) en una copia.
+- Si en una copia se detecta un bug o necesidad genérica, **no se arregla ahí**: se anota en `PENDIENTES_BASE.md` y se implementa en la base (`silverio-club`).
+- En la base (`silverio-club`), todo cambio genérico se desarrolla, prueba y sella con `pnpm base:sellar` antes de etiquetar y sincronizar hacia las copias.

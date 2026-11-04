@@ -37,6 +37,9 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Verificar archivos genéricos contra base
+        run: node scripts/guardia.mjs verificar
+
       - name: Lint
         run: pnpm lint
 
