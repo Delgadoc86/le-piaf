@@ -1,10 +1,17 @@
 'use client';
 
 /**
- * Aviso sonoro de pedido nuevo con Web Audio (sin archivos de audio).
- * Activado por defecto: se desbloquea automáticamente con el primer toque o click del usuario.
+ * Aviso sonoro de pedido nuevo con Web Audio (sin archivos externos) y Screen Wake Lock API (MDN).
+ * - Timbre activado por defecto: se desbloquea con el primer toque o desde el botón explícito.
+ * - Wake Lock: mantiene la pantalla encendida durante el turno y se readquiere automáticamente
+ *   en `visibilitychange` cuando la pestaña vuelve a primer plano (especificación oficial W3C/MDN).
  */
+import { useEffect, useState } from 'react';
+
 const CLAVE = 'panel-sonido-v1';
+
+/** Intervalo de repetición del timbre mientras existan pedidos web pendientes sin aceptar. */
+export const INTERVALO_TIMBRE_PENDIENTES_MS = 25_000;
 
 let contexto: AudioContext | null = null;
 let listenerRegistrado = false;
@@ -42,7 +49,7 @@ export function sonidoHabilitado(): boolean {
 
 /**
  * Registra listeners globales al primer click o toque para desbloquear automáticamente el audio
- * respetando la política de autoplay del navegador sin forzar al usuario a buscar un botón.
+ * respetando la política de autoplay del navegador.
  */
 export function inicializarAudioAutomatico() {
   if (typeof window === 'undefined' || listenerRegistrado) return;
@@ -65,7 +72,7 @@ export function inicializarAudioAutomatico() {
   window.addEventListener('touchstart', desbloquear, { passive: true });
 }
 
-/** "Ding-dong" corto: dos tonos con caída suave. */
+/** "Ding-dong" doble de alta presencia para ambientes con ruido de cocina. */
 export function sonarPedidoNuevo() {
   if (!sonidoGuardado()) return;
   try {
@@ -86,14 +93,67 @@ export function sonarPedidoNuevo() {
   ].forEach(({ f, t }) => {
     const osc = contexto!.createOscillator();
     const vol = contexto!.createGain();
-    osc.type = 'sine';
+    osc.type = 'triangle';
     osc.frequency.value = f;
     vol.gain.setValueAtTime(0.0001, ahora + t);
-    vol.gain.exponentialRampToValueAtTime(0.35, ahora + t + 0.02);
-    vol.gain.exponentialRampToValueAtTime(0.0001, ahora + t + 0.35);
+    vol.gain.exponentialRampToValueAtTime(0.4, ahora + t + 0.02);
+    vol.gain.exponentialRampToValueAtTime(0.0001, ahora + t + 0.38);
     osc.connect(vol).connect(contexto!.destination);
     osc.start(ahora + t);
-    osc.stop(ahora + t + 0.4);
+    osc.stop(ahora + t + 0.42);
   });
 }
 
+/**
+ * Hook que mantiene encendida la pantalla del dispositivo (tablet/mostrador) usando
+ * `navigator.wakeLock.request('screen')` y readquiere el candado al volver a la pestaña.
+ */
+export function useWakeLock(): boolean {
+  const [activo, setActivo] = useState(false);
+
+  useEffect(() => {
+    if (typeof navigator === 'undefined' || !('wakeLock' in navigator)) return;
+
+    let wakeLock: WakeLockSentinel | null = null;
+    let cancelado = false;
+
+    const solicitar = async () => {
+      if (cancelado || document.visibilityState !== 'visible' || wakeLock !== null) return;
+      try {
+        wakeLock = await navigator.wakeLock.request('screen');
+        if (cancelado) {
+          void wakeLock.release();
+          wakeLock = null;
+          return;
+        }
+        setActivo(true);
+        wakeLock.addEventListener('release', () => {
+          wakeLock = null;
+          if (!cancelado) setActivo(false);
+        });
+      } catch {
+        setActivo(false);
+      }
+    };
+
+    void solicitar();
+
+    const alCambiarVisibilidad = () => {
+      if (document.visibilityState === 'visible' && wakeLock === null) {
+        void solicitar();
+      }
+    };
+
+    document.addEventListener('visibilitychange', alCambiarVisibilidad);
+    return () => {
+      cancelado = true;
+      document.removeEventListener('visibilitychange', alCambiarVisibilidad);
+      if (wakeLock !== null) {
+        void wakeLock.release();
+        wakeLock = null;
+      }
+    };
+  }, []);
+
+  return activo;
+}

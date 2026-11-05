@@ -1,6 +1,9 @@
+import { VERSION_BASE } from '@app/shared';
+import { NOMBRE_LOCAL } from '@/lib/local';
+
 /**
  * Chequeo de salud del servidor: ¿arranca Firebase Admin y lee la base? Sirve para diagnosticar
- * deploys (p. ej. variables de entorno o dependencias que faltan en Vercel). No devuelve secretos.
+ * deploys y saber qué versión de la base está desplegada en cada local. No devuelve secretos.
  */
 export async function GET() {
   const variables = {
@@ -11,11 +14,25 @@ export async function GET() {
   try {
     const { adminDb } = await import('@/lib/firebase/admin');
     const local = await adminDb.doc('local/datos').get();
-    return Response.json({ ok: true, variables, localExiste: local.exists, node: process.version });
+    return Response.json({
+      ok: true,
+      local: NOMBRE_LOCAL,
+      versionBase: VERSION_BASE,
+      variables,
+      localExiste: local.exists,
+      node: process.version,
+    });
   } catch (e) {
     const error = e instanceof Error ? `${e.name}: ${e.message}` : String(e);
     return Response.json(
-      { ok: false, variables, node: process.version, error: error.slice(0, 300) },
+      {
+        ok: false,
+        local: NOMBRE_LOCAL,
+        versionBase: VERSION_BASE,
+        variables,
+        node: process.version,
+        error: error.slice(0, 300),
+      },
       { status: 500 },
     );
   }

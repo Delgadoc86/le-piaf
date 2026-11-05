@@ -10,3 +10,4 @@ export * from './vigencia.js';
 export * from './pedido-whatsapp.js';
 export * from './ajuste-precios.js';
 export * from './contraste.js';
+export * from './cupo.js';

@@ -7,6 +7,7 @@ import {
   AlertTriangle,
   Archive,
   BellRing,
+  Bike,
   CheckCircle2,
   ChefHat,
   ChevronDown,
@@ -18,6 +19,7 @@ import {
   Volume2,
   VolumeX,
   Wallet,
+  WifiOff,
   X,
 } from 'lucide-react';
 import {
@@ -35,6 +37,7 @@ import { Button } from '@/components/ui/button';
 import { TarjetaPedido } from '@/components/panel/pedidos/tarjeta-pedido';
 import { DetallePedido } from '@/components/panel/pedidos/detalle-pedido';
 import { DialogoCobro } from '@/components/panel/pedidos/dialogo-cobro';
+import { WidgetCupoTurno } from '@/components/panel/widget-cupo';
 import { useSesion } from '@/features/auth/sesion';
 import { useCajaAbierta } from '@/features/panel/caja';
 import { mensajeError, useDocumento } from '@/features/panel/firestore';
@@ -50,6 +53,7 @@ import {
   puedeOperar,
   registrarCobro,
   useAhora,
+  useOnlineStatus,
   usePedidosJornada,
   type IdEtapa,
   type PedidoConId,
@@ -60,11 +64,15 @@ import {
   sonarPedidoNuevo,
   sonidoGuardado,
   sonidoHabilitado,
+  useWakeLock,
 } from '@/features/panel/sonido';
 import { cn } from '@/lib/utils';
 
 const TERMINADOS: readonly EstadoPedido[] = ['entregado', 'cancelado', 'rechazado'];
 const CLAVE_TIP_PANTALLA = 'panel-tip-pantalla-v1';
+const INTERVALO_TIMBRE_PENDIENTES_MS = 25_000;
+
+type FiltroCanal = 'todos' | 'mostrador' | 'delivery';
 
 interface Aviso {
   tipo: 'ok' | 'error';
@@ -90,8 +98,11 @@ export default function PedidosPage() {
   const sesion = useSesion();
   const local = useDocumento<Local>(DOC_LOCAL);
   const zona = local.datos?.zonaHoraria;
+  const nombreLocal = local.datos?.nombreCorto || local.datos?.nombre || '';
   const { pedidos, cargando, error, cancelacion } = usePedidosJornada(zona);
   const ahora = useAhora();
+  const online = useOnlineStatus();
+  const wakeLockActivo = useWakeLock();
 
   const [detalleId, setDetalleId] = useState<string | null>(null);
   const [cobroId, setCobroId] = useState<string | null>(null);
@@ -100,10 +111,9 @@ export default function PedidosPage() {
   const [ocupados, setOcupados] = useState<ReadonlySet<string>>(new Set());
   const [aviso, setAviso] = useState<Aviso | null>(null);
   const [pestana, setPestana] = useState<IdEtapa>('nuevos');
+  const [filtroCanal, setFiltroCanal] = useState<FiltroCanal>('todos');
   const [verTerminados, setVerTerminados] = useState(false);
-  // El panel se renderiza solo en el navegador: se puede leer localStorage al iniciar el estado.
   const [verTip, setVerTip] = useState(() => leerLocal(CLAVE_TIP_PANTALLA) !== '1');
-  // Sonido activado por defecto: si el navegador lo tiene listo queda activo, sino se activa al primer click
   const [sonido, setSonido] = useState<'apagado' | 'bloqueado' | 'activo'>(() =>
     sonidoGuardado() ? (sonidoHabilitado() ? 'activo' : 'bloqueado') : 'apagado',
   );
@@ -138,7 +148,7 @@ export default function PedidosPage() {
   const cancelacionActiva = cancelacion && cancelacion.id !== cancelacionVista ? cancelacion : null;
   const totales = resumenCaja(pedidos);
 
-  // Pedido nuevo: sonido + contador en la pestaña del navegador.
+  // Pedido nuevo: sonido al entrar + repetición cada 25s mientras siga sin aceptar.
   const vistos = useRef<Set<string> | null>(null);
   useEffect(() => {
     if (cargando) return;
@@ -148,6 +158,15 @@ export default function PedidosPage() {
     }
     vistos.current = new Set([...(vistos.current ?? []), ...ids]);
   }, [nuevos, cargando, sonido]);
+
+  useEffect(() => {
+    if (cargando || sonido !== 'activo' || porAceptar.length === 0) return;
+    const t = setInterval(() => {
+      sonarPedidoNuevo();
+    }, INTERVALO_TIMBRE_PENDIENTES_MS);
+    return () => clearInterval(t);
+  }, [cargando, sonido, porAceptar.length]);
+
   useEffect(() => {
     const original = document.title;
     if (nuevos.length > 0) document.title = `(${nuevos.length}) Pedidos nuevos`;
@@ -224,6 +243,7 @@ export default function PedidosPage() {
       key={p.id}
       pedido={p}
       zonaHoraria={zona}
+      nombreLocal={nombreLocal}
       ahora={ahora}
       operable={puedeOperar(p, rol, uid)}
       ocupado={ocupados.has(p.id)}
@@ -242,7 +262,19 @@ export default function PedidosPage() {
       aceptarSinConfirmar={confirmacion.aceptarSinConfirmar}
     />
   );
-  const terminados = pedidos.filter((p) => TERMINADOS.includes(p.estado));
+
+  // Filtrado por canal para las columnas activas
+  const coincideCanal = (p: PedidoConId) => {
+    if (filtroCanal === 'delivery') return p.tipo === 'delivery';
+    if (filtroCanal === 'mostrador') return p.tipo !== 'delivery';
+    return true;
+  };
+
+  const activos = pedidos.filter((p) => !TERMINADOS.includes(p.estado));
+  const countDelivery = activos.filter((p) => p.tipo === 'delivery').length;
+  const countMostrador = activos.filter((p) => p.tipo !== 'delivery').length;
+
+  const terminados = pedidos.filter((p) => TERMINADOS.includes(p.estado) && coincideCanal(p));
   const sinCobrar = terminados.filter(
     (p) => p.estado === 'entregado' && p.estadoPago !== 'pagado',
   ).length;
@@ -250,88 +282,165 @@ export default function PedidosPage() {
     ETAPAS.map((e) => [
       e.id,
       pedidos
-        .filter((p) => e.estados.includes(p.estado))
+        .filter((p) => e.estados.includes(p.estado) && coincideCanal(p))
         // Lo más viejo primero: es lo que hay que sacar antes.
         .sort((a, b) => (a.creadoEn?.toMillis() ?? 0) - (b.creadoEn?.toMillis() ?? 0)),
     ]),
   ) as Record<IdEtapa, PedidoConId[]>;
 
   return (
-    <div className="max-w-6xl mx-auto rounded-3xl bg-white border border-slate-200/90 p-4 md:p-6 shadow-sm space-y-5 text-slate-900">
-      {/* Encabezado gastronómico en lenguaje del local */}
-      <header className="flex flex-wrap items-center justify-between gap-4 border-b border-slate-100 pb-4">
-        <div className="flex items-center gap-3">
-          <div className="flex size-11 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600 border border-orange-500/20 shadow-sm">
-            <ChefHat className="size-6 text-orange-600" />
-          </div>
-          <div>
-            <div className="flex items-center gap-2">
-              <h1 className="text-xl md:text-2xl font-black tracking-tight text-slate-900">Pantalla de Cocina</h1>
-              <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-600 border border-slate-200">
-                Comandas en vivo
-              </span>
+    <div className="max-w-7xl mx-auto rounded-3xl bg-white border border-slate-200/90 p-4 md:p-5 shadow-sm space-y-3.5 text-slate-900">
+      {/* Banner de estado de red cuando cae internet */}
+      {!online && (
+        <div
+          role="status"
+          className="flex items-center gap-2.5 rounded-2xl border border-amber-300 bg-amber-50 px-4 py-2.5 text-xs md:text-sm font-bold text-amber-950 shadow-xs"
+        >
+          <WifiOff className="size-4 text-amber-700 shrink-0" />
+          <span>
+            Sin conexión a internet: operando con la memoria local. Los cambios se sincronizarán
+            solos apenas vuelva la red.
+          </span>
+        </div>
+      )}
+
+      {/* Encabezado compacto: Título + Métrica + Filtros y Acciones en un bloque limpio */}
+      <header className="space-y-3 border-b border-slate-100 pb-3.5">
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <div className="flex size-10 items-center justify-center rounded-2xl bg-orange-500/10 text-orange-600 border border-orange-500/20 shadow-sm">
+              <ChefHat className="size-5 text-orange-600" />
             </div>
-            <p className="flex items-center gap-1.5 text-xs text-slate-500">
-              <Activity className="size-3 text-emerald-500" />
-              <span>Control de despacho y cocina en tiempo real</span>
-            </p>
+            <div>
+              <div className="flex flex-wrap items-center gap-2">
+                <h1 className="text-lg md:text-xl font-black tracking-tight text-slate-900">
+                  Pantalla de Cocina
+                </h1>
+                <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600 border border-slate-200">
+                  Comandas en vivo
+                </span>
+                {wakeLockActivo && (
+                  <span
+                    className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-50 border border-emerald-200 px-2 py-0.5 text-[11px] font-bold text-emerald-700"
+                    title="La pantalla no se suspenderá durante el turno"
+                  >
+                    <span className="size-1.5 rounded-full bg-emerald-500" />
+                    Pantalla encendida
+                  </span>
+                )}
+              </div>
+              <p className="flex items-center gap-1.5 text-xs text-slate-500">
+                <Activity className="size-3 text-emerald-500" />
+                <span>Control de despacho y cocina en tiempo real</span>
+              </p>
+            </div>
+          </div>
+
+          <div className="flex flex-wrap items-center gap-2">
+            <WidgetCupoTurno variante="compacto" />
+            <div className="flex items-center gap-2 rounded-xl bg-slate-50 border border-slate-200/80 px-3 py-1.5 text-xs text-slate-600">
+              <span className="text-slate-500">Hoy:</span>
+              <span className="inline-flex items-center gap-1 font-black text-slate-900 tabular-nums">
+                <ShoppingBag className="size-3.5 text-slate-400" />
+                {totales.pedidos} pedidos
+              </span>
+              <span className="text-slate-300">·</span>
+              <span className="inline-flex items-center gap-1 font-black text-emerald-600 tabular-nums">
+                <CircleDollarSign className="size-3.5 text-emerald-600" />
+                {formatARS(totales.vendido)}
+              </span>
+              {totales.porCobrar > 0 && (
+                <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-100 border border-amber-300 px-2 py-0.5 font-bold text-amber-900 text-xs">
+                  <Coins className="size-3 text-amber-700" />
+                  Por cobrar {formatARS(totales.porCobrar)}
+                </span>
+              )}
+            </div>
           </div>
         </div>
 
-        {/* Métrica de pedidos y ventas del día con iconos */}
-        <div className="flex items-center gap-2 rounded-2xl bg-slate-50 border border-slate-200/80 px-4 py-2 text-xs md:text-sm text-slate-600">
-          <span className="text-slate-500">Hoy:</span>
-          <span className="inline-flex items-center gap-1 font-black text-slate-900 tabular-nums">
-            <ShoppingBag className="size-3.5 text-slate-400" />
-            {totales.pedidos} pedidos
-          </span>
-          <span className="text-slate-300">·</span>
-          <span className="inline-flex items-center gap-1 font-black text-emerald-600 tabular-nums">
-            <CircleDollarSign className="size-3.5 text-emerald-600" />
-            {formatARS(totales.vendido)}
-          </span>
-          {totales.porCobrar > 0 && (
-            <span className="ml-1 inline-flex items-center gap-1 rounded-md bg-amber-100 border border-amber-300 px-2 py-0.5 font-bold text-amber-900 text-xs">
-              <Coins className="size-3 text-amber-700" />
-              Por cobrar {formatARS(totales.porCobrar)}
-            </span>
-          )}
-        </div>
+        {/* Fila única: Filtros de canal a la izquierda + Timbre y Cargar en Mostrador a la derecha */}
+        <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex items-center gap-1.5" role="group" aria-label="Filtrar por entrega">
+            {(
+              [
+                { id: 'todos', label: 'Todos', count: activos.length, Icono: null },
+                {
+                  id: 'mostrador',
+                  label: 'Mostrador / Retira',
+                  count: countMostrador,
+                  Icono: ShoppingBag,
+                },
+                { id: 'delivery', label: 'Delivery', count: countDelivery, Icono: Bike },
+              ] as const
+            ).map(({ id, label, count, Icono }) => {
+              const activo = filtroCanal === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setFiltroCanal(id)}
+                  className={cn(
+                    'h-9 rounded-xl border px-3 text-xs font-bold transition-all active:scale-[0.98] flex items-center gap-1.5',
+                    activo
+                      ? 'border-slate-900 bg-slate-900 text-white shadow-xs'
+                      : 'border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-100',
+                  )}
+                >
+                  {Icono && <Icono className="size-3.5 shrink-0" />}
+                  <span>{label}</span>
+                  <span
+                    className={cn(
+                      'rounded-full px-1.5 py-0.2 text-[11px] font-black tabular-nums',
+                      activo ? 'bg-white/20 text-white' : 'bg-slate-200 text-slate-700',
+                    )}
+                  >
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
 
-        {/* Acciones */}
-        <div className="flex flex-wrap items-center gap-2">
-          <Button
-            variant="outline"
-            className={cn(
-              'h-11 rounded-xl font-bold border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950 flex items-center gap-2 shadow-xs',
-              sonido === 'activo'
-                ? 'border-emerald-300 text-emerald-700 bg-emerald-50/70'
-                : 'animate-pulse bg-amber-500 text-slate-950 hover:bg-amber-400 border-none',
-            )}
-            onClick={() => void alternarSonido()}
-            aria-pressed={sonido === 'activo'}
-            title={sonido === 'activo' ? 'Tocá para silenciar el timbre' : undefined}
-          >
-            {sonido === 'activo' ? (
-              <>
-                <Volume2 className="size-4 text-emerald-600" />
-                <span>Timbre ON</span>
-              </>
-            ) : (
-              <>
-                <VolumeX className="size-4" />
-                <span>Activar timbre</span>
-              </>
-            )}
-          </Button>
-          <Link href="/panel/mostrador">
+          <div className="flex flex-wrap items-center gap-2">
             <Button
-              size="lg"
-              className="h-11 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black shadow-md shadow-orange-500/20 transition-transform active:scale-[0.98] flex items-center gap-1.5"
+              variant="outline"
+              size="sm"
+              className={cn(
+                'h-9 rounded-xl font-bold border-slate-200 bg-white text-slate-700 hover:bg-slate-50 hover:text-slate-950 flex items-center gap-1.5 shadow-xs text-xs',
+                sonido === 'activo'
+                  ? 'border-emerald-300 text-emerald-700 bg-emerald-50/70'
+                  : 'animate-pulse bg-amber-500 text-slate-950 hover:bg-amber-400 border-none',
+              )}
+              onClick={() => void alternarSonido()}
+              aria-pressed={sonido === 'activo'}
+              title={
+                sonido === 'activo'
+                  ? 'Timbre activo (repite cada 25 s si hay pedidos sin aceptar). Tocá para silenciar.'
+                  : 'Tocá para activar el timbre de pedidos nuevos'
+              }
             >
-              <Plus className="size-4" /> Cargar en Mostrador
+              {sonido === 'activo' ? (
+                <>
+                  <Volume2 className="size-3.5 text-emerald-600" />
+                  <span>Timbre ON</span>
+                </>
+              ) : (
+                <>
+                  <VolumeX className="size-3.5" />
+                  <span>Activar sonido</span>
+                </>
+              )}
             </Button>
-          </Link>
+            <Link href="/panel/mostrador">
+              <Button
+                size="sm"
+                className="h-9 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-black text-xs shadow-sm shadow-orange-500/20 transition-transform active:scale-[0.98] flex items-center gap-1.5"
+              >
+                <Plus className="size-3.5" /> Cargar en Mostrador
+              </Button>
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -345,8 +454,8 @@ export default function PedidosPage() {
           <BellRing className="size-5 shrink-0 animate-bounce" aria-hidden />
           <span className="flex-1">
             {porAceptar.length === 1
-              ? '🔔 ¡Entró 1 pedido nuevo! Aceptalo para empezar a cocinar.'
-              : `🔔 ¡Hay ${porAceptar.length} pedidos nuevos esperando para entrar a cocinar!`}
+              ? '¡Entró 1 pedido nuevo! Aceptalo para empezar a cocinar.'
+              : `¡Hay ${porAceptar.length} pedidos nuevos esperando para entrar a cocinar!`}
           </span>
           <span className="rounded-lg bg-black/20 px-3 py-1 text-xs uppercase tracking-wider font-extrabold">
             Ver ahora →
@@ -379,7 +488,7 @@ export default function PedidosPage() {
         <p className="flex items-center gap-2 rounded-2xl border border-dashed border-amber-300 bg-amber-50/70 px-4 py-2.5 text-sm font-medium text-amber-900">
           <AlertTriangle className="size-4 text-amber-600 shrink-0" />
           <span>
-            ⏳ {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
+            {sinConfirmar === 1 ? '1 pedido espera' : `${sinConfirmar} pedidos esperan`} que el
             cliente lo confirme por WhatsApp. Si no confirma, se cancela solo.
           </span>
         </p>
@@ -396,7 +505,9 @@ export default function PedidosPage() {
         </div>
       )}
       {error && (
-        <p className="rounded-2xl bg-destructive/10 border border-destructive/30 p-3 text-sm font-medium text-destructive">{error}</p>
+        <p className="rounded-2xl bg-destructive/10 border border-destructive/30 p-3 text-sm font-medium text-destructive">
+          {error}
+        </p>
       )}
       {verTip && (
         <p className="flex items-start gap-2 rounded-2xl border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-600 md:hidden">
@@ -499,6 +610,7 @@ export default function PedidosPage() {
                   </span>
                 )}
               </div>
+
               <div className="space-y-3">
                 {lista.length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-slate-300 bg-white/70 p-8 text-center text-sm font-medium text-slate-500">
@@ -562,7 +674,7 @@ export default function PedidosPage() {
       <DetallePedido
         pedido={detalle}
         zonaHoraria={zona}
-        nombreLocal={local.datos?.nombreCorto ?? ''}
+        nombreLocal={nombreLocal}
         operable={detalle ? puedeOperar(detalle, rol, uid) : false}
         ocupado={detalle ? ocupados.has(detalle.id) : false}
         onCerrar={() => setDetalleId(null)}
@@ -615,6 +727,10 @@ export default function PedidosPage() {
           if (!aCobrar) return;
           const p = aCobrar;
           const conEntrega = entregando;
+          const resumenTexto =
+            'monto' in cobro
+              ? `${formatARS(cobro.monto)} en ${cobro.medio}`
+              : cobro.map((c) => `${formatARS(c.monto)} en ${c.medio}`).join(' + ');
           await ejecutar(
             p.id,
             async () => {
@@ -623,8 +739,8 @@ export default function PedidosPage() {
             },
             {
               texto: conEntrega
-                ? `#${p.numero} entregado y cobrado: ${formatARS(cobro.monto)} en ${cobro.medio}`
-                : `Cobro de ${formatARS(cobro.monto)} registrado en el #${p.numero}`,
+                ? `#${p.numero} entregado y cobrado: ${resumenTexto}`
+                : `Cobro registrado en el #${p.numero}: ${resumenTexto}`,
             },
           );
           setCobroId(null);

@@ -124,12 +124,15 @@ export function PromosBento({
 }
 
 function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
+  const tienda = useTienda();
   const agregar = useCarrito((e) => e.agregar);
   const avisar = useTiendaUI((e) => e.avisarAgregado);
   const [listo, setListo] = useState(false);
-  const conCarrito = useTienda().pedidos.habilitados;
+  const conCarrito = tienda.pedidos.habilitados;
+  const agotada = tienda.promoAgotadaPorCupo(p.id);
 
   function sumar() {
+    if (agotada) return;
     agregar({ tipo: 'promo', promoId: p.id, cantidad: 1 });
     avisar();
     setListo(true);
@@ -163,8 +166,13 @@ function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
       </div>
 
       {/* Badge de Promo */}
-      <div className="absolute top-4 left-4 z-10 rounded-full bg-marca px-3.5 py-1 text-[11px] font-bold tracking-wider text-black uppercase shadow-md">
-        Promo Exclusiva
+      <div
+        className={cn(
+          'absolute top-4 left-4 z-10 rounded-full px-3.5 py-1 text-[11px] font-bold tracking-wider uppercase shadow-md',
+          agotada ? 'bg-white/20 text-white' : 'bg-marca text-black',
+        )}
+      >
+        {agotada ? 'Agotado por hoy' : 'Promo Exclusiva'}
       </div>
 
       {/* Contenido de la promo con protagonismo */}
@@ -186,7 +194,7 @@ function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
             </span>
           </div>
 
-          {conCarrito && (
+          {conCarrito && !agotada && (
             <button
               type="button"
               onClick={sumar}

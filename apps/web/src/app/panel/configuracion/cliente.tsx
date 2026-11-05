@@ -6,6 +6,7 @@ import { Contacto } from '@/components/panel/configuracion/contacto';
 import { Horarios } from '@/components/panel/configuracion/horarios';
 import { Entrega } from '@/components/panel/configuracion/entrega';
 import { ConfirmacionPedidos } from '@/components/panel/configuracion/confirmacion';
+import { CupoTurnoConfig } from '@/components/panel/configuracion/cupo';
 import { useSesion } from '@/features/auth/sesion';
 import { useDocumento } from '@/features/panel/firestore';
 
@@ -32,6 +33,7 @@ export default function ConfiguracionPage() {
           <Contacto local={local} />
           <Horarios local={local} />
           <Entrega local={local} />
+          <CupoTurnoConfig local={local} />
           <ConfirmacionPedidos local={local} />
         </>
       )}

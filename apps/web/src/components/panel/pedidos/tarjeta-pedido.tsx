@@ -7,14 +7,15 @@ import {
   Bike,
   Building2,
   Check,
+  CheckCheck,
   CheckCircle2,
   Clock,
   Coins,
   CreditCard,
   MapPin,
   MessageSquare,
+  Printer,
   ShoppingBag,
-  Sparkles,
   User,
   Utensils,
 } from 'lucide-react';
@@ -31,6 +32,7 @@ import { cn } from '@/lib/utils';
 import {
   ACCION_HACIA,
   COLOR_ETAPA,
+  desglosarNotaCocina,
   ETIQUETA_ESTADO,
   ETIQUETA_TIPO,
   etapaDe,
@@ -38,6 +40,7 @@ import {
   MINUTOS_ALERTA_SIN_ACEPTAR,
   type PedidoConId,
 } from '@/features/panel/pedidos';
+import { imprimirComandaTermica } from '@/features/panel/impresion';
 
 export const ICONO_TIPO = { take_away: ShoppingBag, delivery: Bike, salon: Utensils } as const;
 
@@ -49,7 +52,7 @@ const ORIGEN: Record<Pedido['origen'], string> = {
   mozo: 'Mozo',
 };
 
-const ITEMS_VISIBLES = 6;
+const ITEMS_VISIBLES_ARCHIVO = 6;
 
 /** Etiqueta de pago: lo que el cliente eligió y si ya se cobró con ícono representativo. */
 export function EtiquetaPago({ pedido, className }: { pedido: Pedido; className?: string }) {
@@ -102,6 +105,7 @@ export function EtiquetaPago({ pedido, className }: { pedido: Pedido; className?
 interface Props {
   pedido: PedidoConId;
   zonaHoraria: string;
+  nombreLocal?: string;
   ahora: number;
   operable: boolean;
   ocupado: boolean;
@@ -109,7 +113,7 @@ interface Props {
   onAvanzar: () => void;
   /** Cobra lo que falta con ese medio, en un toque. */
   onCobrarRapido: (medio: MedioPagoManual) => void;
-  /** Cobro con otro monto (parcial, vuelto): abre el diálogo. */
+  /** Cobro con otro monto (parcial, mixto, vuelto): abre el diálogo. */
   onCobrarOtro: () => void;
   /** Llegó el WhatsApp del cliente nuevo. */
   onConfirmar: () => void;
@@ -171,6 +175,7 @@ function Transcurrido({ pedido, ahora }: { pedido: Pedido; ahora: number }) {
 export function TarjetaPedido({
   pedido,
   zonaHoraria,
+  nombreLocal,
   ahora,
   operable,
   ocupado,
@@ -193,7 +198,10 @@ export function TarjetaPedido({
     pedido.pagoElegido.medio === 'transferencia'
       ? ['transferencia', 'efectivo']
       : ['efectivo', 'transferencia'];
-  const visibles = pedido.items.slice(0, ITEMS_VISIBLES);
+
+  // En columnas operativas de cocina nunca se ocultan platos; solo se recorta en archivo histórico.
+  const enArchivo = terminado || anulado;
+  const visibles = enArchivo ? pedido.items.slice(0, ITEMS_VISIBLES_ARCHIVO) : pedido.items;
   const ocultos = pedido.items.length - visibles.length;
 
   return (
@@ -205,23 +213,38 @@ export function TarjetaPedido({
         anulado && 'opacity-60 bg-slate-50',
       )}
     >
-      <button
-        type="button"
-        onClick={onAbrir}
-        className="block w-full rounded-xl text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        aria-label={`Ver pedido ${pedido.numero}`}
-      >
-        {/* Encabezado: número bien grande (#104) y origen como chip redondeado con icono */}
-        <div className="flex items-start justify-between gap-2">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="display-comanda text-3xl leading-none font-black text-slate-950">
-              #{pedido.numero}
+      {/* Fila superior: Número + Modalidad a 2 metros + Reloj + Botón Imprimir 1 toque */}
+      <div className="flex items-start justify-between gap-2">
+        <button
+          type="button"
+          onClick={onAbrir}
+          className="flex flex-wrap items-center gap-2 text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none rounded-lg"
+          aria-label={`Ver pedido ${pedido.numero}`}
+        >
+          <span className="display-comanda text-3xl leading-none font-black text-slate-950">
+            #{pedido.numero}
+          </span>
+          <span
+            className={cn(
+              'inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-black uppercase tracking-wide shadow-xs',
+              pedido.tipo === 'delivery'
+                ? 'bg-blue-600 text-white'
+                : pedido.tipo === 'salon'
+                  ? 'bg-emerald-700 text-white'
+                  : 'bg-slate-900 text-white',
+            )}
+          >
+            <Icono className="size-3.5 shrink-0" aria-hidden />
+            <span>{ETIQUETA_TIPO[pedido.tipo]}</span>
+          </span>
+          {pedido.origen !== 'mostrador' && (
+            <span className="inline-flex items-center rounded-md border border-slate-200 bg-slate-100 px-2 py-0.5 text-[11px] font-bold text-slate-600">
+              {ORIGEN[pedido.origen]}
             </span>
-            <span className="inline-flex items-center gap-1.5 rounded-full border border-slate-200 bg-slate-100 px-2.5 py-0.5 text-xs font-bold text-slate-700">
-              <Icono className="size-3 text-orange-600" aria-label={ETIQUETA_TIPO[pedido.tipo]} />
-              <span>{ORIGEN[pedido.origen]}</span>
-            </span>
-          </div>
+          )}
+        </button>
+
+        <div className="flex items-center gap-1.5 shrink-0">
           {terminado ? (
             <span className="flex items-center gap-1 text-xs font-semibold text-slate-500 tabular-nums">
               <Clock className="size-3 text-slate-400" />
@@ -232,19 +255,37 @@ export function TarjetaPedido({
           ) : (
             <Transcurrido pedido={pedido} ahora={ahora} />
           )}
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              imprimirComandaTermica(pedido, { zonaHoraria, nombreLocal });
+            }}
+            title="Imprimir comanda térmica (1 clic)"
+            aria-label={`Imprimir comanda ${pedido.numero}`}
+            className="flex size-8 items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-slate-700 hover:bg-slate-900 hover:text-white hover:border-slate-900 transition shadow-xs"
+          >
+            <Printer className="size-4" />
+          </button>
         </div>
+      </div>
 
+      <button
+        type="button"
+        onClick={onAbrir}
+        className="mt-2.5 block w-full rounded-xl text-left focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+      >
         {/* Nombre del cliente */}
         {pedido.cliente?.nombre && (
-          <p className="mt-2.5 flex items-center gap-1.5 truncate text-base font-extrabold text-slate-900">
+          <p className="flex items-center gap-1.5 truncate text-base font-extrabold text-slate-900">
             <User className="size-4 text-slate-500 shrink-0" />
             <span className="truncate">{pedido.cliente.nombre}</span>
           </p>
         )}
 
         {pedido.tipo === 'delivery' && (
-          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-600">
-            <span className="flex items-center gap-1 truncate font-medium">
+          <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-slate-700">
+            <span className="flex items-center gap-1 truncate font-bold">
               <MapPin className="size-3.5 text-blue-600 shrink-0" />
               {pedido.entrega?.direccion}
             </span>
@@ -256,35 +297,61 @@ export function TarjetaPedido({
           </p>
         )}
 
-        {/* Lista de comanda con cantidades nítidas y notas de cocina fluorescentes */}
-        <ul className="mt-2.5 space-y-1.5 text-sm text-slate-800">
-          {visibles.map((i) => (
-            <li key={i.id} className="leading-snug">
-              <div className="flex items-start">
-                <span className="inline-flex items-center justify-center min-w-7 h-6 px-1.5 rounded-lg bg-slate-900 text-white font-black text-sm tabular-nums mr-2 shrink-0 shadow-xs">
-                  {i.cantidad}x
-                </span>
-                <div className="min-w-0 flex-1">
-                  <span className="font-black text-base text-slate-950">{i.nombre}</span>
-                  {i.varianteNombre && (
-                    <span className="text-slate-600 font-bold text-xs"> · {i.varianteNombre}</span>
-                  )}
-                  {i.extras.length > 0 && (
-                    <span className="block text-xs font-bold text-slate-600">
-                      + {i.extras.map((e) => e.nombre).join(', ')}
+        {/* Lista de comanda con cantidades grandes y exclusiones en bloque de alto contraste */}
+        <ul className="mt-3 space-y-2 text-sm text-slate-800">
+          {visibles.map((i) => {
+            const { exclusiones, aclaracion } = desglosarNotaCocina(i.nota);
+            return (
+              <li key={i.id} className="leading-snug">
+                <div className="flex items-start">
+                  <span className="inline-flex items-center justify-center min-w-8 h-7 px-1.5 rounded-lg bg-slate-900 text-white font-black text-base tabular-nums mr-2.5 shrink-0 shadow-xs">
+                    {i.cantidad}×
+                  </span>
+                  <div className="min-w-0 flex-1">
+                    <span className="font-black text-base md:text-lg text-slate-950 leading-tight">
+                      {i.nombre}
                     </span>
-                  )}
+                    {i.varianteNombre && (
+                      <span className="text-slate-700 font-extrabold text-sm">
+                        {' '}
+                        · {i.varianteNombre}
+                      </span>
+                    )}
+                    {i.extras.length > 0 && (
+                      <span className="block text-xs font-bold text-slate-700 mt-0.5">
+                        + {i.extras.map((e) => e.nombre).join(', ')}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {i.nota && (
-                <div className="mt-1 ml-9 flex items-center gap-1.5 rounded-lg bg-amber-300 border border-amber-400 text-amber-950 px-2.5 py-1 text-xs font-black shadow-xs">
-                  <AlertTriangle className="size-3.5 shrink-0 text-amber-950" />
-                  <span>⚠️ COCINA: “{i.nota}”</span>
-                </div>
-              )}
-            </li>
-          ))}
-          {ocultos > 0 && <li className="pl-9 text-xs font-bold text-slate-500">y {ocultos} más…</li>}
+
+                {/* Exclusiones destacadas a 2 metros (SIN CEBOLLA, SIN MAYONESA) */}
+                {exclusiones.length > 0 && (
+                  <div className="mt-1.5 ml-10 flex flex-wrap gap-1.5">
+                    {exclusiones.map((exc, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center rounded-md bg-rose-600 px-2.5 py-0.5 text-xs font-black uppercase tracking-wider text-white shadow-xs"
+                      >
+                        {exc}
+                      </span>
+                    ))}
+                  </div>
+                )}
+
+                {/* Aclaración general de cocina */}
+                {aclaracion && (
+                  <div className="mt-1.5 ml-10 flex items-center gap-1.5 rounded-lg bg-amber-300 border border-amber-400 text-amber-950 px-2.5 py-1 text-xs font-black shadow-xs">
+                    <AlertTriangle className="size-3.5 shrink-0 text-amber-950" />
+                    <span>COCINA: “{aclaracion}”</span>
+                  </div>
+                )}
+              </li>
+            );
+          })}
+          {ocultos > 0 && (
+            <li className="pl-10 text-xs font-bold text-slate-500">y {ocultos} más…</li>
+          )}
         </ul>
 
         {pedido.nota && (
@@ -358,12 +425,14 @@ export function TarjetaPedido({
               ) : etapa === 'preparacion' ? (
                 <CheckCircle2 className="size-6 shrink-0" />
               ) : (
-                <Sparkles className="size-6 shrink-0" />
+                <CheckCheck className="size-6 shrink-0" />
               )}
               <span>
                 {siguiente === 'entregado' && falta > 0
                   ? 'Cobrar y entregar'
-                  : (etapa ? COLOR_ETAPA[etapa].textoBoton : (ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente]))}
+                  : (etapa
+                      ? COLOR_ETAPA[etapa].textoBoton
+                      : (ACCION_HACIA[siguiente] ?? ETIQUETA_ESTADO[siguiente]))}
               </span>
             </Button>
           )}
@@ -399,9 +468,10 @@ export function TarjetaPedido({
                 className="h-12 rounded-xl px-2.5 text-xs font-bold text-slate-600 hover:bg-slate-100 hover:text-slate-900 flex items-center gap-1 border border-slate-200"
                 onClick={onCobrarOtro}
                 disabled={ocupado}
+                title="Cobro mixto, parcial o calcular vuelto"
               >
                 <CreditCard className="size-4 text-slate-500" />
-                <span>Otro</span>
+                <span>Mixto / Otro</span>
               </Button>
             </div>
           )}

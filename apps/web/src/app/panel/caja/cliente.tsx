@@ -28,6 +28,7 @@ import {
   esperadoCaja,
   formatARS,
   type CategoriaMovimiento,
+  type ConfigCupoTurno,
   type Local,
   type PorMedio,
 } from '@app/shared';
@@ -44,6 +45,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { InputPesos } from '@/components/panel/ui-panel';
+import { WidgetCupoTurno } from '@/components/panel/widget-cupo';
 import { useSesion } from '@/features/auth/sesion';
 import { mensajeError, useDocumento } from '@/features/panel/firestore';
 import {
@@ -102,13 +104,19 @@ export default function CajaPage() {
               {!cargando && (
                 <span
                   className={cn(
-                    'rounded-full px-2.5 py-0.5 text-xs font-bold border',
+                    'inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold border',
                     turno
                       ? 'bg-emerald-500/15 border-emerald-500/30 text-emerald-700 dark:text-emerald-400'
                       : 'bg-amber-500/15 border-amber-500/30 text-amber-800 dark:text-amber-300',
                   )}
                 >
-                  {turno ? '🟢 Abierta' : '🔴 Cerrada'}
+                  <span
+                    className={cn(
+                      'size-2 rounded-full',
+                      turno ? 'bg-emerald-500' : 'bg-amber-500',
+                    )}
+                  />
+                  <span>{turno ? 'Abierta' : 'Cerrada'}</span>
                 </span>
               )}
             </div>
@@ -130,7 +138,7 @@ export default function CajaPage() {
           pedidosNuevosCount={pedidosNuevos}
         />
       ) : (
-        <AbrirCaja />
+        <AbrirCaja cupoConfig={local.datos?.cupo} />
       )}
 
       <Historial zona={zona} />
@@ -140,8 +148,9 @@ export default function CajaPage() {
 
 const ATAJOS_CAMBIO = [0, 10000, 20000, 30000, 50000] as const;
 
-function AbrirCaja() {
+function AbrirCaja({ cupoConfig }: { cupoConfig?: ConfigCupoTurno | undefined }) {
   const [monto, setMonto] = useState(20000);
+  const [cupoInicial, setCupoInicial] = useState<number>(cupoConfig?.cantidadPorDefecto ?? 50);
   const [enviando, setEnviando] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -149,7 +158,10 @@ function AbrirCaja() {
     setEnviando(true);
     setError(null);
     try {
-      await abrirCaja({ montoInicial: monto });
+      await abrirCaja({
+        montoInicial: monto,
+        ...(cupoConfig?.habilitado ? { cupoInicial: Math.max(0, cupoInicial) } : {}),
+      });
     } catch (e) {
       setError(mensajeError(e));
     } finally {
@@ -244,6 +256,81 @@ function AbrirCaja() {
         </div>
       </div>
 
+      {/* Cupo de producción del turno (solo si está habilitado en Configuración) */}
+      {cupoConfig?.habilitado && (
+        <div className="space-y-2.5 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/80 p-4">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <div>
+              <Label
+                htmlFor="cupo-inicial"
+                className="text-xs font-bold uppercase tracking-wider text-slate-700 dark:text-slate-300"
+              >
+                Cupo de {cupoConfig.nombreItem} para este turno
+              </Label>
+              <p className="text-xs text-muted-foreground">
+                Valor habitual sugerido: {cupoConfig.cantidadPorDefecto}. Ajustalo con un toque si hoy prepararon más o menos.
+              </p>
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 rounded-xl font-bold"
+              onClick={() => setCupoInicial((c) => Math.max(0, c - 5))}
+            >
+              −5
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 rounded-xl font-bold"
+              onClick={() => setCupoInicial((c) => Math.max(0, c - 1))}
+            >
+              −1
+            </Button>
+            <Input
+              id="cupo-inicial"
+              type="number"
+              min={0}
+              max={10000}
+              value={cupoInicial}
+              onChange={(e) => setCupoInicial(Math.max(0, Number(e.target.value) || 0))}
+              className="h-11 w-28 text-center text-lg font-black tabular-nums rounded-xl"
+            />
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 rounded-xl font-bold"
+              onClick={() => setCupoInicial((c) => c + 1)}
+            >
+              +1
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 rounded-xl font-bold"
+              onClick={() => setCupoInicial((c) => c + 5)}
+            >
+              +5
+            </Button>
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              className="h-11 rounded-xl font-bold"
+              onClick={() => setCupoInicial((c) => c + 10)}
+            >
+              +10
+            </Button>
+          </div>
+        </div>
+      )}
+
       {error && (
         <div className="rounded-2xl border border-destructive/40 bg-destructive/10 p-3 text-sm font-semibold text-destructive">
           {error}
@@ -312,6 +399,8 @@ function CajaAbierta({
           </Button>
         </section>
 
+        <WidgetCupoTurno variante="tarjeta" />
+
         {/* ACCIÓN #1 PRINCIPAL (MÁS USADA): MOSTRADOR. ACCIÓN #2 SECUNDARIA: PEDIDOS WEB */}
         <section aria-label="Operaciones rápidas de pedidos" className="space-y-3">
           <div className="grid gap-3.5 sm:grid-cols-2">
@@ -327,7 +416,7 @@ function CajaAbierta({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="rounded-full bg-black/20 px-2 py-0.5 text-[10px] font-black uppercase tracking-wider text-white">
-                      ⭐ Principal · Más usado
+                      Principal · Más usado
                     </span>
                   </div>
                   <p className="mt-1 text-lg md:text-xl font-black tracking-tight text-white">
@@ -371,7 +460,7 @@ function CajaAbierta({
                     </span>
                     {pedidosNuevosCount > 0 && (
                       <span className="rounded-full bg-rose-500 px-2 py-0.5 text-[10px] font-black uppercase text-white animate-pulse">
-                        🔔 {pedidosNuevosCount} nuevo{pedidosNuevosCount > 1 ? 's' : ''}
+                        {pedidosNuevosCount} nuevo{pedidosNuevosCount > 1 ? 's' : ''}
                       </span>
                     )}
                   </div>
@@ -565,7 +654,7 @@ function FormMovimiento({ turnoId, uid }: { turnoId: string; uid: string }) {
           )}
         >
           <ArrowUpRight className="size-4" />
-          <span>🔴 Sale plata (Gasto)</span>
+          <span>Sale plata (Gasto)</span>
         </button>
         <button
           type="button"
@@ -578,7 +667,7 @@ function FormMovimiento({ turnoId, uid }: { turnoId: string; uid: string }) {
           )}
         >
           <ArrowDownLeft className="size-4" />
-          <span>🟢 Entra plata (Aporte)</span>
+          <span>Entra plata (Aporte)</span>
         </button>
       </div>
 
@@ -874,6 +963,8 @@ function Historial({ zona }: { zona: string }) {
               </div>
               <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                 {t.cantidadPedidos} pedidos · Efectivo contado: <strong>{formatARS(t.contado?.efectivo ?? 0)}</strong> (esperado: {formatARS(t.esperado?.efectivo ?? 0)}) · Transferencias: <strong>{formatARS(t.totales.transferencia)}</strong>
+                {t.cupoFinal &&
+                  ` · Cupo ${t.cupoFinal.nombre}: ${t.cupoFinal.vendidos}/${t.cupoFinal.inicial} vendidos (restante: ${t.cupoFinal.restante})`}
                 {t.cerradoPorNombre && ` · Cerró: ${t.cerradoPorNombre}`}
               </p>
               {t.notas && (

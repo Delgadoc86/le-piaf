@@ -26,12 +26,16 @@ service cloud.firestore {
     // ─── Local ───
 
     // local/datos: marca, contacto, horarios, contenido web, config de pedidos y pagos.
+    // local/cupo: contador aislado del cupo del turno abierto (gestores pueden sumar/restar auxilio).
     match /local/{doc} {
       allow read: if true;
       allow create, delete: if false;
-      allow update: if doc == 'datos' && esDueno()
-        && datos().activo is bool
-        && esTextoCorto(datos().nombre);
+      allow update: if (doc == 'datos' && esDueno()
+          && datos().activo is bool
+          && esTextoCorto(datos().nombre))
+        || (doc == 'cupo' && esGestor()
+          && soloCambia(['restante', 'actualizadoEn'])
+          && datos().restante is int);
     }
 
     // Perfil técnico (claimsVersion): cada uno lee el suyo; solo lo escriben las Functions.
@@ -81,12 +85,13 @@ service cloud.firestore {
       function productoValido() {
         return datos().keys().hasOnly(['categoriaId', 'nombre', 'descripcion', 'precio', 'fotoUrl',
             'orden', 'visible', 'disponible', 'diasDisponible', 'estacion', 'etiquetas',
-            'variantes', 'gruposExtras', 'actualizadoEn'])
+            'variantes', 'gruposExtras', 'pesoCupo', 'actualizadoEn'])
           && datos().keys().hasAll(['categoriaId', 'nombre', 'precio', 'orden', 'visible',
             'disponible', 'estacion'])
           && esTextoCorto(datos().nombre)
           && datos().categoriaId is string
           && esPesos(datos().precio)
+          && (!('pesoCupo' in datos()) || esPesos(datos().pesoCupo))
           && datos().orden is int
           && datos().visible is bool
           && datos().disponible is bool
@@ -99,9 +104,10 @@ service cloud.firestore {
       allow delete: if esGestor();
       allow create, update: if esGestor()
         && datos().keys().hasOnly(['titulo', 'descripcion', 'precio', 'fotoUrl', 'orden', 'activa',
-            'items', 'vigencia'])
+            'items', 'vigencia', 'pesoCupo'])
         && esTextoCorto(datos().titulo)
         && esPesos(datos().precio)
+        && (!('pesoCupo' in datos()) || esPesos(datos().pesoCupo))
         && datos().orden is int
         && datos().activa is bool;
     }

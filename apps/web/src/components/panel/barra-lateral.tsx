@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ExternalLink, LogOut, UserCircle, Wallet } from 'lucide-react';
-import { DOC_LOCAL, type Local, type Rol } from '@app/shared';
+import { DOC_LOCAL, VERSION_BASE, type Local, type Rol } from '@app/shared';
 import { cn } from '@/lib/utils';
 import { NOMBRE_LOCAL } from '@/lib/local';
 import {
@@ -16,6 +16,7 @@ import {
 import { useCajaAbierta } from '@/features/panel/caja';
 import { useDocumento } from '@/features/panel/firestore';
 import { useAlertaPedidosPendientes } from '@/features/panel/pedidos';
+import { WidgetCupoTurno } from './widget-cupo';
 
 interface Props {
   rol: Rol;
@@ -60,7 +61,7 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
         className={cn(
           'relative flex items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium transition-all md:justify-center md:px-0 md:py-2.5 xl:justify-start xl:px-3 xl:py-2',
           hayAlerta
-            ? 'border border-orange-500/60 bg-orange-500/20 text-orange-200 shadow-md shadow-orange-500/20 animate-pulse'
+            ? 'border-2 border-orange-400 bg-orange-600 font-black text-white shadow-lg shadow-orange-500/40 animate-pulse'
             : activo
               ? 'bg-slate-800 font-semibold text-white shadow-xs'
               : 'text-slate-400 hover:bg-slate-800/60 hover:text-slate-100',
@@ -70,26 +71,30 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
           <Icono
             className={cn(
               'size-4 shrink-0 md:size-5 xl:size-4.5',
-              hayAlerta ? 'text-orange-400 animate-bounce' : activo ? 'text-orange-400' : 'text-slate-400',
+              hayAlerta ? 'text-white animate-bounce' : activo ? 'text-orange-400' : 'text-slate-400',
             )}
             aria-hidden
           />
           {hayAlerta && (
-            <span className="absolute -top-1.5 -right-2 hidden size-4 items-center justify-center rounded-full bg-orange-500 text-[9px] font-black text-white shadow-sm md:flex xl:hidden">
+            <span className="absolute -top-2 -right-2.5 hidden size-5 items-center justify-center rounded-full bg-rose-600 ring-2 ring-white text-[10px] font-black text-white shadow-sm md:flex xl:hidden">
               {pedidosNuevos}
             </span>
           )}
         </div>
         <div className="flex flex-1 items-center justify-between min-w-0 md:sr-only xl:not-sr-only">
-          <span className="whitespace-nowrap truncate">{item.titulo}</span>
+          <span className="whitespace-nowrap truncate">
+            {hayAlerta ? `${item.titulo} · ¡NUEVO!` : item.titulo}
+          </span>
           {hayAlerta && (
-            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-orange-500 px-2 py-0.5 text-[10px] font-black uppercase text-white shadow-sm shadow-orange-500/40">
-              🔔 {pedidosNuevos}
+            <span className="ml-1.5 inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-black uppercase text-orange-700 shadow-sm">
+              {pedidosNuevos}
             </span>
           )}
         </div>
         {hayAlerta && (
-          <span className="inline-flex size-2 rounded-full bg-orange-400 md:hidden animate-ping" />
+          <span className="inline-flex items-center justify-center rounded-full bg-white px-1.5 py-0.5 text-[10px] font-black text-orange-700 md:hidden">
+            {pedidosNuevos}
+          </span>
         )}
       </Link>
     );
@@ -143,6 +148,11 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
               ) : null}
             </div>
           )}
+
+          {/* Cupo del turno activo (visible para todo el staff si existe) */}
+          <div className="mt-2">
+            <WidgetCupoTurno variante="lateral" />
+          </div>
         </div>
 
         {/* Logo compacto para tablet */}
@@ -213,6 +223,12 @@ export function BarraLateral({ rol, email, onCerrarSesion }: Props) {
           <LogOut className="size-3.5" aria-hidden />
           <span className="md:sr-only xl:not-sr-only">Cerrar sesión</span>
         </button>
+        <p
+          className="mt-2 hidden px-2.5 text-[10px] font-semibold tracking-wider text-slate-500 xl:block"
+          title="Versión del motor base (DelgadoDev)"
+        >
+          DelgadoDev · Base v{VERSION_BASE}
+        </p>
       </div>
     </aside>
   );

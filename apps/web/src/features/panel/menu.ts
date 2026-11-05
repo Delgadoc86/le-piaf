@@ -1,21 +1,17 @@
-/** Menú lateral del panel según el rol (ROADMAP §6). */
+/** Menú lateral del panel de gestión. */
 import type { Rol } from '@app/shared';
 import {
   BarChart3,
-  ChefHat,
   ClipboardList,
+  HelpCircle,
   Home,
   KeyRound,
-  LayoutGrid,
-  MapPin,
   Percent,
   QrCode,
   Settings,
   ShoppingBag,
   UtensilsCrossed,
-  UserSquare,
   Wallet,
-  Armchair,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -26,8 +22,6 @@ export interface ItemMenu {
   titulo: string;
   icono: LucideIcon;
   roles: readonly Rol[];
-  /** Fase en la que se construye; mientras tanto se muestra deshabilitado. */
-  fase: number;
   seccion: SeccionMenu;
 }
 
@@ -39,7 +33,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Resumen',
     icono: Home,
     roles: ['dueno', 'encargado', 'mozo', 'cocina'],
-    fase: 0,
     seccion: 'operaciones',
   },
   {
@@ -47,7 +40,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Mostrador',
     icono: ShoppingBag,
     roles: [...GESTORES, 'mozo'],
-    fase: 2,
     seccion: 'operaciones',
   },
   {
@@ -55,23 +47,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Pedidos',
     icono: ClipboardList,
     roles: [...GESTORES, 'mozo'],
-    fase: 2,
-    seccion: 'operaciones',
-  },
-  {
-    ruta: 'cocina',
-    titulo: 'Cocina',
-    icono: ChefHat,
-    roles: [...GESTORES, 'cocina'],
-    fase: 3,
-    seccion: 'operaciones',
-  },
-  {
-    ruta: 'salon',
-    titulo: 'Salón',
-    icono: Armchair,
-    roles: [...GESTORES, 'mozo'],
-    fase: 3,
     seccion: 'operaciones',
   },
   {
@@ -79,7 +54,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Caja',
     icono: Wallet,
     roles: GESTORES,
-    fase: 4,
     seccion: 'finanzas',
   },
   {
@@ -87,7 +61,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Ventas',
     icono: BarChart3,
     roles: GESTORES,
-    fase: 4,
     seccion: 'finanzas',
   },
   {
@@ -95,7 +68,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Carta',
     icono: UtensilsCrossed,
     roles: GESTORES,
-    fase: 1,
     seccion: 'catalogo',
   },
   {
@@ -103,7 +75,6 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Promos',
     icono: Percent,
     roles: GESTORES,
-    fase: 1,
     seccion: 'catalogo',
   },
   {
@@ -111,39 +82,13 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'QR de la carta',
     icono: QrCode,
     roles: GESTORES,
-    fase: 1,
     seccion: 'catalogo',
-  },
-  {
-    ruta: 'mesas',
-    titulo: 'Mesas',
-    icono: LayoutGrid,
-    roles: GESTORES,
-    fase: 3,
-    seccion: 'operaciones',
-  },
-  {
-    ruta: 'zonas',
-    titulo: 'Zonas de delivery',
-    icono: MapPin,
-    roles: GESTORES,
-    fase: 9,
-    seccion: 'catalogo',
-  },
-  {
-    ruta: 'clientes',
-    titulo: 'Clientes',
-    icono: UserSquare,
-    roles: GESTORES,
-    fase: 9,
-    seccion: 'finanzas',
   },
   {
     ruta: 'configuracion',
     titulo: 'Configuración',
     icono: Settings,
     roles: ['dueno'],
-    fase: 1,
     seccion: 'sistema',
   },
   {
@@ -151,7 +96,13 @@ export const MENU: readonly ItemMenu[] = [
     titulo: 'Mi cuenta',
     icono: KeyRound,
     roles: ['dueno', 'encargado', 'mozo', 'cocina'],
-    fase: 0,
+    seccion: 'sistema',
+  },
+  {
+    ruta: 'ayuda',
+    titulo: 'Ayuda',
+    icono: HelpCircle,
+    roles: ['dueno', 'encargado', 'mozo', 'cocina'],
     seccion: 'sistema',
   },
 ];
@@ -163,14 +114,8 @@ export const ETIQUETA_SECCION: Record<SeccionMenu, string> = {
   sistema: 'Sistema',
 };
 
-/**
- * Fases ya construidas (la 4 se hizo antes que la 3, a pedido). Lo demás no se muestra: panel
- * mínimo, nada de secciones "Pronto" que confunden. Fase 9 = "después, según la demanda" (ROADMAP §12).
- */
-export const FASES_HECHAS: readonly number[] = [0, 1, 2, 4];
-
 export function menuPara(rol: Rol): ItemMenu[] {
-  return MENU.filter((i) => i.roles.includes(rol) && FASES_HECHAS.includes(i.fase));
+  return MENU.filter((i) => i.roles.includes(rol));
 }
 
 export const NOMBRE_ROL: Record<Rol, string> = {

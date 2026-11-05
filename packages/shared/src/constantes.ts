@@ -1,10 +1,16 @@
 /** Constantes del dominio. Los tipos se derivan de estos arrays para no duplicar listas. */
 
+/** Versión semántica del motor base compartido entre el repositorio padre (Silverio) y las copias. */
+export const VERSION_BASE = '2.0.0';
+
 /**
  * Documento único con los datos del local. Cada repo es UN local (ROADMAP §3):
  * no hay locales/{id}; todo lo demás cuelga de la raíz de Firestore.
  */
 export const DOC_LOCAL = 'local/datos';
+
+/** Contador aislado en tiempo real del cupo del turno abierto (evita contención en local/datos). */
+export const DOC_CUPO = 'local/cupo';
 
 /** Carpeta de Storage para las imágenes públicas del local. */
 export const CARPETA_IMAGENES = 'imagenes';

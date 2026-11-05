@@ -90,8 +90,20 @@ export function obtenerRolYKit() {
   return { rol, kit };
 }
 
+function obtenerVersionBase() {
+  try {
+    const constantesPath = path.join(raiz, 'packages/shared/src/constantes.ts');
+    const contenido = fs.readFileSync(constantesPath, 'utf8');
+    const match = contenido.match(/VERSION_BASE\s*=\s*['"]([^'"]+)['"]/);
+    return match ? match[1] : '2.0.0';
+  } catch {
+    return '2.0.0';
+  }
+}
+
 function sellar() {
   const { kit } = obtenerRolYKit();
+  const versionBase = obtenerVersionBase();
   const salida = execSync('git ls-files', { cwd: raiz, encoding: 'utf8' });
   const archivos = salida
     .split(/\r?\n/)
@@ -101,7 +113,8 @@ function sellar() {
     .sort();
 
   const manifest = {
-    version: 1,
+    version: 2,
+    versionBase,
     actualizado: new Date().toISOString(),
     totalArchivos: archivos.length,
     archivos: {},
@@ -116,7 +129,9 @@ function sellar() {
 
   const manifestPath = path.join(raiz, '.base-manifest.json');
   fs.writeFileSync(manifestPath, JSON.stringify(manifest, null, 2) + '\n', 'utf8');
-  console.log(`✅ Manifiesto base sellado exitosamente con ${archivos.length} archivos genéricos en .base-manifest.json`);
+  console.log(
+    `✅ Manifiesto Base v${versionBase} sellado exitosamente con ${archivos.length} archivos genéricos en .base-manifest.json`,
+  );
 }
 
 function verificar() {
@@ -171,8 +186,9 @@ function verificar() {
     process.exit(1);
   }
 
+  const ver = manifest.versionBase ? ` (Base v${manifest.versionBase})` : '';
   console.log(
-    `✅ Verificación de guardia exitosa: los ${Object.keys(manifest.archivos).length} archivos genéricos coinciden con la base.`,
+    `✅ Verificación de guardia exitosa${ver}: los ${Object.keys(manifest.archivos).length} archivos genéricos coinciden con la base.`,
   );
   process.exit(0);
 }

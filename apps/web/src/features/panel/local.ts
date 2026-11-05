@@ -27,3 +27,11 @@ export function guardarConfirmacion(confirmacion: {
     actualizadoEn: serverTimestamp(),
   });
 }
+
+/** Configuración del Cupo del Turno (stock operativo simple por turno de caja). */
+export function guardarCupoTurno(cupo: NonNullable<LocalEditable['cupo']>) {
+  return updateDoc(doc(firebase().db, DOC_LOCAL), {
+    cupo,
+    actualizadoEn: serverTimestamp(),
+  });
+}
