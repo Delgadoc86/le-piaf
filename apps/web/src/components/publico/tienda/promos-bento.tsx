@@ -157,7 +157,6 @@ function TarjetaPromo({ promo: p }: { promo: PromoPublica }) {
             <PromoComboSvg className="size-36 opacity-85 drop-shadow-[0_12px_24px_rgba(0,0,0,0.7)] transition-transform duration-500 group-hover:scale-110" />
           </div>
         )}
-        )}
 
         {/* Degradé protector inferior para que la comida se vea nítida y los textos contrasten */}
         <div
