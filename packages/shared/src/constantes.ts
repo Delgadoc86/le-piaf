@@ -1,7 +1,7 @@
 /** Constantes del dominio. Los tipos se derivan de estos arrays para no duplicar listas. */
 
 /** Versión semántica del motor base compartido entre el repositorio padre (Silverio) y las copias. */
-export const VERSION_BASE = '2.0.0';
+export const VERSION_BASE = '2.1.0';
 
 /**
  * Documento único con los datos del local. Cada repo es UN local (ROADMAP §3):

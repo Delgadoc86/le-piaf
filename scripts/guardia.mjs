@@ -104,7 +104,7 @@ function obtenerVersionBase() {
 function sellar() {
   const { kit } = obtenerRolYKit();
   const versionBase = obtenerVersionBase();
-  const salida = execSync('git ls-files', { cwd: raiz, encoding: 'utf8' });
+  const salida = execSync('git ls-files --cached --others --exclude-standard', { cwd: raiz, encoding: 'utf8' });
   const archivos = salida
     .split(/\r?\n/)
     .map((l) => l.trim().replace(/\\/g, '/'))
@@ -160,7 +160,7 @@ function verificar() {
 
   // 2. Verificar si hay archivos genéricos nuevos no registrados
   try {
-    const salida = execSync('git ls-files', { cwd: raiz, encoding: 'utf8' });
+    const salida = execSync('git ls-files --cached --others --exclude-standard', { cwd: raiz, encoding: 'utf8' });
     const versionados = salida
       .split(/\r?\n/)
       .map((l) => l.trim().replace(/\\/g, '/'))

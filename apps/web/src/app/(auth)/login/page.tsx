@@ -1,19 +1,13 @@
 'use client';
 
 import { useEffect, useState, type FormEvent } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import { sendPasswordResetEmail, signInWithEmailAndPassword } from 'firebase/auth';
 import { FirebaseError } from 'firebase/app';
-import { ArrowLeft, Eye, EyeOff, Lock, MailCheck } from 'lucide-react';
+import { ArrowLeft, Eye, EyeOff, Lock, MailCheck, ShieldCheck } from 'lucide-react';
+import { DOC_LOCAL, type Local } from '@app/shared';
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useSesion } from '@/features/auth/sesion';
@@ -23,6 +17,7 @@ import {
   limpiarIntentos,
   registrarFallo,
 } from '@/features/auth/intentos';
+import { useDocumento } from '@/features/panel/firestore';
 import { firebase, usaEmuladores } from '@/lib/firebase/client';
 import { NOMBRE_LOCAL } from '@/lib/local';
 
@@ -53,6 +48,8 @@ type Modo = 'entrar' | 'recuperar';
 export default function LoginPage() {
   const sesion = useSesion();
   const router = useRouter();
+  const local = useDocumento<Local>(DOC_LOCAL);
+
   const [modo, setModo] = useState<Modo>('entrar');
   const [email, setEmail] = useState('');
   const [contrasena, setContrasena] = useState('');
@@ -62,6 +59,9 @@ export default function LoginPage() {
   const [enviando, setEnviando] = useState(false);
   const [bloqueo, setBloqueo] = useState<number | null>(null);
   const [ahora, setAhora] = useState(0);
+
+  const nombreLocal = local.datos?.nombre || NOMBRE_LOCAL;
+  const logoUrl = local.datos?.marca?.logoUrl || '/icons/icon-512.png';
 
   useEffect(() => {
     if (sesion.estado === 'lista') router.replace('/panel');
@@ -126,9 +126,8 @@ export default function LoginPage() {
     setEnviando(true);
     try {
       const auth = firebase().auth;
-      auth.languageCode = 'es'; // el mail de Firebase sale en español
+      auth.languageCode = 'es';
       await sendPasswordResetEmail(auth, email.trim());
-      // Con la contraseña nueva tiene que poder entrar sin esperar el bloqueo.
       limpiarIntentos(email);
       setBloqueo(null);
       setAviso(
@@ -157,8 +156,10 @@ export default function LoginPage() {
   }
 
   const campoEmail = (
-    <div className="space-y-2">
-      <Label htmlFor="email">Email</Label>
+    <div className="space-y-1.5">
+      <Label htmlFor="email" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+        Email
+      </Label>
       <Input
         id="email"
         type="email"
@@ -169,150 +170,198 @@ export default function LoginPage() {
           setEmail(e.target.value);
           setBloqueo(null);
         }}
+        placeholder="tu@correo.com"
+        className="h-11 rounded-xl border-slate-800 bg-slate-950/70 text-slate-100 placeholder:text-slate-600 focus-visible:border-orange-500/80 focus-visible:ring-orange-500/20"
       />
     </div>
   );
 
-  if (modo === 'recuperar') {
-    return (
-      <Card className="w-full max-w-sm">
-        <CardHeader>
-          <CardTitle className="text-2xl">Recuperar contraseña</CardTitle>
-          <CardDescription>
-            Te mandamos un link a tu email para que elijas una contraseña nueva.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          {aviso ? (
-            <div className="space-y-4 text-center">
-              <MailCheck className="mx-auto size-10 text-emerald-600" aria-hidden />
-              <p role="status" className="text-sm">
-                {aviso}
-              </p>
-            </div>
-          ) : (
-            <form onSubmit={(e) => void recuperar(e)} className="space-y-4">
-              {campoEmail}
-              {error && (
-                <p role="alert" className="text-sm text-destructive">
-                  {error}
-                </p>
-              )}
-              <Button type="submit" className="w-full" disabled={enviando}>
-                {enviando ? 'Enviando…' : 'Enviarme el link'}
-              </Button>
-            </form>
-          )}
-        </CardContent>
-        <CardFooter>
-          <button
-            type="button"
-            onClick={() => irA('entrar')}
-            className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="size-4" aria-hidden /> Volver a entrar
-          </button>
-        </CardFooter>
-      </Card>
-    );
-  }
-
   return (
-    <Card className="w-full max-w-sm">
-      <CardHeader>
-        <CardTitle className="text-2xl">{NOMBRE_LOCAL}</CardTitle>
-        <CardDescription>Entrá al panel del local con tu email y contraseña.</CardDescription>
-      </CardHeader>
-      <CardContent>
-        {bloqueo ? (
-          <div className="space-y-4 text-center" role="alert">
-            <Lock className="mx-auto size-10 text-destructive" aria-hidden />
-            <div>
-              <p className="font-semibold">Demasiados intentos fallidos</p>
-              <p className="mt-1 text-sm text-muted-foreground">
-                Por seguridad, esperá{' '}
-                <strong className="text-foreground tabular-nums">{mmss(bloqueo - ahora)}</strong> o
-                recuperá tu contraseña.
-              </p>
+    <div className="w-full max-w-md space-y-6 motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-4 duration-500">
+      {/* Tarjeta de Login Premium */}
+      <div className="relative rounded-3xl border border-slate-800/90 bg-slate-900/90 p-6 sm:p-8 shadow-2xl shadow-black/80 backdrop-blur-2xl space-y-6">
+        {/* Cabecera de Marca del Local */}
+        <div className="text-center space-y-3">
+          <div className="relative mx-auto flex size-20 items-center justify-center rounded-2xl border border-slate-800 bg-slate-950/90 p-2.5 shadow-xl shadow-black/50 ring-1 ring-white/10 transition-transform duration-300 hover:scale-105">
+            {logoUrl ? (
+              <Image
+                src={logoUrl}
+                alt={nombreLocal}
+                width={80}
+                height={80}
+                className="h-full w-full object-contain"
+                priority
+              />
+            ) : (
+              <span className="text-2xl font-black tracking-tight text-white">
+                {nombreLocal.charAt(0).toUpperCase()}
+              </span>
+            )}
+          </div>
+
+          <div className="space-y-1.5">
+            <div className="inline-flex items-center gap-2 rounded-full border border-slate-800 bg-slate-950/70 px-3 py-1 text-[11px] font-semibold text-slate-300 shadow-inner">
+              <span className="size-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span>Terminal Privada · Acceso Exclusivo</span>
             </div>
-            <Button className="w-full" onClick={() => irA('recuperar')}>
-              Recuperar contraseña
-            </Button>
+            <h1 className="text-2xl font-black tracking-tight text-white sm:text-3xl">
+              {nombreLocal}
+            </h1>
+            <p className="text-xs text-slate-400">
+              {modo === 'recuperar'
+                ? 'Recuperación de credenciales del personal'
+                : 'Sistema integral de gestión de mostrador, cocina y caja'}
+            </p>
+          </div>
+        </div>
+
+        {/* Modo Recuperar Contraseña */}
+        {modo === 'recuperar' ? (
+          <div className="space-y-4">
+            {aviso ? (
+              <div className="space-y-4 rounded-2xl border border-emerald-900/50 bg-emerald-950/30 p-4 text-center">
+                <MailCheck className="mx-auto size-10 text-emerald-400" aria-hidden />
+                <p role="status" className="text-xs font-medium text-emerald-200">
+                  {aviso}
+                </p>
+              </div>
+            ) : (
+              <form onSubmit={(e) => void recuperar(e)} className="space-y-4">
+                {campoEmail}
+                {error && (
+                  <p role="alert" className="text-xs font-semibold text-rose-400">
+                    {error}
+                  </p>
+                )}
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold tracking-wide shadow-lg shadow-orange-950/40 transition-all active:scale-[0.99] disabled:opacity-50"
+                  disabled={enviando}
+                >
+                  {enviando ? 'Enviando…' : 'Enviarme el link'}
+                </Button>
+              </form>
+            )}
+            <button
+              type="button"
+              onClick={() => irA('entrar')}
+              className="flex items-center justify-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-200 transition-colors w-full pt-1"
+            >
+              <ArrowLeft className="size-3.5" aria-hidden /> Volver a entrar
+            </button>
           </div>
         ) : (
-          <form onSubmit={(e) => void entrar(e)} className="space-y-4">
-            {campoEmail}
-            <div className="space-y-2">
-              <div className="flex items-baseline justify-between">
-                <Label htmlFor="contrasena">Contraseña</Label>
-                <button
-                  type="button"
+          /* Modo Ingreso Normal */
+          <div>
+            {bloqueo ? (
+              <div className="space-y-4 text-center rounded-2xl border border-rose-900/40 bg-rose-950/20 p-5" role="alert">
+                <Lock className="mx-auto size-10 text-rose-400" aria-hidden />
+                <div>
+                  <p className="text-sm font-bold text-rose-200">Demasiados intentos fallidos</p>
+                  <p className="mt-1 text-xs text-rose-300/80">
+                    Por seguridad, esperá{' '}
+                    <strong className="text-rose-100 tabular-nums">{mmss(bloqueo - ahora)}</strong> o
+                    recuperá tu contraseña.
+                  </p>
+                </div>
+                <Button
+                  className="w-full rounded-xl bg-slate-800 hover:bg-slate-700 text-white font-bold text-xs"
                   onClick={() => irA('recuperar')}
-                  className="text-xs text-muted-foreground underline-offset-4 hover:text-foreground hover:underline"
                 >
-                  ¿La olvidaste?
-                </button>
+                  Recuperar contraseña
+                </Button>
               </div>
-              <div className="relative">
-                <Input
-                  id="contrasena"
-                  type={verContrasena ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  required
-                  value={contrasena}
-                  onChange={(e) => setContrasena(e.target.value)}
-                  className="pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setVerContrasena((v) => !v)}
-                  aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
-                  aria-pressed={verContrasena}
-                  className="absolute top-1/2 right-1 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+            ) : (
+              <form onSubmit={(e) => void entrar(e)} className="space-y-4">
+                {campoEmail}
+                <div className="space-y-1.5">
+                  <div className="flex items-baseline justify-between">
+                    <Label htmlFor="contrasena" className="text-xs font-semibold text-slate-300 uppercase tracking-wider">
+                      Contraseña
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => irA('recuperar')}
+                      className="text-xs font-medium text-slate-400 hover:text-orange-400 transition-colors"
+                    >
+                      ¿La olvidaste?
+                    </button>
+                  </div>
+                  <div className="relative">
+                    <Input
+                      id="contrasena"
+                      type={verContrasena ? 'text' : 'password'}
+                      autoComplete="current-password"
+                      required
+                      value={contrasena}
+                      onChange={(e) => setContrasena(e.target.value)}
+                      placeholder="••••••••"
+                      className="h-11 rounded-xl border-slate-800 bg-slate-950/70 text-slate-100 placeholder:text-slate-600 focus-visible:border-orange-500/80 focus-visible:ring-orange-500/20 pr-10"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setVerContrasena((v) => !v)}
+                      aria-label={verContrasena ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                      aria-pressed={verContrasena}
+                      className="absolute top-1/2 right-1 inline-flex size-8 -translate-y-1/2 items-center justify-center rounded-lg text-slate-400 hover:bg-slate-800 hover:text-slate-200 focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:outline-none"
+                    >
+                      {verContrasena ? (
+                        <EyeOff className="size-4" aria-hidden />
+                      ) : (
+                        <Eye className="size-4" aria-hidden />
+                      )}
+                    </button>
+                  </div>
+                </div>
+
+                {error && (
+                  <p role="alert" className="text-xs font-semibold text-rose-400">
+                    {error}
+                  </p>
+                )}
+
+                <Button
+                  type="submit"
+                  className="h-11 w-full rounded-xl bg-orange-600 hover:bg-orange-500 text-white font-bold tracking-wide shadow-lg shadow-orange-950/40 transition-all active:scale-[0.99] disabled:opacity-50"
+                  disabled={enviando}
                 >
-                  {verContrasena ? (
-                    <EyeOff className="size-4" aria-hidden />
-                  ) : (
-                    <Eye className="size-4" aria-hidden />
-                  )}
-                </button>
-              </div>
-            </div>
-            {error && (
-              <p role="alert" className="text-sm text-destructive">
-                {error}
-              </p>
+                  {enviando ? 'Verificando credenciales…' : 'Ingresar al Panel'}
+                </Button>
+              </form>
             )}
-            <Button type="submit" className="w-full" disabled={enviando}>
-              {enviando ? 'Entrando…' : 'Entrar'}
-            </Button>
-          </form>
-        )}
-      </CardContent>
-      {usaEmuladores && !bloqueo && (
-        <CardFooter>
-          <div className="w-full rounded-md border border-dashed p-3 text-center text-xs text-muted-foreground">
-            <p className="mb-2">
-              Usuarios de prueba (contraseña <strong>local123</strong>):
-            </p>
-            <div className="flex flex-wrap justify-center gap-1.5">
-              {['dueno', 'encargado', 'mozo', 'cocina'].map((u) => (
-                <button
-                  key={u}
-                  type="button"
-                  onClick={() => {
-                    setEmail(`${u}@local.test`);
-                    setContrasena('local123');
-                  }}
-                  className="rounded-full border px-2.5 py-1 hover:bg-muted"
-                >
-                  {u}@local.test
-                </button>
-              ))}
-            </div>
           </div>
-        </CardFooter>
+        )}
+      </div>
+
+      {/* Accesos rápidos de desarrollo (solo en emuladores locales) */}
+      {usaEmuladores && !bloqueo && modo === 'entrar' && (
+        <div className="rounded-2xl border border-slate-800/80 bg-slate-950/60 p-4 text-center text-xs text-slate-400 backdrop-blur-md">
+          <p className="mb-2.5 font-semibold text-slate-300">
+            Accesos de prueba local (contraseña <strong className="text-slate-100">local123</strong>):
+          </p>
+          <div className="flex flex-wrap justify-center gap-1.5">
+            {['dueno', 'encargado', 'mozo', 'cocina'].map((u) => (
+              <button
+                key={u}
+                type="button"
+                onClick={() => {
+                  setEmail(`${u}@local.test`);
+                  setContrasena('local123');
+                }}
+                className="rounded-lg border border-slate-800 bg-slate-900/90 px-3 py-1.5 text-xs font-medium text-slate-300 transition-colors hover:border-slate-700 hover:bg-slate-800 hover:text-white"
+              >
+                {u}@local.test
+              </button>
+            ))}
+          </div>
+        </div>
       )}
-    </Card>
+
+      {/* Pie institucional sobrio */}
+      <footer className="text-center text-[11px] font-medium text-slate-500 flex items-center justify-center gap-1.5">
+        <ShieldCheck className="size-3.5 text-slate-400" />
+        <span>Conexión cifrada y acceso protegido</span>
+      </footer>
+    </div>
   );
 }

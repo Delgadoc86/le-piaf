@@ -32,6 +32,7 @@ import {
   Trash2,
   Utensils,
   Wallet,
+  WifiOff,
   X,
 } from 'lucide-react';
 import {
@@ -70,7 +71,9 @@ import {
   crearPedidoManual,
   ETIQUETA_TIPO,
   useAlertaPedidosPendientes,
+  useOnlineStatus,
 } from '@/features/panel/pedidos';
+import { useWakeLock } from '@/features/panel/sonido';
 import {
   autoImprimirGuardado,
   guardarAutoImprimir,
@@ -127,6 +130,8 @@ export function PosMostrador({ tipos }: Props) {
   const productos = useColeccion<ProductoDatos>('productos');
   const categorias = useColeccion<CategoriaDatos>('categorias');
   const promos = useColeccion<PromoDatos>('promos');
+  const wakeLockActivo = useWakeLock();
+  const online = useOnlineStatus();
 
   const [busqueda, setBusqueda] = useState('');
   const [categoriaId, setCategoriaId] = useState<string | null>(null);
@@ -432,6 +437,17 @@ export function PosMostrador({ tipos }: Props) {
 
   return (
     <div className="flex flex-col h-[calc(100dvh-5.5rem)] md:h-[calc(100dvh-6.5rem)] rounded-3xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm overflow-hidden">
+      {/* Banner de estado de red cuando cae internet */}
+      {!online && (
+        <div
+          role="status"
+          className="flex items-center gap-2 border-b border-amber-300 bg-amber-50 dark:bg-amber-950/40 dark:border-amber-900/60 px-4 py-2 text-xs font-semibold text-amber-950 dark:text-amber-200 shrink-0"
+        >
+          <WifiOff className="size-3.5 text-amber-700 dark:text-amber-400 shrink-0" />
+          <span>Sin conexión a internet: verificá tu conexión antes de confirmar nuevos pedidos.</span>
+        </div>
+      )}
+
       {/* Encabezado Superior del Mostrador */}
       <header className="flex flex-wrap items-center justify-between gap-3 px-4 py-2.5 border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shrink-0">
         <div className="flex items-center gap-3">
@@ -446,6 +462,15 @@ export function PosMostrador({ tipos }: Props) {
               <span className="hidden sm:inline-flex rounded-full bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-700 text-[10px] font-bold uppercase px-2 py-0.5">
                 3 Toques
               </span>
+              {wakeLockActivo && (
+                <span
+                  className="hidden sm:inline-flex items-center gap-1 rounded-full bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-200 dark:border-emerald-800 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:text-emerald-300"
+                  title="La pantalla no se suspenderá durante el turno"
+                >
+                  <span className="size-1.5 rounded-full bg-emerald-500" />
+                  Pantalla encendida
+                </span>
+              )}
             </div>
             <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
               {caja.turno ? (
