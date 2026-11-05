@@ -1,8 +1,8 @@
 {
   "version": 2,
   "versionBase": "2.1.0",
-  "actualizado": "2026-11-05T13:41:54.763Z",
-  "totalArchivos": 175,
+  "actualizado": "2026-11-05T13:56:19.104Z",
+  "totalArchivos": 176,
   "archivos": {
     ".editorconfig": "49e53afa4ae47ecc7446a8b471792dbbc91575262b3d3b161b063801aa096f5f",
     ".gitattributes": "e4d872a9dbca8141211fc815387fc7510de1970edfc374f94eec1816f1c17fa6",
@@ -27,6 +27,7 @@
     "apps/web/src/app/api/salud/route.ts": "06cb1ad32a696e0f6f3c143783c14d71beebc3aa5b15eb13cea441a652eae60b",
     "apps/web/src/app/globals.css": "17e08d06da0f7a59ca4a12d81854da7002551f9aeae3d4d9762777422a29e30e",
     "apps/web/src/app/layout.tsx": "e580c16c85d8126388979b7648602f7d0c4a5c45d4441d8eb94c872e92034b23",
+    "apps/web/src/app/manifest.ts": "b200f8f6d15f20076c19b05d9970e4a0a76162aa8340846a5b8cb58e21cf1f2b",
     "apps/web/src/app/not-found.tsx": "b592e05d6a89c976ffc4c9bf6f520324826320324ff212d9ddb8e47d60d8ddf2",
     "apps/web/src/app/panel/ayuda/cliente.tsx": "ac5ba6d455598b4ccbe989247975fa0dd2c032047770bb7355b3c39e3a7402ff",
     "apps/web/src/app/panel/ayuda/page.tsx": "a3ab17f495749339e58fa8000f45bf44ad14dae18f4e348374710cecf4892aa2",
@@ -166,7 +167,7 @@
     "pnpm-lock.yaml": "ade9c9d83d256c7fb3251909513709e37001eefdbde4f078defaaeb0771283b8",
     "pnpm-workspace.yaml": "b1075817fb67fdc584a03d73281792e9de630a84cbe17dcff9594e16cbd15d5e",
     "scripts/entorno.ts": "096ff4a864484a4aa477d06d03ede7bd284537435267ad56dc3eebf64c6a1c9b",
-    "scripts/guardia.mjs": "88ea09cb8f35cca50596baf3cca713e180493ba6f344fec090fec77b6e292f7c",
+    "scripts/guardia.mjs": "533ade40889dcb52f16fdf316bfdc303fdd8531967472bf05463d144de21493b",
     "scripts/seed.ts": "a21a0df1b264eb19ffa6da65591f94e10640b24b47869f2cb1b78550b6ca296a",
     "scripts/subir-assets.ts": "b52bc4385e51047ed8679a0f7fa4e59178405d300c42d87dafb82dbaf23cafd3",
     "scripts/subir-carta.ts": "34752e909f020b48135cb4fb5ce349f0fd7b23f103674e6ab0972be9393936c8",
