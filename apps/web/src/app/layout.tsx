@@ -14,6 +14,15 @@ const plusJakartaSans = Plus_Jakarta_Sans({
 // Provisorio: en la Fase 1 el título, la descripción y el favicon salen de local/datos (SEO).
 export const metadata: Metadata = {
   title: { default: NOMBRE_LOCAL, template: `%s · ${NOMBRE_LOCAL}` },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'black-translucent',
+    title: NOMBRE_LOCAL,
+  },
+  icons: {
+    icon: '/icons/icon-192.png',
+    apple: '/icons/icon-192.png',
+  },
 };
 
 export default function RootLayout({ children }: LayoutProps<'/'>) {

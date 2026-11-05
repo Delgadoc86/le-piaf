@@ -11,14 +11,19 @@ import {
   ChefHat,
   ChevronDown,
   Clock,
+  Download,
   ExternalLink,
   HelpCircle,
+  Laptop,
   MessageSquare,
   Package,
   Printer,
   Search,
+  Share2,
   ShieldAlert,
   ShoppingBag,
+  Smartphone,
+  SquarePlus,
   Utensils,
   UtensilsCrossed,
   Volume2,
@@ -33,7 +38,7 @@ interface PasoGuia {
 }
 
 interface ModuloAyuda {
-  id: 'mostrador' | 'cocina' | 'antifraude' | 'caja-cupo' | 'carta-promos';
+  id: 'mostrador' | 'cocina' | 'antifraude' | 'caja-cupo' | 'carta-promos' | 'instalacion';
   titulo: string;
   resumen: string;
   rutaPanel?: string;
@@ -106,6 +111,11 @@ const MODULOS_AYUDA: readonly ModuloAyuda[] = [
       'vuelto',
       'efectivo',
       'transferencia',
+      'pantalla',
+      'pantalla encendida',
+      'internet',
+      'offline',
+      'sin conexion',
     ],
     pasos: [
       {
@@ -130,7 +140,7 @@ const MODULOS_AYUDA: readonly ModuloAyuda[] = [
       },
     ],
     consejo:
-      'Si estás cargando en Mostrador y entra un pedido por la web, arriba a la derecha verás un botón naranja parpadeando y escuchás el timbre sin perder lo que estás cargando.',
+      'Tanto en Mostrador como en Cocina el sistema activa un bloqueo automático para que la pantalla de la tablet o PC no se apague sola durante el servicio. Si estás cargando y entra un pedido web, arriba a la derecha verás el botón parpadeando con timbre sonoro sin perder lo que estás cargando.',
   },
   {
     id: 'cocina',
@@ -139,7 +149,23 @@ const MODULOS_AYUDA: readonly ModuloAyuda[] = [
     rutaPanel: '/panel/pedidos',
     textoBoton: 'Ir a Pedidos / Cocina',
     icono: ChefHat,
-    palabrasClave: ['cocina', 'pedidos', 'timbre', 'sonido', 'impresora', 'comanda', 'termica', 'ticket', 'listo', 'columnas'],
+    palabrasClave: [
+      'cocina',
+      'pedidos',
+      'timbre',
+      'sonido',
+      'impresora',
+      'comanda',
+      'termica',
+      'ticket',
+      'listo',
+      'columnas',
+      'pantalla',
+      'pantalla encendida',
+      'internet',
+      'offline',
+      'sin conexion',
+    ],
     pasos: [
       {
         titulo: 'Las 3 columnas del tablero',
@@ -258,6 +284,57 @@ const MODULOS_AYUDA: readonly ModuloAyuda[] = [
       },
     ],
   },
+  {
+    id: 'instalacion',
+    titulo: 'Instalar la aplicación en PC, Tablet o Celular (PWA)',
+    resumen:
+      'Cómo tener el sistema instalado en el escritorio de la computadora o en la pantalla de inicio del teléfono, con ícono propio y a pantalla completa.',
+    icono: Laptop,
+    palabrasClave: [
+      'instalar',
+      'instalacion',
+      'app',
+      'pwa',
+      'pc',
+      'celular',
+      'tablet',
+      'escritorio',
+      'descargar',
+      'pantalla de inicio',
+      'icono',
+      'standalone',
+      'computadora',
+      'notebook',
+      'iphone',
+      'android',
+      'windows',
+      'mac',
+    ],
+    pasos: [
+      {
+        titulo: 'En computadora (PC o Notebook con Windows / Mac)',
+        detalle:
+          'Abrí el panel en Chrome o Edge. Mirá el extremo derecho de la barra donde escribís la web: hacé clic en el ícono de pantalla con flecha ("Instalar aplicación") o tocá los 3 puntos ⋮ arriba a la derecha y elegí "Instalar Silverio Club". Se crea un ícono en tu Escritorio y abre en una ventana independiente.',
+      },
+      {
+        titulo: 'En celular o tablet Android (Google Chrome)',
+        detalle:
+          'Abrí el panel en Google Chrome, tocá los 3 puntos ⋮ arriba a la derecha y elegí "Instalar aplicación" (o "Agregar a la pantalla principal"). Confirmá tocando "Instalar". Se descargará el ícono directo a tu inicio y abrirá a pantalla completa como una app nativa.',
+      },
+      {
+        titulo: 'En iPhone o iPad (Safari de Apple)',
+        detalle:
+          'Abrí el panel en Safari, tocá el botón Compartir (el ícono del cuadrado con la flecha hacia arriba ↑ en el centro de la barra inferior), deslizá hacia abajo y tocá "Agregar al inicio". Tocá "Agregar" arriba a la derecha y te quedará guardada como app con el logo del local.',
+      },
+      {
+        titulo: 'Ventajas de tenerla instalada',
+        detalle:
+          'Abre en 1 segundo sin tener que escribir la dirección web, corre en una ventana limpia sin pestañas ni barras del navegador, y mantiene la pantalla encendida de forma automática durante todo el turno.',
+      },
+    ],
+    consejo:
+      'Al instalarla como aplicación, el personal de mostrador y cocina trabaja en una ventana exclusiva sin distracciones, evitando que cierren la pestaña del navegador por error.',
+  },
 ];
 
 const PROBLEMAS_COMUNES: readonly ProblemaComun[] = [
@@ -324,6 +401,22 @@ const PROBLEMAS_COMUNES: readonly ProblemaComun[] = [
     solucion:
       'Los pedidos quedan guardados en la sección Ventas igual, pero para que el arqueo de billetes te sume los cobros del turno tenés que abrir la Caja antes de registrar los cobros. Abrila desde Caja → Abrir caja.',
     palabrasClave: ['olvide abrir caja', 'caja cerrada', 'ventas', 'turno'],
+  },
+  {
+    id: 'instalar-pwa',
+    categoria: 'acceso',
+    pregunta: '¿Cómo instalo la aplicación en la PC, tablet o celular (PWA)?',
+    solucion:
+      'En PC (Windows/Mac con Chrome o Edge), hacé clic en el ícono de "Instalar aplicación" a la derecha de la barra de direcciones o en el menú de opciones (...). En Android, abrí Chrome y tocá "Instalar aplicación" o "Agregar a la pantalla principal". En iPhone/iPad, tocá Compartir en Safari y elegí "Agregar al inicio". La aplicación se abrirá en su propia ventana sin barras del navegador, con ícono directo en tu escritorio o pantalla principal.',
+    palabrasClave: ['instalar', 'pwa', 'pc', 'celular', 'tablet', 'descargar', 'aplicacion', 'pantalla de inicio', 'iphone', 'android', 'escritorio'],
+  },
+  {
+    id: 'corte-internet',
+    categoria: 'pedidos',
+    pregunta: '¿Qué pasa si se corta internet durante el turno?',
+    solucion:
+      'El sistema activa un aviso de "Sin conexión". Si la pantalla de Cocina ya estaba abierta, podés seguir visualizando comandas, cambiando de columna (preparación a listo) e imprimiendo comandas en la ticketera térmica (funciona 100% local en tu red/equipo). Los cambios de estado se sincronizan automáticamente con Firebase apenas regrese la conexión. Para recibir nuevos pedidos web de clientes o registrar nuevas ventas en Mostrador se requiere enlace a internet activo.',
+    palabrasClave: ['corte', 'internet', 'offline', 'sin conexion', 'wifi', 'red', 'se cayo', 'desconexion'],
   },
 ];
 
@@ -518,7 +611,8 @@ function IlustracionModulo({ id }: { id: ModuloAyuda['id'] }) {
     );
   }
 
-  return (
+  if (id === 'carta-promos') {
+    return (
     <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
       <span className="mb-2.5 block text-[11px] font-black tracking-wider text-slate-400 uppercase">
         Vista rápida · Pausar plato agotado y Aumento por porcentaje
@@ -554,7 +648,137 @@ function IlustracionModulo({ id }: { id: ModuloAyuda['id'] }) {
       </div>
     </div>
   );
+  }
+
+  if (id === 'instalacion') {
+    return (
+      <div className="mb-4 rounded-xl border border-slate-200 bg-white p-3.5 shadow-2xs">
+        <span className="mb-2.5 block text-[11px] font-black tracking-wider text-slate-400 uppercase">
+          Referencia visual · Dónde tocar para instalar según tu dispositivo
+        </span>
+        <div className="grid gap-3 md:grid-cols-3">
+          {/* Tarjeta 1: PC / Notebook */}
+          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-3 shadow-2xs">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                <span className="flex items-center gap-1.5 text-xs font-black text-slate-900">
+                  <Laptop className="h-4 w-4 text-slate-700" /> PC / Notebook
+                </span>
+                <span className="rounded bg-slate-200/90 px-1.5 py-0.5 text-[10px] font-bold text-slate-700">
+                  Windows / Mac
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">
+                1. Mirá al final de la barra donde escribís la web:
+              </p>
+              {/* Mockup barra de direcciones Chrome */}
+              <div className="flex items-center justify-between rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 shadow-xs">
+                <span className="truncate text-[11px] font-mono text-slate-400">
+                  .../panel/ayuda
+                </span>
+                <span className="flex items-center gap-1 rounded bg-orange-50 border border-orange-300 px-1.5 py-0.5 text-[10px] font-black text-orange-700">
+                  <Download className="h-3 w-3 text-orange-600" /> Instalar
+                </span>
+              </div>
+            </div>
+            <p className="mt-2.5 text-[11px] font-medium leading-relaxed text-slate-500">
+              2. Tocá <strong>&ldquo;Instalar&rdquo;</strong> y te creará el acceso directo en el Escritorio abriéndose en su propia ventana.
+            </p>
+          </div>
+
+          {/* Tarjeta 2: Celular o Tablet Android */}
+          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-3 shadow-2xs">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                <span className="flex items-center gap-1.5 text-xs font-black text-slate-900">
+                  <Smartphone className="h-4 w-4 text-slate-700" /> Android
+                </span>
+                <span className="rounded bg-emerald-100 border border-emerald-200 px-1.5 py-0.5 text-[10px] font-bold text-emerald-800">
+                  Google Chrome
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">
+                1. Tocá los 3 puntos ⋮ arriba a la derecha:
+              </p>
+              {/* Mockup menú Chrome Android */}
+              <div className="rounded-lg border border-slate-300 bg-white p-2 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 border-b border-slate-100 pb-1">
+                  <span>Pestaña nueva</span>
+                  <span>⋮</span>
+                </div>
+                <div className="flex items-center gap-1.5 rounded bg-emerald-50 border border-emerald-300 px-2 py-1 text-[11px] font-black text-emerald-800">
+                  <Download className="h-3 w-3 text-emerald-600" /> Instalar aplicación
+                </div>
+              </div>
+            </div>
+            <p className="mt-2.5 text-[11px] font-medium leading-relaxed text-slate-500">
+              2. Elegí <strong>&ldquo;Instalar aplicación&rdquo;</strong>. Se descarga el ícono directo a tu inicio a pantalla completa.
+            </p>
+          </div>
+
+          {/* Tarjeta 3: iPhone / iPad */}
+          <div className="flex flex-col justify-between rounded-xl border border-slate-200 bg-slate-50/80 p-3 shadow-2xs">
+            <div>
+              <div className="flex items-center justify-between border-b border-slate-200 pb-2 mb-2">
+                <span className="flex items-center gap-1.5 text-xs font-black text-slate-900">
+                  <Smartphone className="h-4 w-4 text-slate-700" /> iPhone / iPad
+                </span>
+                <span className="rounded bg-blue-100 border border-blue-200 px-1.5 py-0.5 text-[10px] font-bold text-blue-800">
+                  Safari (Apple)
+                </span>
+              </div>
+              <p className="text-xs text-slate-600 mb-2">
+                1. Tocá Compartir en la barra de abajo:
+              </p>
+              {/* Mockup menú Safari iOS */}
+              <div className="rounded-lg border border-slate-300 bg-white p-2 shadow-xs space-y-1">
+                <div className="flex items-center justify-between text-[11px] font-semibold text-slate-400 border-b border-slate-100 pb-1">
+                  <span>Copiar enlace</span>
+                  <Share2 className="h-3 w-3" />
+                </div>
+                <div className="flex items-center gap-1.5 rounded bg-blue-50 border border-blue-300 px-2 py-1 text-[11px] font-black text-blue-800">
+                  <SquarePlus className="h-3 w-3 text-blue-600" /> Agregar al inicio
+                </div>
+              </div>
+            </div>
+            <p className="mt-2.5 text-[11px] font-medium leading-relaxed text-slate-500">
+              2. Tocá <strong>&ldquo;Agregar al inicio&rdquo;</strong> y luego &ldquo;Agregar&rdquo;. Queda como app nativa con el logo del local.
+            </p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
 }
+
+const PALABRAS_VACIAS = new Set([
+  'y',
+  'e',
+  'o',
+  'u',
+  'de',
+  'del',
+  'la',
+  'el',
+  'los',
+  'las',
+  'un',
+  'una',
+  'unos',
+  'unas',
+  'en',
+  'al',
+  'para',
+  'por',
+  'con',
+  'sin',
+  'como',
+  'que',
+  'su',
+  'sus',
+]);
 
 function normalizarTexto(texto: string): string {
   return texto
@@ -563,39 +787,83 @@ function normalizarTexto(texto: string): string {
     .replace(/[\u0300-\u036f]/g, '');
 }
 
+function extraerTokens(texto: string): string[] {
+  const norm = normalizarTexto(texto);
+  const palabras = norm.match(/[a-z0-9]+/g) ?? [];
+  const filtradas = palabras.filter((p) => p.length >= 2 && !PALABRAS_VACIAS.has(p));
+  return filtradas.length > 0 ? filtradas : palabras;
+}
+
+function coincidePalabra(a: string, b: string): boolean {
+  if (!a || !b) return false;
+  if (a === b) return true;
+  // Solo subcadena si el término tiene al menos 4 caracteres (evita que "app" coincida con "whatsapp")
+  if (b.length >= 4 && a.includes(b)) return true;
+  if (a.length >= 4 && b.includes(a)) return true;
+  if (a.length >= 5 && b.length >= 5) {
+    const minLen = Math.min(a.length, b.length);
+    const lenRaiz = Math.min(5, minLen);
+    return a.slice(0, lenRaiz) === b.slice(0, lenRaiz);
+  }
+  return false;
+}
+
+function coincideTexto(texto: string, tokens: string[], frase: string): boolean {
+  const norm = normalizarTexto(texto);
+  if (!norm) return false;
+  if (frase && norm.includes(frase)) return true;
+  const palabrasTexto = norm.match(/[a-z0-9]+/g) ?? [];
+  return tokens.some((token) =>
+    palabrasTexto.some((palabra) => coincidePalabra(palabra, token)),
+  );
+}
+
+function coincideClaves(claves: readonly string[], tokens: string[], frase: string): boolean {
+  return claves.some((c) => {
+    const k = normalizarTexto(c);
+    if (!k) return false;
+    if (frase && (k.includes(frase) || frase.includes(k))) return true;
+    return tokens.some((t) => coincidePalabra(k, t));
+  });
+}
+
 export default function AyudaPage() {
   const [busqueda, setBusqueda] = useState('');
   const [moduloAbierto, setModuloAbierto] = useState<string>('mostrador');
 
-  const termino = useMemo(() => normalizarTexto(busqueda.trim()), [busqueda]);
+  const frase = useMemo(() => normalizarTexto(busqueda.trim()), [busqueda]);
+  const tokens = useMemo(() => extraerTokens(busqueda), [busqueda]);
 
   const modulosFiltrados = useMemo(() => {
-    if (!termino) return MODULOS_AYUDA;
+    if (!frase || tokens.length === 0) return MODULOS_AYUDA;
     return MODULOS_AYUDA.filter((m) => {
-      const enTitulo = normalizarTexto(m.titulo).includes(termino);
-      const enResumen = normalizarTexto(m.resumen).includes(termino);
-      const enClaves = m.palabrasClave.some((k) => normalizarTexto(k).includes(termino));
+      const enTitulo = coincideTexto(m.titulo, tokens, frase);
+      const enResumen = coincideTexto(m.resumen, tokens, frase);
+      const enClaves = coincideClaves(m.palabrasClave, tokens, frase);
       const enPasos = m.pasos.some(
         (p) =>
-          normalizarTexto(p.titulo).includes(termino) ||
-          normalizarTexto(p.detalle).includes(termino),
+          coincideTexto(p.titulo, tokens, frase) ||
+          coincideTexto(p.detalle, tokens, frase),
       );
-      return enTitulo || enResumen || enClaves || enPasos;
+      const enConsejo = m.consejo ? coincideTexto(m.consejo, tokens, frase) : false;
+      return enTitulo || enResumen || enClaves || enPasos || enConsejo;
     });
-  }, [termino]);
+  }, [tokens, frase]);
 
   const problemasFiltrados = useMemo(() => {
-    if (!termino) return PROBLEMAS_COMUNES;
+    if (!frase || tokens.length === 0) return PROBLEMAS_COMUNES;
     return PROBLEMAS_COMUNES.filter((p) => {
-      const enPregunta = normalizarTexto(p.pregunta).includes(termino);
-      const enSolucion = normalizarTexto(p.solucion).includes(termino);
-      const enClaves = p.palabrasClave.some((k) => normalizarTexto(k).includes(termino));
+      const enPregunta = coincideTexto(p.pregunta, tokens, frase);
+      const enSolucion = coincideTexto(p.solucion, tokens, frase);
+      const enClaves = coincideClaves(p.palabrasClave, tokens, frase);
       return enPregunta || enSolucion || enClaves;
     });
-  }, [termino]);
+  }, [tokens, frase]);
 
   const busquedasRapidas = [
     'Timbre y sonido',
+    'Instalar app (PWA)',
+    'Corte de internet',
     'Pago mixto',
     'Cupo / Stock',
     'Deshacer cobro',
@@ -668,7 +936,7 @@ export default function AyudaPage() {
       </div>
 
       {/* Rutina de un día de trabajo en 5 pasos (solo cuando no hay filtro activo) */}
-      {!termino && (
+      {!frase && (
         <section className="rounded-2xl border border-slate-200/90 bg-white p-5 shadow-xs sm:p-6">
           <div className="mb-4 flex items-center justify-between">
             <div>
@@ -717,13 +985,24 @@ export default function AyudaPage() {
 
         {modulosFiltrados.length === 0 ? (
           <div className="rounded-2xl border border-slate-200 bg-white p-6 text-center text-sm text-slate-500">
-            No hay guías que coincidan con &ldquo;{busqueda}&rdquo;. Revisá las dudas rápidas más abajo o probá con otra palabra.
+            {problemasFiltrados.length > 0 ? (
+              <span>
+                No hay guías de pantalla para &ldquo;{busqueda}&rdquo;. Encontrás{' '}
+                <strong className="text-slate-900 font-bold">
+                  {problemasFiltrados.length} respuesta{problemasFiltrados.length > 1 ? 's' : ''} en Dudas comunes más abajo ↓
+                </strong>
+              </span>
+            ) : (
+              <span>
+                No hay guías que coincidan con &ldquo;{busqueda}&rdquo;. Revisá las dudas rápidas más abajo o probá con otra palabra.
+              </span>
+            )}
           </div>
         ) : (
           <div className="space-y-3">
             {modulosFiltrados.map((modulo) => {
               const Icono = modulo.icono;
-              const abierto = Boolean(termino) || moduloAbierto === modulo.id;
+              const abierto = Boolean(frase) || moduloAbierto === modulo.id;
               return (
                 <div
                   key={modulo.id}

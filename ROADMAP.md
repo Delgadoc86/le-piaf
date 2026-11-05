@@ -69,6 +69,7 @@ Cada local tiene su propia base de Firestore aislada (sin `locales/{id}`):
 - [x] **4.3.** Configuración del Cupo del Turno (`configuracion/cupo.tsx`) y campo `pesoCupo` en formularios de productos y promos.
 - [x] **4.4.** Conexión de la tienda web pública para marcar como *"Agotado por hoy"* los ítems alcanzados cuando `cupo.restante <= 0`.
 - [x] **4.5.** Crear sección **`Ayuda` (`/panel/ayuda`)** con buscador instantáneo, vistas ilustrativas de los controles reales y resolución de problemas comunes, y reemplazar el manual de usuario externo por el dossier comercial **`silverio/comercial/presentacion-comercial.pdf`** (DelgadoDev · Cristian Delgado).
+- [x] **4.6.** Implementar Login corporativo exclusivo con tema oscuro, branding y logo propio del local, animaciones fluidas, instalador PWA multiplataforma (`manifest.ts`, iconos 192/512 para PC, Android e iOS), Screen Wake Lock continuo y banner offline en Mostrador, y actualización del Centro de Ayuda.
 
 ### Fase 5: Cierre de Base y Sincronización a Copias
 - [x] **5.1.** Validación integral local en **Silverio2026** (`pnpm lint`, `pnpm typecheck`, `pnpm test` y prueba visual en navegador).

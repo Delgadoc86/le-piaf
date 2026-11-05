@@ -27,11 +27,14 @@ Este repositorio (`silverio-club`) cumple un doble rol:
 - **Freno automático por stock agotado:** Si el Cupo del Turno llega a `0`, los platos y promos alcanzados pasan automáticamente a *"Agotado por hoy"*.
 
 ### Panel de Gestión (`apps/web/src/app/panel`)
+- **Login Exclusivo y Profesional (`/login`):**
+  - Interfaz oscura (dark obsidian) personalizada para cada negocio con el logo oficial del comercio, animación suave de entrada y acceso seguro para el personal.
 - **Mostrador (`/panel/mostrador`):**
   - Carga táctil en **1 toque** con foto en miniatura e indicador de unidades cargadas (`1×`, `2×`).
   - Modalidad por defecto en **"Comer acá"** para atención presencial (con cambio en 1 clic a *Para llevar* o *Delivery*).
   - Botones rápidos de exclusión de ingredientes (`SIN Cebolla`, `SIN Mayonesa`, `SIN Huevo`, etc.) y notas libres.
   - Calculadora de vuelto en efectivo y soporte nativo de **Cobro Mixto** (*Efectivo + Transferencia* en un solo paso).
+  - **Screen Wake Lock API** y detector de estado de red (`useOnlineStatus`) para mantener el display encendido y alertar si cae la conexión.
 - **Pantalla de Cocina / Pedidos (`/panel/pedidos`):**
   - Tablero KDS en tiempo real en 3 columnas (*Nuevos*, *En Cocina*, *Listos para despacho*) con filtros rápidos por canal (*Todos*, *Mostrador / Retira*, *Delivery*).
   - Comandas completas sin truncar ítems, con exclusiones `SIN...` resaltadas en etiquetas rojas de alto contraste.
@@ -120,7 +123,20 @@ El sistema imprime comandas térmicas nativas para impresoras de **58 mm u 80 mm
 
 ---
 
-## 5. Arquitectura Base vs. Copias y Sincronización
+## 5. Instalación PWA en PC, Tablets y Celulares
+
+El sistema opera como **Progressive Web App (PWA)** instalable con experiencia de software nativo (modo ventana independiente, sin barras del navegador):
+
+- **PC (Windows / Mac) con Chrome o Edge:**
+  Hacé clic en el ícono de *"Instalar aplicación"* que aparece a la derecha de la barra de direcciones (o menú `···` → *Instalar Silverio Club*). Se creará un acceso directo en el Escritorio y en la barra de tareas de Windows.
+- **Celulares y Tablets Android (Chrome / Edge):**
+  Al ingresar al panel, tocá *"Instalar aplicación"* en el aviso inferior o desde el menú de Chrome. Se generará el ícono en la pantalla de inicio abriéndose a pantalla completa.
+- **iPhone / iPad (Safari):**
+  Tocá el botón de Compartir en la barra inferior de Safari y seleccioná *"Agregar al inicio"*.
+
+---
+
+## 6. Arquitectura Base vs. Copias y Sincronización
 
 ### Clasificación de archivos (`scripts/guardia.mjs`)
 - **Genéricos (solo se editan en `silverio-club`):** `apps/web/src/components/panel/**`, `apps/web/src/app/panel/**`, `apps/web/src/features/**`, `packages/shared/**`, `functions/src/**`, `firestore.rules`, `storage.rules`, `scripts/**`.
