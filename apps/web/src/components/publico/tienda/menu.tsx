@@ -229,10 +229,12 @@ function FilaProducto({
   const abrir = useTiendaUI((e) => e.abrirProducto);
   const avisar = useTiendaUI((e) => e.avisarAgregado);
   const agregar = useCarrito((e) => e.agregar);
+  const tienda = useTienda();
   const [listo, setListo] = useState(false);
-  const agotado = !p.disponible;
+  const agotadoCupo = tienda.productoAgotadoPorCupo(p.id);
+  const agotado = !p.disponible || agotadoCupo;
   const directo = agregadoDirecto(p);
-  const conCarrito = useTienda().pedidos.habilitados;
+  const conCarrito = tienda.pedidos.habilitados;
 
   function mas(e: MouseEvent) {
     e.stopPropagation();
@@ -257,7 +259,6 @@ function FilaProducto({
         className="absolute inset-0 z-0 rounded-2xl"
         aria-label={`Ver ${p.nombre}`}
       />
-
       {/* Miniatura protagonista a la izquierda */}
       <div className="relative shrink-0">
         <Miniatura
@@ -288,7 +289,7 @@ function FilaProducto({
             </span>
             {agotado && (
               <span className="rounded-full bg-white/10 px-2 py-0.5 text-[9px] font-bold tracking-wide uppercase text-tinta-2">
-                Agotado
+                {agotadoCupo ? 'Agotado por hoy' : 'Agotado'}
               </span>
             )}
             {p.etiquetas?.map((e) => (

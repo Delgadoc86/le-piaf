@@ -37,7 +37,7 @@ export function HojaProducto() {
 }
 
 function Contenido({ productoId }: { productoId: string }) {
-  const { producto, categoria, pedidos, whatsapp, nombreLocal } = useTienda();
+  const { producto, categoria, pedidos, whatsapp, nombreLocal, productoAgotadoPorCupo } = useTienda();
   const p = producto(productoId)!;
   const agregar = useCarrito((e) => e.agregar);
   const { abrirProducto, avisarAgregado } = useTiendaUI();
@@ -101,7 +101,8 @@ function Contenido({ productoId }: { productoId: string }) {
     setTimeout(() => abrirProducto(null), 450);
   }
 
-  const agotado = !p.disponible;
+  const agotadoCupo = productoAgotadoPorCupo(p.id);
+  const agotado = !p.disponible || agotadoCupo;
   const cat = categoria(p.categoriaId);
 
   return (
@@ -241,7 +242,7 @@ function Contenido({ productoId }: { productoId: string }) {
                 <Check className="size-5" aria-hidden /> Agregado
               </span>
             ) : agotado ? (
-              <span className="mx-auto">Agotado</span>
+              <span className="mx-auto">{agotadoCupo ? 'Agotado por hoy' : 'Agotado'}</span>
             ) : !calculo.ok ? (
               <span className="mx-auto truncate text-sm">{calculo.error}</span>
             ) : (

@@ -1,5 +1,7 @@
 import {
   cancelarPedidoClienteInputSchema,
+  correspondeRestituirCupo,
+  DOC_CUPO,
   puedeCancelarCliente,
   type CanceladoPor,
   type EstadoPedido,
@@ -97,4 +99,34 @@ export const registrarClienteEntregado = onDocumentUpdated('pedidos/{id}', async
   await db
     .doc(`clientes/${telefono}`)
     .set({ telefono, entregados: FieldValue.increment(1) }, { merge: true });
+});
+
+/**
+ * Restituye automáticamente al Cupo del Turno (`local/cupo`) las unidades descontadas cuando un
+ * pedido pasa desde `pendiente` o `aceptado` a `cancelado` o `rechazado` (por cualquier vía:
+ * rechazo del encargado en el panel, cancelación del cliente o vencimiento de confirmación).
+ */
+export const restituirCupoPedido = onDocumentUpdated('pedidos/{id}', async (event) => {
+  const antes = event.data?.before.data() as Pedido | undefined;
+  const despues = event.data?.after.data() as Pedido | undefined;
+  if (!antes || !despues || !correspondeRestituirCupo(antes, despues)) return;
+
+  const pedidoRef = event.data?.after.ref;
+  if (!pedidoRef) return;
+  const cupoRef = db.doc(DOC_CUPO);
+
+  await db.runTransaction(async (tx) => {
+    const [pedidoSnap, cupoSnap] = await Promise.all([tx.get(pedidoRef), tx.get(cupoRef)]);
+    const p = pedidoSnap.data() as Pedido | undefined;
+    if (!p || !p.unidadesCupo || p.unidadesCupo <= 0 || p.cupoRestituido === true) return;
+    if (p.estado !== 'cancelado' && p.estado !== 'rechazado') return;
+
+    if (cupoSnap.exists) {
+      tx.update(cupoRef, {
+        restante: FieldValue.increment(p.unidadesCupo),
+        actualizadoEn: FieldValue.serverTimestamp(),
+      });
+    }
+    tx.update(pedidoRef, { cupoRestituido: true });
+  });
 });

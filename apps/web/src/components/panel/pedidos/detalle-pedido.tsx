@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Clock, MapPin, Minus, Plus } from 'lucide-react';
+import { Clock, MapPin, Minus, Plus, Printer } from 'lucide-react';
 import {
   formatARS,
   puedePasar,
@@ -25,6 +25,7 @@ import { linkWhatsApp } from '@/lib/whatsapp';
 import {
   ACCION_HACIA,
   COLOR_ETAPA,
+  desglosarNotaCocina,
   etapaDe,
   ETIQUETA_ESTADO,
   ETIQUETA_TIPO,
@@ -32,6 +33,7 @@ import {
   mensajeParaCliente,
   type PedidoConId,
 } from '@/features/panel/pedidos';
+import { imprimirComandaTermica } from '@/features/panel/impresion';
 import { EtiquetaPago, ICONO_TIPO } from './tarjeta-pedido';
 
 interface Props {
@@ -104,27 +106,43 @@ function Contenido({
   return (
     <>
       <DialogHeader>
-        <DialogTitle className="flex items-center gap-2 text-xl">
-          Pedido #{pedido.numero}
-          <span className="rounded-full bg-muted px-2 py-0.5 text-xs font-medium">
-            {ETIQUETA_ESTADO[pedido.estado]}
-          </span>
-        </DialogTitle>
-        <DialogDescription className="flex items-center gap-1.5">
-          <Icono className="size-4" aria-hidden /> {ETIQUETA_TIPO[pedido.tipo]} ·{' '}
-          {horaDe(pedido.creadoEn, zonaHoraria)} ·{' '}
-          {pedido.origen === 'web'
-            ? 'por la web'
-            : pedido.origen === 'telefono'
-              ? 'por teléfono'
-              : 'en mostrador'}
-        </DialogDescription>
+        <div className="flex items-start justify-between gap-2 pr-6">
+          <div>
+            <DialogTitle className="flex items-center gap-2 text-xl font-black">
+              Pedido #{pedido.numero}
+              <span className="rounded-full bg-muted px-2.5 py-0.5 text-xs font-bold">
+                {ETIQUETA_ESTADO[pedido.estado]}
+              </span>
+            </DialogTitle>
+            <DialogDescription className="mt-1 flex items-center gap-1.5">
+              <Icono className="size-4" aria-hidden /> {ETIQUETA_TIPO[pedido.tipo]} ·{' '}
+              {horaDe(pedido.creadoEn, zonaHoraria)} ·{' '}
+              {pedido.origen === 'web'
+                ? 'por la web'
+                : pedido.origen === 'telefono'
+                  ? 'por teléfono'
+                  : 'en mostrador'}
+            </DialogDescription>
+          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => imprimirComandaTermica(pedido, { zonaHoraria, nombreLocal })}
+            className="h-9 rounded-xl font-bold flex items-center gap-1.5 shrink-0"
+          >
+            <Printer className="size-4" />
+            <span>Imprimir</span>
+          </Button>
+        </div>
       </DialogHeader>
 
       {/* Cliente nuevo: confirmación por WhatsApp */}
       {sinConfirmar && (
         <section className="space-y-2 rounded-lg border border-dashed border-zinc-400 bg-muted/40 p-3 text-sm">
-          <p className="font-medium">⏳ Esperando que el cliente lo confirme por WhatsApp</p>
+          <p className="flex items-center gap-1.5 font-medium">
+            <Clock className="size-4 shrink-0 text-amber-600" />
+            <span>Esperando que el cliente lo confirme por WhatsApp</span>
+          </p>
           <p className="text-muted-foreground">
             Es su primer pedido. Cuando te llegue su mensaje con el #{pedido.numero}, tocá “Ya
             confirmó”. Si no confirma, se cancela solo.
@@ -137,7 +155,7 @@ function Contenido({
                 onClick={onConfirmar}
                 disabled={ocupado}
               >
-                ✓ Ya confirmó por WhatsApp
+                Ya confirmó por WhatsApp
               </Button>
               {pedido.cliente?.telefono && (
                 <Button variant="outline" size="sm" asChild>
@@ -160,31 +178,51 @@ function Contenido({
 
       {/* Ítems: lo más importante, bien grande para la cocina */}
       <ul className="divide-y rounded-lg border">
-        {pedido.items.map((i) => (
-          <li key={i.id} className="flex gap-3 p-3">
-            <span className="text-lg font-bold tabular-nums">{i.cantidad}×</span>
-            <div className="min-w-0 flex-1">
-              <p className="font-medium">
-                {i.nombre}
-                {i.varianteNombre && (
-                  <span className="text-muted-foreground"> · {i.varianteNombre}</span>
-                )}
-              </p>
-              {i.extras.length > 0 && (
-                <p className="text-sm text-muted-foreground">
-                  + {i.extras.map((e) => e.nombre).join(', ')}
+        {pedido.items.map((i) => {
+          const { exclusiones, aclaracion } = desglosarNotaCocina(i.nota);
+          return (
+            <li key={i.id} className="flex gap-3 p-3">
+              <span className="text-lg font-black tabular-nums">{i.cantidad}×</span>
+              <div className="min-w-0 flex-1 space-y-1">
+                <p className="font-bold text-base">
+                  {i.nombre}
+                  {i.varianteNombre && (
+                    <span className="text-muted-foreground font-semibold">
+                      {' '}
+                      · {i.varianteNombre}
+                    </span>
+                  )}
                 </p>
-              )}
-              {i.nota && (
-                <p className="text-sm font-medium text-amber-700 dark:text-amber-300">“{i.nota}”</p>
-              )}
-            </div>
-            <span className="text-sm tabular-nums">{formatARS(i.subtotal)}</span>
-          </li>
-        ))}
+                {i.extras.length > 0 && (
+                  <p className="text-sm text-muted-foreground font-medium">
+                    + {i.extras.map((e) => e.nombre).join(', ')}
+                  </p>
+                )}
+                {exclusiones.length > 0 && (
+                  <div className="flex flex-wrap gap-1 pt-0.5">
+                    {exclusiones.map((exc, idx) => (
+                      <span
+                        key={idx}
+                        className="inline-flex items-center rounded-md bg-rose-600 px-2 py-0.5 text-xs font-black uppercase tracking-wider text-white"
+                      >
+                        {exc}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                {aclaracion && (
+                  <p className="text-sm font-bold text-amber-800 dark:text-amber-300">
+                    “{aclaracion}”
+                  </p>
+                )}
+              </div>
+              <span className="text-sm font-bold tabular-nums">{formatARS(i.subtotal)}</span>
+            </li>
+          );
+        })}
         {pedido.costoEnvio > 0 && (
           <li className="flex justify-between p-3 text-sm">
-            <span>🛵 Envío</span>
+            <span>Envío</span>
             <span className="tabular-nums">{formatARS(pedido.costoEnvio)}</span>
           </li>
         )}

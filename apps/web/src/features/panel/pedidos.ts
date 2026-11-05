@@ -37,7 +37,7 @@ import {
   type TipoPedido,
 } from '@app/shared';
 import { firebase } from '@/lib/firebase/client';
-import { sonarPedidoNuevo } from './sonido';
+import { INTERVALO_TIMBRE_PENDIENTES_MS, sonarPedidoNuevo } from './sonido';
 
 export type PedidoConId = Pedido & { id: string };
 
@@ -169,15 +169,32 @@ export function useAlertaPedidosPendientes(zonaHoraria: string | undefined, ruta
     );
   }, [zonaHoraria, rutaActual]);
 
-  // Si hay pedidos pendientes y estamos en otra pantalla, actualizar el título de la pestaña del navegador
+  // Si hay pedidos pendientes y estamos en otra pantalla (ej. Mostrador o Caja):
+  // 1) Alterna el título de la pestaña del navegador para que pestañee visualmente.
+  // 2) Repite el timbre cada 25 s hasta que entren a aceptarlo.
   useEffect(() => {
-    if (nuevosCount > 0 && rutaActual !== '/panel/pedidos') {
-      const prevTitle = document.title;
-      document.title = `(${nuevosCount}) 🔔 Pedidos nuevos`;
-      return () => {
-        document.title = prevTitle;
-      };
-    }
+    if (nuevosCount <= 0 || rutaActual === '/panel/pedidos') return;
+
+    const prevTitle = document.title;
+    const textoAlerta =
+      nuevosCount === 1 ? '(1) ¡PEDIDO NUEVO!' : `(${nuevosCount}) ¡PEDIDOS NUEVOS!`;
+    let mostrandoAlerta = true;
+    document.title = textoAlerta;
+
+    const idTitulo = setInterval(() => {
+      mostrandoAlerta = !mostrandoAlerta;
+      document.title = mostrandoAlerta ? textoAlerta : prevTitle;
+    }, 1200);
+
+    const idTimbre = setInterval(() => {
+      sonarPedidoNuevo();
+    }, INTERVALO_TIMBRE_PENDIENTES_MS);
+
+    return () => {
+      clearInterval(idTitulo);
+      clearInterval(idTimbre);
+      document.title = prevTitle;
+    };
   }, [nuevosCount, rutaActual]);
 
   return nuevosCount;
@@ -263,25 +280,78 @@ export function cambiarEnvio(pedido: PedidoConId, costoEnvio: number) {
   });
 }
 
-/** Registra un cobro manual (efectivo o transferencia) y recalcula el estado del pago. */
+/** Registra uno o más cobros manuales (efectivo, transferencia o mixto) y recalcula el estado del pago. */
 export function registrarCobro(
   pedido: PedidoConId,
-  cobro: Cobro & { pagaCon?: number },
+  cobro: (Cobro & { pagaCon?: number }) | readonly (Cobro & { pagaCon?: number })[],
   uid: string,
 ) {
-  const pago: PagoPedido = {
-    medio: cobro.medio,
-    monto: cobro.monto,
-    estado: 'aprobado',
-    porUid: uid,
-    ...(cobro.pagaCon ? { pagaCon: cobro.pagaCon } : {}),
-  };
-  const pagos = [...pedido.pagos, pago];
+  const entradas = Array.isArray(cobro) ? cobro : [cobro];
+  const nuevos: PagoPedido[] = entradas
+    .filter((c) => c.monto > 0)
+    .map((c) => ({
+      medio: c.medio,
+      monto: c.monto,
+      estado: 'aprobado',
+      porUid: uid,
+      ...(c.pagaCon ? { pagaCon: c.pagaCon } : {}),
+    }));
+  const pagos = [...pedido.pagos, ...nuevos];
   return updateDoc(refPedido(pedido.id), {
     pagos,
     estadoPago: estadoPagoDe(pagos, pedido.total),
     actualizadoEn: serverTimestamp(),
   });
+}
+
+/**
+ * Separa de la nota de un ítem las exclusiones de ingredientes ("SIN CEBOLLA", "SIN MAYONESA")
+ * respecto de las aclaraciones generales de cocción ("bien cocido", "aderezo aparte").
+ */
+export function desglosarNotaCocina(nota?: string): {
+  exclusiones: string[];
+  aclaracion: string;
+} {
+  if (!nota || !nota.trim()) return { exclusiones: [], aclaracion: '' };
+  const exclusiones: string[] = [];
+  const otras: string[] = [];
+
+  for (const bloque of nota.split('·')) {
+    const partes = bloque.split(',');
+    const restoBloque: string[] = [];
+    for (const p of partes) {
+      const limpio = p.trim();
+      if (!limpio) continue;
+      if (/^sin\s+/i.test(limpio)) {
+        exclusiones.push(limpio.toUpperCase());
+      } else {
+        restoBloque.push(limpio);
+      }
+    }
+    if (restoBloque.length > 0) {
+      otras.push(restoBloque.join(', '));
+    }
+  }
+
+  return { exclusiones, aclaracion: otras.join(' · ') };
+}
+
+/** Estado de conexión a internet del navegador en tiempo real. */
+export function useOnlineStatus(): boolean {
+  const [online, setOnline] = useState(() =>
+    typeof navigator !== 'undefined' ? navigator.onLine : true,
+  );
+  useEffect(() => {
+    const onOnline = () => setOnline(true);
+    const onOffline = () => setOnline(false);
+    window.addEventListener('online', onOnline);
+    window.addEventListener('offline', onOffline);
+    return () => {
+      window.removeEventListener('online', onOnline);
+      window.removeEventListener('offline', onOffline);
+    };
+  }, []);
+  return online;
 }
 
 /** Deshace los cobros (por si se marcó pagado por error). */

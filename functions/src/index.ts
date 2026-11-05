@@ -17,4 +17,5 @@ export {
   cancelarPedidoCliente,
   cancelarPedidosSinConfirmar,
   registrarClienteEntregado,
+  restituirCupoPedido,
 } from './pedidos/confirmacion.js';

@@ -60,6 +60,23 @@ export type Local = Omit<LocalEditable, 'pedidos'> & {
   actualizadoEn: Timestamp;
 };
 
+/** Documento local/cupo: contador aislado en tiempo real del cupo del turno abierto. */
+export interface CupoTurnoActivo {
+  nombre: string;
+  inicial: number;
+  /** Unidades disponibles. Puede ser negativo si el staff realiza sobreventa controlada. */
+  restante: number;
+  actualizadoEn: Timestamp;
+}
+
+/** Foto del cupo guardada en turnosCaja/{turnoId} al cerrar la caja. */
+export interface ResumenCupoTurno {
+  nombre: string;
+  inicial: number;
+  restante: number;
+  vendidos: number;
+}
+
 /** miembros/{uid} */
 export interface Miembro {
   rol: Rol;
@@ -154,6 +171,10 @@ export interface Pedido {
   seguimientoToken: string;
   /** Candado de contabilizarPedido: true si ya está sumado en la caja y en statsDiarias. */
   contabilizado: boolean;
+  /** Unidades de cupo descontadas al crear el pedido (para trazabilidad y devolución). */
+  unidadesCupo?: number;
+  /** Candado idempotente: true si las unidades ya fueron restituidas al cupo tras cancelar/rechazar. */
+  cupoRestituido?: boolean;
   /** Qué se sumó y dónde, para poder restarlo igual si se cancela o se deshace el cobro. */
   contabilizacion?: {
     turnoCajaId: string | null;
@@ -233,6 +254,8 @@ export interface TurnoCaja {
   diferencia?: Record<MedioPagoManual, number>;
   movimientosNeto?: number;
   notas?: string;
+  /** Balance del cupo del turno si estuvo habilitado durante la jornada. */
+  cupoFinal?: ResumenCupoTurno;
 }
 
 export interface MovimientoCaja {
