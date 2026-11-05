@@ -442,5 +442,5 @@ Las mejoras pendientes salen del análisis anterior (impresión de comanda, PWA 
 | 1 Le Piaf | 2026-11-03 | 4a1a6f8 | 4a1a6f8 | `aporte/le-piaf` (`4742fbe`) | completada | Aporte limpio subido a silverio-club sin tocar main |
 | 2 Bautista | 2026-11-03 | 4a1a6f8 | 4a1a6f8 | `aporte/bautista` | completada | Aporte limpio preparado sobre base/main (emuladores, fuentes, extras seed, menu SEO) |
 | 3 Silverio | 2026-11-03 | 4a1a6f8 | 4a1a6f8 | `base-sync-v1` | completada | Base unificada: aportes integrados, fijos neutralizados y barreras instaladas |
-| 4 Retorno Le Piaf | | | | | pendiente | |
+| 4 Retorno Le Piaf | 2026-11-03 | 69a7f28 | 4a1a6f8 | `main` | completada | Merge base-sync-v1 limpio, 173 archivos genéricos verificados, guardia activo y push a base desactivado |
 | 5 Retorno Bautista | | | | | pendiente | |
