@@ -8,22 +8,28 @@ import { useEffect, useState } from 'react';
 import {
   addDoc,
   collection,
+  doc,
+  increment,
   limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  updateDoc,
   where,
 } from 'firebase/firestore';
 import { httpsCallable } from 'firebase/functions';
-import type {
-  AbrirCajaInput,
-  CerrarCajaInput,
-  MovimientoCaja,
-  MovimientoCajaDatos,
-  PorMedio,
-  StatsDiarias,
-  TurnoCaja,
+import {
+  DOC_CUPO,
+  type AbrirCajaInput,
+  type CerrarCajaInput,
+  type CupoTurnoActivo,
+  type MovimientoCaja,
+  type MovimientoCajaDatos,
+  type PorMedio,
+  type ResumenCupoTurno,
+  type StatsDiarias,
+  type TurnoCaja,
 } from '@app/shared';
 import { firebase } from '@/lib/firebase/client';
 
@@ -111,12 +117,40 @@ export async function abrirCaja(input: AbrirCajaInput) {
 export async function cerrarCaja(input: CerrarCajaInput) {
   const r = await httpsCallable<
     CerrarCajaInput,
-    { esperado: PorMedio; contado: PorMedio; diferencia: PorMedio }
+    { esperado: PorMedio; contado: PorMedio; diferencia: PorMedio; cupoFinal?: ResumenCupoTurno }
   >(
     firebase().functions,
     'cerrarCaja',
   )(input);
   return r.data;
+}
+
+/** Escucha en tiempo real el contador aislado `local/cupo` del turno abierto (o null si no aplica). */
+export function useCupoActivo(): { cupo: CupoTurnoActivo | null; cargando: boolean } {
+  const [estado, setEstado] = useState<{ cupo: CupoTurnoActivo | null; cargando: boolean }>({
+    cupo: null,
+    cargando: true,
+  });
+  useEffect(() => {
+    return onSnapshot(
+      doc(db(), DOC_CUPO),
+      (snap) =>
+        setEstado({
+          cupo: snap.exists() ? (snap.data() as CupoTurnoActivo) : null,
+          cargando: false,
+        }),
+      () => setEstado({ cupo: null, cargando: false }),
+    );
+  }, []);
+  return estado;
+}
+
+/** Ajuste rápido en vivo (+5, +10, -5) del cupo disponible durante el turno (solo gestores). */
+export function ajustarCupoActivo(delta: number) {
+  return updateDoc(doc(db(), DOC_CUPO), {
+    restante: increment(Math.trunc(delta)),
+    actualizadoEn: serverTimestamp(),
+  });
 }
 
 export function anotarMovimiento(turnoId: string, datos: MovimientoCajaDatos, uid: string) {

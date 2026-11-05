@@ -1,234 +1,151 @@
-# Silverio Club · base para locales gastronómicos
+# Silverio Club · Base para Locales Gastronómicos (DelgadoDev)
 
-Web de pedidos + panel de gestión ("semi-FUDO") para **un** local de comida. Este repo es la web de
-**Silverio Food Truck Beer** y, a la vez, la **base que se copia** para cada local nuevo: un repo,
-un proyecto de Firebase y un proyecto de Vercel por local.
+Sistema integral de **Tienda Web de Pedidos + Punto de Venta de Mostrador + Pantalla de Cocina (KDS) + Control de Caja y Cupo de Stock por Turno** pensado para pizzerías, lomiterías, rotiserías, hamburgueserías, bares y food trucks.
 
-> [!NOTE]
-> Este repositorio (`silverio-club`) es la **base neutra y unificada** del sistema. `silverio/` es el kit del local inicial. Todo cambio o funcionalidad genérica (stock, caja, comandas, etc.) se desarrolla aquí y luego se distribuye a las copias (`git merge base/main`).
+Este repositorio (`silverio-club`) cumple un doble rol:
+1. Es el sistema en producción de **Silverio Food Truck Beer**.
+2. Es la **base maestra** desde la cual se clonan y sincronizan las copias de otros locales gastronómicos (como **Le Piaf** y **Bautista**), manteniendo un repositorio, un proyecto Firebase y un proyecto Vercel independiente por cada comercio.
 
-- **Web pública:** carta tipo app, carrito, pedido online (retiro o delivery), seguimiento en vivo.
-- **Panel:** mostrador POS táctil (carga rápida de mostrador/delivery/salón, calculadora de vuelto en efectivo y exclusión ágil de ingredientes), pantalla de cocina con comandas en vivo de alto contraste (estilo ticket de papel), caja y turnos, ventas y reportes diarios, carta, promos, banner de fecha especial, QR y configuración.
-
-| Documento | Para qué |
+| Documento | Contenido |
 |---|---|
-| [ROADMAP.md](ROADMAP.md) | La especificación: arquitectura, modelo de datos, reglas, Functions y fases. |
-| [CLAUDE.md](CLAUDE.md) | Reglas de trabajo en el repo. |
-| [silverio/SILVERIO.md](silverio/SILVERIO.md) | Marca, textos y datos del local (el "kit"). |
-| [silverio/manual/manual-usuario.pdf](silverio/manual/manual-usuario.pdf) | Manual para el dueño y el encargado. |
+| [`README.md`](README.md) | Arquitectura, módulos del sistema, comandos, despliegue, impresión térmica y guía para crear o sincronizar copias. |
+| [`ROADMAP.md`](ROADMAP.md) | Especificación funcional unificada, modelo de datos y checklist de progreso y sincronización multi-local. |
+| [`CLAUDE.md`](CLAUDE.md) | Reglas de trabajo y convenciones del repositorio. |
+| [`silverio/SILVERIO.md`](silverio/SILVERIO.md) | Kit de identidad visual, textos y catálogo propio de Silverio. |
+| [`silverio/comercial/presentacion-comercial.pdf`](silverio/comercial/presentacion-comercial.pdf) | Dossier comercial en PDF (4 páginas A4) para presentar el sistema en nuevos negocios. |
 
-## Estado
+---
 
-| Fase | Qué incluye | Estado |
-|---|---|---|
-| 0 · Fundaciones | Monorepo, Firebase, roles, reglas con tests | ✅ |
-| 1 · Carta y web | Web pública, panel de carta, promos, banner, QR | ✅ (Silverio en producción como demo) |
-| 2 · Pedidos online | `crearPedido`, seguimiento, tablero, cobro manual, carga manual, delivery sin zonas | ✅ (versión mínima) |
-| 4 · Caja y ventas | Caja simple (abrir, movimientos, cierre), ventas, resumen | ✅ (hecha antes que la 3) |
-| 3 · Salón y cocina | Mesas, mozos, pantalla de cocina | Pendiente (solo si el local atiende mesas) |
-| 5 · Plantilla y venta | Automatizar la copia y el cobro del abono | Pendiente |
+## 1. Qué incluye el sistema
 
-**Pendientes conocidos:** App Check con el dominio definitivo, rotar la clave de la cuenta de
-servicio de Silverio, plan Pro de Vercel antes del dominio oficial (el plan Hobby no permite uso
-comercial). Ver "Después" en cada fase del [ROADMAP](ROADMAP.md).
+### Tienda Web Pública (`apps/web/src/app/(sitio)`)
+- **Carta digital rápida:** Categorías, fotos optimizadas en WebP, variantes, extras opcionales y buscador instantáneo.
+- **Promociones y Banner de fecha especial:** Combos programables por día/horario y banner promocional con vigencia automática.
+- **Carrito y pedido online sin registro:** El cliente elige retiro en el local o delivery, medio de pago (efectivo o transferencia) y confirma en segundos.
+- **Filtro inteligente anti-pedidos falsos:** La primera vez que un número pide por la web debe validar su pedido con 1 toque por WhatsApp (ventana de 15 minutos). Una vez entregado su primer pedido, queda registrado como cliente habitual y en futuras compras pasa directo.
+- **Seguimiento en vivo (`/pedido/[token]`):** El cliente ve en tiempo real cuando el local acepta su pedido, la demora estimada de cocina y cuándo está listo.
+- **Freno automático por stock agotado:** Si el Cupo del Turno llega a `0`, los platos y promos alcanzados pasan automáticamente a *"Agotado por hoy"*.
 
-## Stack
+### Panel de Gestión (`apps/web/src/app/panel`)
+- **Mostrador (`/panel/mostrador`):**
+  - Carga táctil en **1 toque** con foto en miniatura e indicador de unidades cargadas (`1×`, `2×`).
+  - Modalidad por defecto en **"Comer acá"** para atención presencial (con cambio en 1 clic a *Para llevar* o *Delivery*).
+  - Botones rápidos de exclusión de ingredientes (`SIN Cebolla`, `SIN Mayonesa`, `SIN Huevo`, etc.) y notas libres.
+  - Calculadora de vuelto en efectivo y soporte nativo de **Cobro Mixto** (*Efectivo + Transferencia* en un solo paso).
+- **Pantalla de Cocina / Pedidos (`/panel/pedidos`):**
+  - Tablero KDS en tiempo real en 3 columnas (*Nuevos*, *En Cocina*, *Listos para despacho*) con filtros rápidos por canal (*Todos*, *Mostrador / Retira*, *Delivery*).
+  - Comandas completas sin truncar ítems, con exclusiones `SIN...` resaltadas en etiquetas rojas de alto contraste.
+  - **Timbre sonoro persistente cada 25 segundos**, pestaña del navegador parpadeante (`¡PEDIDO NUEVO!`) y alerta visual en barra lateral y mostrador cuando entra un pedido web.
+  - **Screen Wake Lock API** para evitar que la tablet o monitor de cocina se apague durante el servicio.
+  - **Impresión de comanda térmica en 1 clic** para impresoras de `58 mm` u `80 mm` (203 DPI).
+- **Caja y Cupo del Turno (`/panel/caja`):**
+  - Apertura de turno con fondo de cambio inicial y selector de **Cupo del Turno** (ej. cantidad de bollos, panes o porciones disponibles para la noche).
+  - Registro de ingresos/egresos manuales en efectivo (pago a proveedores, hielo, retiros).
+  - Widget de cupo en vivo con ajuste rápido (`-5`, `+5`, `+10`), sobreventa permitida para staff en mostrador con alerta ámbar y restitución automática de stock si un pedido se cancela.
+  - Arqueo de cierre ciego (*Da justo*, *Faltan $...* o *Sobran $...*) e historial de cierres.
+- **Ventas (`/panel/ventas`) y Resumen (`/panel`):**
+  - Facturación del día comparada contra la semana anterior, ticket promedio, ranking de productos más vendidos y horarios pico.
+- **Carta (`/panel/carta`), Promos (`/panel/promos`) y QR (`/panel/qr`):**
+  - Pausa instantánea de productos agotados, **aumento masivo de precios por porcentaje** con redondeo configurable y vista previa, peso de cupo (`pesoCupo`) por plato/promo y generador de QR con logo en PNG y PDF A4.
+- **Configuración (`/panel/configuracion`) y Centro de Ayuda (`/panel/ayuda`):**
+  - Configuración de horarios, WhatsApp, modalidades de entrega, reglas anti-pedidos falsos, números bloqueados y Cupo del Turno.
+  - **Centro de Ayuda integrado (`/panel/ayuda`)** con buscador instantáneo, rutina diaria en 5 pasos, vistas ilustrativas de cada botón y soluciones rápidas a dudas frecuentes + contacto directo de soporte (**DelgadoDev**).
+
+---
+
+## 2. Stack Técnico y Estructura
 
 | Capa | Tecnología |
 |---|---|
-| Web y panel | Next.js 16 (App Router, Cache Components) · React 19 · TypeScript estricto |
-| UI | Tailwind CSS v4 · shadcn/ui (Radix) · lucide-react · zustand (carrito) · dnd-kit |
-| Datos | Firebase: Firestore, Auth (email y contraseña), Storage (imágenes en WebP) |
-| Lógica de servidor | Cloud Functions 2ª gen en `southamerica-east1` (empaquetadas con esbuild) |
-| Compartido | `packages/shared`: esquemas zod, tipos, precios, horarios, pedidos y caja (lo usan la web y las Functions) |
-| Hosting | Vercel (web) · Firebase (Functions, reglas, datos) |
-| Calidad | Vitest (unitarios y reglas con emuladores) · ESLint 9 · Prettier |
-| Monorepo | pnpm workspaces (pnpm 11, Node ≥ 22.12) |
+| Frontend (Web + Panel) | Next.js 16 (App Router, Cache Components) · React 19 · TypeScript estricto |
+| Interfaz | Tailwind CSS v4 · shadcn/ui (Radix) · lucide-react · zustand · dnd-kit |
+| Backend y Base de Datos | Firebase: Firestore, Auth, Storage (WebP), Cloud Functions 2ª gen (`southamerica-east1`) |
+| Dominio compartido | `packages/shared`: esquemas Zod, tipos, cálculo de precios, horarios, caja y cupo |
+| Calidad y Guardia | Vitest (unitarios y reglas Firestore/Storage) · ESLint 9 · Prettier · `scripts/guardia.mjs` |
 
-## Estructura
-
-```
-apps/web/                 Next.js: web pública (app/(sitio)) y panel (app/panel)
-  src/components/publico/ Diseño de la web del local (lo propio de cada local)
-  src/components/panel/   Panel (genérico)
-  src/features/           Lógica por área: carrito, panel, auth, sitio
-functions/src/            Cloud Functions: pedidos, caja, carta, auth, revalidación de la web
-packages/shared/src/      Esquemas, tipos y reglas de negocio compartidas (con tests)
-tests/reglas/             Tests de firestore.rules y storage.rules contra los emuladores
-scripts/                  seed (carga el kit en Firebase) y subida de assets
-silverio/                 KIT DEL LOCAL: seed.json, assets/, SILVERIO.md y manual/
-firestore.rules · storage.rules · firestore.indexes.json
+```text
+apps/web/                 Aplicación Next.js: tienda pública (app/(sitio)) y panel (app/panel)
+  src/components/publico/ Diseño visual propio del local (personalizable en cada copia)
+  src/components/panel/   Componentes del panel de gestión (código genérico de la base)
+  src/features/           Lógica de negocio por módulo (carrito, panel, auth, sitio)
+functions/src/            Cloud Functions: crearPedido, confirmacion, restituirCupoPedido, caja, carta
+packages/shared/src/      Esquemas Zod, tipos, precios, cupo y constantes compartidas (con tests)
+tests/reglas/             Tests de seguridad de firestore.rules y storage.rules en emuladores
+scripts/                  seed.ts, subir-assets.ts, subir-carta.ts y guardia.mjs (sellar/verificar)
+silverio/                 Kit del local: seed.json, assets/, SILVERIO.md y comercial/
 ```
 
-**Genérico vs. propio del local.** Todo es genérico salvo el kit (`silverio/`), el diseño de la
-web pública (`apps/web/src/components/publico/` y sus estilos), los `.env` y los nombres del
-proyecto (`.firebaserc`, `functions/.env.<proyecto>`). Los arreglos del panel, las Functions, las
-reglas y `packages/shared` se hacen en la base y se llevan a las copias con `git merge`.
+---
 
-## Cómo funciona (en corto)
+## 3. Comandos de Desarrollo y Producción
 
-- **Web pública:** se prerenderiza y queda en caché (`"use cache"`). Cuando el panel cambia la carta
-  o el local, una Function (`revalidarWeb`) avisa a `/api/revalidate` y la web se actualiza en
-  segundos, sin gastar lecturas en cada visita.
-- **Pedidos:** el cliente nunca escribe precios. `crearPedido` recalcula todo con
-  `packages/shared/precios.ts`, numera por jornada (corte 06:00) y crea el espejo público
-  `seguimiento/{token}`. `espejarSeguimiento` mantiene al cliente al día.
-- **Caja:** `contabilizarPedido` suma a la caja abierta y a `statsDiarias` cuando un pedido queda
-  cobrado y no anulado, y resta si se cancela (idempotente). `abrirCaja` y `cerrarCaja` manejan una
-  sola caja abierta.
-- **Seguridad:** roles por custom claim `{ rol }` (dueño, encargado, mozo, cocina) y reglas de
-  Firestore y Storage con tests. `/api/salud` informa si Firebase Admin arranca en el servidor.
-
-## Desarrollo
-
-**Requisitos:** Node 22.12+, pnpm 11 (`corepack enable`), Java 21+ (lo exigen los emuladores de Firebase) y
-Firebase CLI (viene como dependencia).
+**Requisitos:** Node 22.12+, pnpm 11 (`corepack enable`) y Java 21+ (para los emuladores de Firebase).
 
 ```bash
 pnpm install
-pnpm dev        # emuladores + seed + web en http://localhost:3000 (UI de emuladores en :4000)
+pnpm dev        # Compila shared/functions, levanta emuladores (:4000), corre seed y abre web (:3000)
 ```
 
-Usuarios de prueba (contraseña `local123`): `dueno@local.test`, `encargado@local.test`,
-`mozo@local.test`, `cocina@local.test`. Se entra por `http://localhost:3000/login`.
+Usuarios locales de prueba (contraseña `local123` en `http://localhost:3000/login`): `dueno@local.test`, `encargado@local.test`, `mozo@local.test`, `cocina@local.test`.
 
-| Comando | Qué hace |
+| Comando | Descripción |
 |---|---|
-| `pnpm dev` | Compila shared y Functions, levanta emuladores, carga el kit y arranca Next.js |
-| `pnpm seed` | Carga el kit en los emuladores (con `pnpm emuladores` corriendo) |
-| `pnpm test` | Tests unitarios de `packages/shared` |
-| `pnpm test:reglas` | Tests de reglas contra los emuladores |
-| `pnpm lint` · `pnpm typecheck` · `pnpm build` | Calidad y build (el build usa los emuladores) |
-| `pnpm deploy:functions` | Deploy de las Functions a producción |
-| `pnpm deploy:reglas` | Deploy de reglas, índices y Storage a producción |
+| `pnpm dev` | Entorno completo en vivo contra emuladores locales de Firebase. |
+| `pnpm seed` | Recarga los datos de `silverio/seed.json` en los emuladores activos. |
+| `pnpm test` | Ejecuta los tests unitarios de `packages/shared` (precios, horarios, caja, cupo). |
+| `pnpm test:reglas` | Ejecuta los tests de seguridad de `firestore.rules` y `storage.rules`. |
+| `pnpm lint` · `pnpm typecheck` | Verificación estricta de ESLint y TypeScript en todos los paquetes. |
+| `pnpm base:sellar` | Actualiza `.base-manifest.json` con los hashes SHA-256 de los archivos genéricos. |
+| `pnpm base:verificar` | Verifica en una copia que ningún archivo genérico de la base haya sido alterado. |
+| `pnpm deploy:functions` | Empaqueta con esbuild y despliega Cloud Functions a producción. |
+| `pnpm deploy:reglas` | Despliega reglas e índices de Firestore y Storage a producción. |
 
-> Si después de `pnpm build` el `pnpm dev` devuelve 404 en rutas que existen, borrá `apps/web/.next`.
-
-## Duplicar para un local nuevo
-
-Tiempo estimado: medio día, más lo que tarde el diseño de la web del local.
-
-### 1. Repo
-
+### Regenerar el PDF Comercial (`presentacion-comercial.pdf`)
 ```bash
-git clone https://github.com/Delgadoc86/silverio-club.git <local>
-cd <local>
-git remote rename origin base          # para traer arreglos de la base después
-git remote add origin https://github.com/<usuario>/<local>.git
-git remote set-url --push base DESACTIVADO   # bloquea pushes accidentales a la base
-git config merge.ours.driver true            # respeta .firebaserc y .env en futuros merges
-git push -u origin main
+node silverio/comercial/a-pdf.mjs
 ```
 
-Creá el archivo `.repo-role` en la raíz (activa las barreras de protección de guardia):
-```ini
-rol=copia
-kit=<local>
-```
+---
 
-Cambiá el `name` de `package.json` raíz a `<local>`.
+## 4. Impresión Térmica en 1 Clic (`--kiosk-printing`)
 
-### 2. Firebase
+El sistema imprime comandas térmicas nativas para impresoras de **58 mm u 80 mm** (203 DPI, blanco y negro puro) sin requerir programas intermedios:
 
-1. Creá el proyecto `<local>` en la consola y pasalo a **Blaze** con una **alerta de presupuesto**
-   (por ejemplo USD 5 por mes).
-2. **Firestore** y **Storage** en `southamerica-east1`.
-3. **Auth:** solo "Correo electrónico/contraseña".
-4. Registrá una **app web** y copiá su configuración.
-5. En `.firebaserc`, poné el alias `prod` apuntando a `<local>`.
-6. Generá una **clave de cuenta de servicio** (Configuración → Cuentas de servicio) y guardala
-   como `service-account.json` en la raíz. Ya está en `.gitignore`: nunca la subas ni la pegues en
-   un chat.
+1. En Windows, configurá la ticketera térmica como **Impresora predeterminada**.
+2. Creá un acceso directo de Chrome o Edge en el escritorio y agregá al final del campo **Destino**:
+   ```text
+   --kiosk-printing https://<tu-dominio>/panel/mostrador
+   ```
+3. En la primera impresión manual, destildá *"Encabezados y pies de página"* y elegí márgenes *"Ninguno"*.
 
-### 3. Kit del local
+---
 
-Copiá `silverio/` a `<local>/` y reemplazá su contenido:
+## 5. Arquitectura Base vs. Copias y Sincronización
 
-- `seed.json`: datos del local (contacto, dirección, horarios, marca), textos de la web (`web`),
-  formas de entrega (`pedidos`), medios de pago (`pagos`), categorías, productos y promos.
-  El script valida todo con los esquemas de `packages/shared` y avisa si algo está mal.
-- `assets/`: logo, portada y fotos (WebP).
-- `<LOCAL>.md`: marca, tono y datos de referencia.
-- Al renombrar o crear `<local>/seed.json` y borrar `silverio/`, los scripts (`seed`, `subirAssets`) detectan la carpeta del kit automáticamente (o podés pasar `--kit <local>`).
-- Borrá `silverio/` cuando el kit nuevo esté completo.
+### Clasificación de archivos (`scripts/guardia.mjs`)
+- **Genéricos (solo se editan en `silverio-club`):** `apps/web/src/components/panel/**`, `apps/web/src/app/panel/**`, `apps/web/src/features/**`, `packages/shared/**`, `functions/src/**`, `firestore.rules`, `storage.rules`, `scripts/**`.
+- **Propios de cada local (permitidos en copias como `le-piaf` o `bautista`):** carpeta del kit (`silverio/`, `lepiaf/`, `bautista/`), diseño público (`apps/web/src/components/publico/**`, `apps/web/src/app/(sitio)/**`, `apps/web/public/**`), `.firebaserc`, `functions/.env.*`, `apps/web/.env*`, `.repo-role`.
 
-### 4. Variables y secretos
+### Cómo sincronizar mejoras desde esta base hacia una copia (Le Piaf / Bautista)
+1. En esta base (`silverio-club`), tras validar pruebas locales:
+   ```bash
+   pnpm base:sellar
+   git add .
+   git commit -m "feat(base): actualizacion de panel, mostrador, cupo y ayuda"
+   git tag base-sync-v2
+   git push origin main --tags
+   ```
+2. En el repositorio de la copia (`LePiaf2026` o `RotiseriaBautista2026`):
+   ```bash
+   git config merge.ours.driver true
+   git fetch base --tags
+   git merge base/main
+   pnpm install
+   pnpm base:verificar && pnpm lint && pnpm typecheck && pnpm test
+   ```
 
-- `pnpm dev` crea `apps/web/.env.local` y `functions/.secret.local` desde sus `.example`.
-  En `.env.local` cambiá `NEXT_PUBLIC_NOMBRE_LOCAL`.
-- Renombrá `functions/.env.silverio-club` a `functions/.env.<local>` con
-  `WEB_URL=https://<local>.vercel.app` (o el dominio final).
-- Generá un secreto aleatorio y cargalo en Firebase:
-  `npx firebase functions:secrets:set REVALIDATE_SECRET -P prod`.
-- Armá `apps/web/.env.vercel-produccion` (no se sube) con la config web de Firebase,
-  `NEXT_PUBLIC_USE_EMULATORS=false`, `NEXT_PUBLIC_NOMBRE_LOCAL`, `NEXT_PUBLIC_APP_URL`,
-  `REVALIDATE_SECRET` (el mismo de arriba), `FIREBASE_SERVICE_ACCOUNT_JSON` (la clave en base64:
-  `base64 -w0 service-account.json` en Git Bash, o
-  `[Convert]::ToBase64String([IO.File]::ReadAllBytes("service-account.json"))` en PowerShell) y
-  `ENABLE_EXPERIMENTAL_COREPACK=1`.
-- Guardá `.env.vercel-produccion` y `service-account.json` en un gestor de contraseñas.
-
-### 5. Diseño de la web
-
-Ajustá `apps/web/src/components/publico/` y los estilos a la marca del local. Los colores, las
-fuentes, el logo y los textos salen del kit; la maquetación es código.
-
-### 6. Probar en local
-
-```bash
-pnpm dev            # revisá web y panel con los datos del kit nuevo
-pnpm test && pnpm test:reglas && pnpm lint && pnpm typecheck
-```
-
-### 7. Producción
-
-```bash
-pnpm deploy:reglas
-pnpm deploy:functions
-GOOGLE_APPLICATION_CREDENTIALS=$PWD/service-account.json \
-  pnpm seed --proyecto <local> --si-estoy-seguro --dueno <email-del-dueño>
-```
-
-El seed crea solo al dueño e imprime un **link para que elija su contraseña**; mandáselo por
-WhatsApp. Si el local ya tiene datos, no pisa nada salvo con `--pisar`.
-
-**Vercel:** importá el repo con **Root Directory `apps/web`** (el `vercel.json` ya define install y
-build). Pegá las variables de `.env.vercel-produccion` en Environment Variables (Production).
-Después del primer deploy:
-
-- Abrí `https://<web>/api/salud`: tiene que decir `"ok": true`.
-- En Firebase → Authentication → Configuración → Dominios autorizados, agregá el dominio de Vercel.
-- Si el dominio no es el de `WEB_URL`, actualizalo y volvé a correr `pnpm deploy:functions`.
-- Cambiá algo en el panel y comprobá que la web lo muestre en segundos.
-
-### 8. Manual del local
-
-`<local>/manual/manual.html` es el manual con capturas. Reemplazá las imágenes de `img/` por
-capturas del local nuevo y generá el PDF:
-
-```bash
-node <local>/manual/a-pdf.mjs <local>/manual/manual.html <local>/manual/manual-usuario.pdf
-```
-
-(Usa Microsoft Edge en modo headless; cambiá la ruta del ejecutable y el pie de página si hace falta.)
-
-### Traer arreglos de la base
-
-En cada copia/clon, configurá una sola vez el driver para respetar las configs propias del local (`.firebaserc`, `.env.example` protegidos con `merge=ours` en `.gitattributes`):
-```bash
-git config merge.ours.driver true
-```
-
-Luego, para traer mejoras y arreglos de la base:
-```bash
-git fetch base && git merge base/main
-```
-
-Los conflictos solo deberían aparecer en archivos del local (kit, diseño). Si aparecen en
-código genérico, ese cambio tenía que hacerse en la base.
-
-## Costos (referencia)
-
-Con ~50 pedidos por día, Firestore, Functions, Auth y Storage entran en la **cuota gratis** de
-Firebase (unas 4.000 lecturas por día contra 50.000 gratis). El costo fijo real es **Vercel Pro:
-USD 20 por mes** por local. Revisá el uso en Firebase Console después del primer fin de semana.
+### Cómo crear un local nuevo desde cero
+1. Clonar `silverio-club`, renombrar el remoto `origin` a `base`, bloquear push a `base` (`git remote set-url --push base DESACTIVADO`) y apuntar `origin` al nuevo repo.
+2. Crear el archivo `.repo-role` en la raíz con `rol=copia` y `kit=<nombre_local>`.
+3. Reemplazar la carpeta del kit con `<nombre_local>/seed.json` y sus imágenes WebP en `assets/`.
+4. Configurar el proyecto en Firebase (Firestore, Auth, Storage, Functions en `southamerica-east1`) y Vercel (`Root Directory: apps/web`).

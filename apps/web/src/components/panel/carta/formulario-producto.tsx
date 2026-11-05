@@ -95,6 +95,7 @@ function Contenido({ producto, categorias, onCerrar }: Props & { producto: Produ
     inicial.gruposExtras?.length ||
     inicial.etiquetas?.length ||
     inicial.diasDisponible?.length ||
+    inicial.pesoCupo !== undefined ||
     !inicial.visible ||
     inicial.estacion === 'barra',
   );
@@ -216,6 +217,21 @@ function Contenido({ producto, categorias, onCerrar }: Props & { producto: Produ
                 <option value="cocina">Cocina</option>
                 <option value="barra">Barra</option>
               </select>
+            </label>
+            <label className="flex items-center gap-2 text-sm">
+              Unidades de cupo
+              <Input
+                type="number"
+                min={0}
+                max={100}
+                placeholder="1"
+                value={v.pesoCupo ?? ''}
+                onChange={(e) => {
+                  const val = e.target.value.trim();
+                  f.cambiar('pesoCupo', val === '' ? undefined : Math.max(0, Number(val) || 0));
+                }}
+                className="h-8 w-20 text-center tabular-nums"
+              />
             </label>
           </div>
 

@@ -1,9 +1,11 @@
 import { randomBytes } from 'node:crypto';
 import {
   calcularPedido,
+  calcularUnidadesCupo,
   claveJornada,
   configConfirmacion,
   crearPedidoInputSchema,
+  DOC_CUPO,
   DOC_LOCAL,
   ErrorPrecio,
   estaAbierto,
@@ -11,6 +13,7 @@ import {
   MINUTOS_CONFIRMACION,
   promoVigente,
   requiereConfirmacion,
+  type CupoTurnoActivo,
   type EstadoPedido,
   type Cliente,
   type ItemPedido,
@@ -141,16 +144,45 @@ export const crearPedido = onCall(async (req) => {
     ronda: 1,
     estadoCocina: 'pendiente',
   }));
+  const efectivoMixto = input.pago.montoEfectivoMixto;
+  const esMixtoValido =
+    esStaff &&
+    input.pagado &&
+    efectivoMixto !== undefined &&
+    efectivoMixto > 0 &&
+    efectivoMixto < totales.total;
+
   const pagos: PagoPedido[] =
     esStaff && input.pagado
-      ? [
-          {
-            medio: input.pago.medio,
-            monto: totales.total,
-            estado: 'aprobado',
-            ...(uid ? { porUid: uid } : {}),
-          },
-        ]
+      ? esMixtoValido
+        ? [
+            {
+              medio: 'efectivo',
+              monto: efectivoMixto,
+              estado: 'aprobado',
+              ...(input.pago.pagaCon && input.pago.pagaCon > efectivoMixto
+                ? { pagaCon: input.pago.pagaCon }
+                : {}),
+              ...(uid ? { porUid: uid } : {}),
+            },
+            {
+              medio: 'transferencia',
+              monto: totales.total - efectivoMixto,
+              estado: 'aprobado',
+              ...(uid ? { porUid: uid } : {}),
+            },
+          ]
+        : [
+            {
+              medio: input.pago.medio,
+              monto: totales.total,
+              estado: 'aprobado',
+              ...(input.pago.medio === 'efectivo' && input.pago.pagaCon
+                ? { pagaCon: input.pago.pagaCon }
+                : {}),
+              ...(uid ? { porUid: uid } : {}),
+            },
+          ]
       : [];
   const nombre = input.cliente?.nombre.trim() ?? '';
   const telefono = input.cliente?.telefono;
@@ -163,12 +195,15 @@ export const crearPedido = onCall(async (req) => {
 
   const bloqueoRef = !esStaff && telefono ? db.doc(`bloqueados/${telefono}`) : null;
   const confirmacion = configConfirmacion(local.pedidos);
+  const unidadesDemandadas = calcularUnidadesCupo(input.items, catalogo, local.cupo);
+  const cupoRef = local.cupo?.habilitado && unidadesDemandadas > 0 ? db.doc(DOC_CUPO) : null;
 
   const { numero, porConfirmar, confirmarAntesDe } = await db.runTransaction(async (tx) => {
-    const [contador, clienteSnap, bloqueo] = await Promise.all([
+    const [contador, clienteSnap, bloqueo, cupoSnap] = await Promise.all([
       tx.get(contadorRef),
       clienteRef ? tx.get(clienteRef) : Promise.resolve(null),
       bloqueoRef ? tx.get(bloqueoRef) : Promise.resolve(null),
+      cupoRef ? tx.get(cupoRef) : Promise.resolve(null),
     ]);
 
     // Número bloqueado por el local: mensaje genérico, sin decirle que está bloqueado.
@@ -188,8 +223,31 @@ export const crearPedido = onCall(async (req) => {
       );
     }
 
+    // Control transaccional del Cupo del Turno (bloquea en web si no alcanza; permite sobreventa a staff).
+    const descontarCupo = Boolean(cupoRef && cupoSnap?.exists);
+    if (descontarCupo && cupoSnap) {
+      const cupoActivo = cupoSnap.data() as CupoTurnoActivo;
+      if (!esStaff && local.cupo?.pausarAlAgotar && unidadesDemandadas > cupoActivo.restante) {
+        if (cupoActivo.restante <= 0) {
+          rechazar(
+            `Ya agotamos el cupo de ${cupoActivo.nombre} por hoy. Consultanos por WhatsApp.`,
+          );
+        }
+        rechazar(
+          `Nos quedan solo ${cupoActivo.restante} ${cupoActivo.nombre} para este turno y tu pedido incluye ${unidadesDemandadas}. Probá pidiendo menos cantidad o consultanos por WhatsApp.`,
+        );
+      }
+    }
+
     const numero = ((contador.get('ultimoNumero') as number | undefined) ?? 0) + 1;
     tx.set(contadorRef, { ultimoNumero: numero }, { merge: true });
+
+    if (descontarCupo && cupoRef) {
+      tx.update(cupoRef, {
+        restante: FieldValue.increment(-unidadesDemandadas),
+        actualizadoEn: FieldValue.serverTimestamp(),
+      });
+    }
 
     // Cliente nuevo (nunca recibió un pedido): tiene que confirmar por WhatsApp o se cancela solo.
     const porConfirmar =
@@ -235,6 +293,7 @@ export const crearPedido = onCall(async (req) => {
       ...confirmacionPedido,
       seguimientoToken: token,
       contabilizado: false,
+      ...(descontarCupo ? { unidadesCupo: unidadesDemandadas } : {}),
       historial: [{ estado, en, ...(uid && esStaff ? { porUid: uid } : {}) }],
     };
     tx.create(pedidoRef, {

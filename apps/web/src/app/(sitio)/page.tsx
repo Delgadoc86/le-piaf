@@ -49,6 +49,7 @@ export default async function Inicio() {
         horario,
         pedidos: local.pedidos,
         pagos: local.pagos,
+        cupo: local.cupo,
         categorias,
         productos,
         promos,

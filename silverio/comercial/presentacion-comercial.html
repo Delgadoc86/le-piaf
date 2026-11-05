@@ -1,0 +1,546 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Presentación Comercial · Sistema Gastronómico DelgadoDev</title>
+<style>
+  @page { size: A4; margin: 14mm 15mm 16mm; }
+  :root {
+    --marca: #f59716;
+    --marca-oscura: #c2410c;
+    --tinta: #0f172a;
+    --suave: #475569;
+    --borde: #e2e8f0;
+    --fondo: #f8fafc;
+    --oscuro: #0f172a;
+  }
+  * { box-sizing: border-box; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, Roboto, sans-serif;
+    color: var(--tinta);
+    font-size: 10pt;
+    line-height: 1.45;
+    margin: 0;
+  }
+  h1, h2, h3, h4 { line-height: 1.18; margin: 0; }
+  p { margin: 0 0 2.5mm; }
+  ul { margin: 0 0 3mm; padding-left: 5mm; }
+  li { margin-bottom: 1.4mm; }
+  .pagina {
+    page-break-after: always;
+    break-after: page;
+  }
+  .pagina:last-child {
+    page-break-after: auto;
+    break-after: auto;
+  }
+
+  /* Portada */
+  .portada {
+    height: 262mm;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 14mm 12mm;
+    background: linear-gradient(155deg, #0f172a 0%, #1e293b 65%, #0f172a 100%);
+    color: #ffffff;
+    border-radius: 5mm;
+  }
+  .portada-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+    padding-bottom: 4mm;
+  }
+  .marca-badge {
+    color: var(--marca);
+    letter-spacing: 0.22em;
+    font-size: 9pt;
+    font-weight: 800;
+    text-transform: uppercase;
+  }
+  .web-badge {
+    font-size: 9pt;
+    color: #cbd5e1;
+    font-weight: 600;
+  }
+  .portada-centro {
+    margin: 6mm 0;
+  }
+  .portada-kicker {
+    display: inline-block;
+    background: rgba(245, 151, 22, 0.16);
+    border: 1px solid rgba(245, 151, 22, 0.45);
+    color: #fbbf24;
+    font-size: 8.5pt;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    padding: 1.5mm 3.5mm;
+    border-radius: 2mm;
+    margin-bottom: 4mm;
+  }
+  .portada h1 {
+    font-size: 29pt;
+    font-weight: 900;
+    letter-spacing: -0.02em;
+    margin-bottom: 4.5mm;
+    color: #ffffff;
+  }
+  .portada h1 span {
+    color: var(--marca);
+  }
+  .portada-sub {
+    font-size: 11.5pt;
+    color: #cbd5e1;
+    max-width: 150mm;
+    line-height: 1.5;
+  }
+  .metricas {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 4mm;
+    margin-top: 7mm;
+  }
+  .metrica {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    border-radius: 3.5mm;
+    padding: 4mm;
+  }
+  .metrica-valor {
+    font-size: 18pt;
+    font-weight: 900;
+    color: var(--marca);
+    display: block;
+    margin-bottom: 1mm;
+  }
+  .metrica-titulo {
+    font-size: 9.5pt;
+    font-weight: 700;
+    color: #ffffff;
+    display: block;
+    margin-bottom: 1mm;
+  }
+  .metrica-desc {
+    font-size: 8.5pt;
+    color: #94a3b8;
+    margin: 0;
+  }
+  .comparativa-portada {
+    background: rgba(15, 23, 42, 0.65);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    border-radius: 3.5mm;
+    padding: 4.5mm;
+    margin-top: 5mm;
+  }
+  .comparativa-portada h3 {
+    font-size: 10.5pt;
+    color: #fbbf24;
+    margin-bottom: 2.5mm;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .comparativa-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+    font-size: 9pt;
+  }
+  .comparativa-grid div strong {
+    display: block;
+    color: #ffffff;
+    margin-bottom: 1mm;
+  }
+  .comparativa-grid div p {
+    color: #cbd5e1;
+    margin: 0;
+  }
+  .portada-pie {
+    border-top: 1px solid rgba(255, 255, 255, 0.14);
+    padding-top: 4mm;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 9.5pt;
+    color: #e2e8f0;
+  }
+  .portada-pie strong {
+    color: var(--marca);
+  }
+
+  /* Encabezados de sección */
+  .cabecera-seccion {
+    border-bottom: 2.5px solid var(--marca);
+    padding-bottom: 2.5mm;
+    margin-bottom: 4.5mm;
+  }
+  .cabecera-seccion .etiqueta {
+    font-size: 8pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+    color: var(--marca-oscura);
+    display: block;
+    margin-bottom: 1mm;
+  }
+  .cabecera-seccion h2 {
+    font-size: 17pt;
+    font-weight: 900;
+    color: var(--tinta);
+  }
+
+  /* Bloques y grillas */
+  .grilla-2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4mm;
+    margin-bottom: 4mm;
+  }
+  .tarjeta {
+    border: 1px solid var(--borde);
+    background: var(--fondo);
+    border-radius: 3mm;
+    padding: 3.8mm 4.2mm;
+    break-inside: avoid;
+  }
+  .tarjeta h3 {
+    font-size: 11pt;
+    font-weight: 800;
+    color: var(--tinta);
+    margin-bottom: 1.5mm;
+  }
+  .tarjeta p {
+    font-size: 9.2pt;
+    color: var(--suave);
+    margin: 0;
+  }
+  .tarjeta-destacada {
+    border-left: 4px solid var(--marca);
+    background: #fffbeb;
+  }
+
+  /* Figuras */
+  figure {
+    margin: 2.5mm 0 4mm;
+    break-inside: avoid;
+    text-align: center;
+  }
+  figure img {
+    display: block;
+    max-width: 100%;
+    max-height: 82mm;
+    width: auto;
+    margin: 0 auto;
+    border: 1px solid var(--borde);
+    border-radius: 3mm;
+  }
+  figcaption {
+    font-size: 8pt;
+    color: var(--suave);
+    margin-top: 1.5mm;
+    font-weight: 600;
+  }
+  .fila-celulares {
+    display: flex;
+    gap: 4mm;
+    justify-content: center;
+    margin: 3mm 0 4mm;
+  }
+  .fila-celulares figure {
+    flex: 0 0 31%;
+    margin: 0;
+  }
+  .fila-celulares figure img {
+    max-height: 96mm;
+  }
+
+  /* Tabla comparativa */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 2.5mm 0 4.5mm;
+    font-size: 9pt;
+    break-inside: avoid;
+  }
+  th, td {
+    text-align: left;
+    padding: 2.2mm 3mm;
+    border-bottom: 1px solid var(--borde);
+    vertical-align: top;
+  }
+  th {
+    background: #f1f5f9;
+    font-weight: 800;
+    color: var(--tinta);
+  }
+
+  /* Cierre comercial */
+  .cta-comercial {
+    background: var(--oscuro);
+    color: #ffffff;
+    border-radius: 4mm;
+    padding: 6mm;
+    margin-top: 5mm;
+    break-inside: avoid;
+  }
+  .cta-comercial .sobrenome {
+    color: var(--marca);
+    font-size: 8.5pt;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.16em;
+  }
+  .cta-comercial h3 {
+    font-size: 15pt;
+    font-weight: 900;
+    margin: 1.5mm 0 2mm;
+    color: #ffffff;
+  }
+  .cta-comercial p {
+    color: #cbd5e1;
+    font-size: 9.5pt;
+    margin-bottom: 4mm;
+  }
+  .datos-contacto {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 3mm;
+    border-top: 1px solid rgba(255, 255, 255, 0.15);
+    padding-top: 3.5mm;
+  }
+  .dato-item span {
+    display: block;
+    font-size: 7.5pt;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #94a3b8;
+  }
+  .dato-item strong {
+    font-size: 10.5pt;
+    color: #ffffff;
+  }
+</style>
+</head>
+<body>
+
+<!-- PÁGINA 1: PORTADA -->
+<div class="pagina">
+  <div class="portada">
+    <div class="portada-top">
+      <span class="marca-badge">DelgadoDev · Software Gastronómico</span>
+      <span class="web-badge">www.delgadodev.com.ar</span>
+    </div>
+
+    <div class="portada-centro">
+      <span class="portada-kicker">Web de Pedidos + Mostrador + Cocina + Caja</span>
+      <h1>Tu propio sistema gastronómico, <span>sin pagar comisiones por venta.</span></h1>
+      <p class="portada-sub">
+        Diseñado especialmente para pizzerías, lomiterías, rotiserías, hamburgueserías, bares y food trucks que buscan vender más por su propio canal y ordenar la cocina con la velocidad del papel y la lapicera.
+      </p>
+
+      <div class="metricas">
+        <div class="metrica">
+          <span class="metrica-valor">0%</span>
+          <span class="metrica-titulo">Comisión por pedido</span>
+          <p class="metrica-desc">Cada venta web o presencial va íntegra a tu caja, sin intermediarios ni descuentos por plato.</p>
+        </div>
+        <div class="metrica">
+          <span class="metrica-valor">1 Toque</span>
+          <span class="metrica-titulo">Mostrador ultrarrápido</span>
+          <p class="metrica-desc">Tomá pedidos presenciales o telefónicos en segundos, con cálculo de vuelto y cobro mixto.</p>
+        </div>
+        <div class="metrica">
+          <span class="metrica-valor">100%</span>
+          <span class="metrica-titulo">Llave en mano</span>
+          <p class="metrica-desc">Se entrega listo con tu logo, tus colores, tus fotos, tu dominio y tu carta completa cargada.</p>
+        </div>
+      </div>
+
+      <div class="comparativa-portada">
+        <h3>Por qué los negocios gastronómicos se pasan a un sistema propio</h3>
+        <div class="comparativa-grid">
+          <div>
+            <strong>Basta de perder tiempo en WhatsApp</strong>
+            <p>El cliente mira la carta actualizada desde su celular, elige sus platos y te envía el pedido ya armado y sumado.</p>
+          </div>
+          <div>
+            <strong>Sin sistemas contables lentos ni complejos</strong>
+            <p>Cero pantallas llenas de formularios eternos: todo está pensado para usarse en pleno horario pico de cocina.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="portada-pie">
+      <div><strong>Cristian Delgado</strong> · Desarrollo e Implementación</div>
+      <div>WhatsApp: <strong>+54 9 261 747-8090</strong> · <strong>www.delgadodev.com.ar</strong></div>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA 2: TIENDA WEB PROPIA Y EXPERIENCIA DEL CLIENTE -->
+<div class="pagina">
+  <div class="cabecera-seccion">
+    <span class="etiqueta">1 · Canal de Ventas Propio</span>
+    <h2>Tu carta digital que toma pedidos sola desde el celular</h2>
+  </div>
+
+  <p>
+    Cuando un cliente entra desde tu Instagram, tu estado de WhatsApp o escanea el código QR en la mesa, accede al instante a tu tienda web rápida, sin tener que descargar ninguna aplicación ni crearse una cuenta.
+  </p>
+
+  <div class="fila-celulares">
+    <figure>
+      <img src="img/cel-web-inicio.png" alt="Carta digital en el celular">
+      <figcaption>1. Carta con tu identidad y promos</figcaption>
+    </figure>
+    <figure>
+      <img src="img/cel-web-carrito.png" alt="Armado del pedido">
+      <figcaption>2. Pedido claro sin errores de suma</figcaption>
+    </figure>
+    <figure>
+      <img src="img/cel-web-seguimiento.png" alt="Seguimiento en vivo">
+      <figcaption>3. Seguimiento en vivo del estado</figcaption>
+    </figure>
+  </div>
+
+  <div class="grilla-2">
+    <div class="tarjeta tarjeta-destacada">
+      <h3>Filtro inteligente contra pedidos falsos</h3>
+      <p>
+        Cuando un número nuevo pide por primera vez, el sistema le solicita confirmar su pedido con 1 toque por WhatsApp antes de pasarlo a la cocina. Una vez que ya compró, el sistema lo recuerda y en sus próximas compras pide directo.
+      </p>
+    </div>
+    <div class="tarjeta">
+      <h3>Seguimiento en tiempo real para el cliente</h3>
+      <p>
+        El cliente ve en su celular cuando aceptás el pedido, cuántos minutos de demora tiene la cocina y cuándo ya está listo para retirar o en camino. Ahorrás decenas de mensajes preguntando "¿cuánto falta?".
+      </p>
+    </div>
+    <div class="tarjeta">
+      <h3>Promociones y Banner de fechas especiales</h3>
+      <p>
+        Destacá combos por día y horario (por ejemplo, promos de lunes a jueves) y activá banners promocionales para fechas clave o eventos desde el mismo panel.
+      </p>
+    </div>
+    <div class="tarjeta">
+      <h3>Generador de QR listo para imprimir</h3>
+      <p>
+        Descargá desde el panel el código QR con el logo de tu negocio en alta calidad para redes sociales, cartel de mostrador o plancha A4 lista para las mesas del salón.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA 3: MOSTRADOR, COCINA Y CONTROL DE STOCK -->
+<div class="pagina">
+  <div class="cabecera-seccion">
+    <span class="etiqueta">2 · Operación en Horas Pico</span>
+    <h2>Mostrador en 1 toque, Pantalla de Cocina y Stock del Turno</h2>
+  </div>
+
+  <div class="grilla-2">
+    <div class="tarjeta">
+      <h3>Mostrador rápido con fotos y Pago Mixto</h3>
+      <p>
+        Cargá pedidos de salón ("Comer acá"), retiro ("Para llevar") o teléfono tocando las fotos de los platos. Quitá ingredientes con botones grandes ("SIN Cebolla", "SIN Mayonesa"), calculá el vuelto o cobrá mitad en efectivo y mitad por transferencia en un solo paso.
+      </p>
+    </div>
+    <div class="tarjeta">
+      <h3>Pantalla de Cocina (KDS) con timbre sonoro</h3>
+      <p>
+        Todas las comandas organizadas en 3 columnas claras: Nuevos, En Cocina y Listos para despacho. El timbre suena cada 25 segundos y la pestaña parpadea cuando entra un pedido web para que nunca se pase ninguno en medio del ruido de la cocina.
+      </p>
+    </div>
+  </div>
+
+  <figure>
+    <img src="img/pc-pedidos.png" alt="Tablero de cocina y despacho en tiempo real">
+    <figcaption>Tablero de cocina en tiempo real: números grandes, notas resaltadas y avance de etapa en 1 clic.</figcaption>
+  </figure>
+
+  <div class="grilla-2">
+    <div class="tarjeta tarjeta-destacada">
+      <h3>Control de Cupo del Turno (Stock sin planillas)</h3>
+      <p>
+        Olvidate de los inventarios imposibles. Al abrir la caja indicás con cuántas unidades del insumo crítico arrancás (ej. 80 bollos de pizza, 60 panes de lomo o docenas de empanadas). Cada venta descuenta sola y, al llegar a cero, la web frena esos platos ("Agotado por hoy") mientras el mostrador te permite seguir operando.
+      </p>
+    </div>
+    <div class="tarjeta">
+      <h3>Impresión de comandas térmicas (58 mm / 80 mm)</h3>
+      <p>
+        Si usás impresora térmica de tickets en cocina o mostrador, imprimís la comanda con 1 clic en alto contraste, con el número de pedido gigante, modalidad de entrega y exclusiones de ingredientes destacadas.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- PÁGINA 4: CAJA, VENTAS, CARTA Y CONTACTO COMERCIAL -->
+<div class="pagina">
+  <div class="cabecera-seccion">
+    <span class="etiqueta">3 · Administración Simple y Puesta en Marcha</span>
+    <h2>Control de Caja, Aumento de Precios y Estadísticas Reales</h2>
+  </div>
+
+  <div class="grilla-2">
+    <figure style="margin:0">
+      <img src="img/pc-caja-abierta.png" alt="Control de caja y movimientos" style="max-height:66mm">
+      <figcaption>Control de efectivo en cajón, transferencias y gastos del turno.</figcaption>
+    </figure>
+    <figure style="margin:0">
+      <img src="img/pc-ventas.png" alt="Estadísticas de ventas" style="max-height:66mm">
+      <figcaption>Reporte de ventas, platos más pedidos y horarios pico.</figcaption>
+    </figure>
+  </div>
+
+  <table>
+    <tr>
+      <th style="width:32%">Herramienta para el Dueño</th>
+      <th>Qué resuelve en el negocio</th>
+    </tr>
+    <tr>
+      <td><strong>Arqueo de Caja y Gastos</strong></td>
+      <td>Anotá pagos en efectivo a proveedores, hielo o retiros durante la noche. Al cerrar, ingresás los billetes contados y el sistema calcula al instante si da justo, sobra o falta dinero.</td>
+    </tr>
+    <tr>
+      <td><strong>Aumento Masivo de Precios</strong></td>
+      <td>Actualizá toda la carta o una categoría puntual por porcentaje (con redondeo limpio a $50, $100 o $500) en menos de 10 segundos y con vista previa antes de confirmar.</td>
+    </tr>
+    <tr>
+      <td><strong>Pausa Instantánea de Platos</strong></td>
+      <td>¿Se terminó un producto a mitad de la noche? Apagás un interruptor en Carta y desaparece de las opciones de compra en la web al instante.</td>
+    </tr>
+    <tr>
+      <td><strong>Sin Comprar Equipos Especiales</strong></td>
+      <td>Funciona directamente en cualquier PC, notebook, tablet o celular que ya tengas en el local, con centro de ayuda integrado dentro del panel.</td>
+    </tr>
+  </table>
+
+  <div class="cta-comercial">
+    <span class="sobrenome">DelgadoDev · Soluciones Digitales a Medida</span>
+    <h3>Solicitá una demostración en vivo para tu negocio</h3>
+    <p>
+      Te mostramos el sistema funcionando en tiempo real y adaptamos la tienda web y el panel a la identidad visual y forma de trabajo de tu local gastronómico.
+    </p>
+    <div class="datos-contacto">
+      <div class="dato-item">
+        <span>Responsable</span>
+        <strong>Cristian Delgado</strong>
+      </div>
+      <div class="dato-item">
+        <span>WhatsApp Directo</span>
+        <strong>+54 9 261 747-8090</strong>
+      </div>
+      <div class="dato-item">
+        <span>Sitio Web</span>
+        <strong>www.delgadodev.com.ar</strong>
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
+

@@ -58,12 +58,15 @@ function TarjetaPromo({
   grande?: boolean;
   className?: string;
 }) {
+  const tienda = useTienda();
   const agregar = useCarrito((e) => e.agregar);
   const avisar = useTiendaUI((e) => e.avisarAgregado);
   const [listo, setListo] = useState(false);
-  const conCarrito = useTienda().pedidos.habilitados;
+  const conCarrito = tienda.pedidos.habilitados;
+  const agotada = tienda.promoAgotadaPorCupo(p.id);
 
   function sumar() {
+    if (agotada) return;
     agregar({ tipo: 'promo', promoId: p.id, cantidad: 1 });
     avisar();
     setListo(true);
@@ -92,8 +95,13 @@ function TarjetaPromo({
         aria-hidden
       />
 
-      <span className="absolute top-3 left-3 rounded-full bg-marca px-2.5 py-1 text-[10px] font-bold tracking-wider text-black uppercase">
-        Promo
+      <span
+        className={cn(
+          'absolute top-3 left-3 rounded-full px-2.5 py-1 text-[10px] font-bold tracking-wider uppercase',
+          agotada ? 'bg-white/20 text-white' : 'bg-marca text-black',
+        )}
+      >
+        {agotada ? 'Agotado por hoy' : 'Promo'}
       </span>
 
       <div className={cn('flex items-end gap-3', grande ? 'p-5 md:p-7' : 'p-4')}>
@@ -118,7 +126,7 @@ function TarjetaPromo({
             {formatARS(p.precio)}
           </p>
         </div>
-        {conCarrito && (
+        {conCarrito && !agotada && (
           <button
             type="button"
             onClick={sumar}

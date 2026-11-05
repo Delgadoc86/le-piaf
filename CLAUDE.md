@@ -1,44 +1,24 @@
-# CLAUDE.md — Silverio Club
+# CLAUDE.md — Silverio Club (Base Gastronómica DelgadoDev)
 
-Web + sistema de gestión gastronómica ("semi-FUDO") para **un** local: Silverio Food Truck Beer.
-Este repo es también la **base que se copia** para cada local nuevo (un repo, un Firebase y un Vercel por local; ROADMAP §16).
+Sistema integral de **Tienda Web de Pedidos + Mostrador POS + Pantalla de Cocina (KDS) + Caja y Cupo de Stock por Turno**.
+Este repositorio (`silverio-club`) es la **base maestra** que se copia y sincroniza hacia cada local gastronómico (**Silverio**, **Le Piaf**, **Bautista**): un repo, un proyecto Firebase y un proyecto Vercel por comercio.
 
-## Documentos fuente (leer antes de trabajar)
-- [ROADMAP.md](ROADMAP.md): arquitectura, modelo de datos, reglas, Functions y fases con checklists. **Es la especificación.** Si algo del código contradice el roadmap, preguntar antes de desviarse; si se decide cambiarlo, actualizar el roadmap en el mismo cambio.
-- [silverio/SILVERIO.md](silverio/SILVERIO.md): marca, textos y datos del local (es el "kit" del local; en una copia se reemplaza).
-- [silverio/seed.json](silverio/seed.json): datos iniciales para `scripts/seed.ts`.
+## Documentos fuente
+- [`README.md`](README.md): arquitectura, módulos, comandos, despliegue, impresión térmica y sincronización hacia copias.
+- [`ROADMAP.md`](ROADMAP.md): especificación funcional unificada, modelo de datos y checklist de estado.
+- [`silverio/SILVERIO.md`](silverio/SILVERIO.md): marca, textos y datos propios de Silverio (kit del local).
+- [`silverio/seed.json`](silverio/seed.json): catálogo y configuración inicial para `scripts/seed.ts`.
+- [`silverio/comercial/presentacion-comercial.pdf`](silverio/comercial/presentacion-comercial.pdf): dossier comercial de DelgadoDev.
 
-## Cómo trabajar
-- Ir **fase por fase** y tarea por tarea del roadmap; marcar `[x]` en ROADMAP.md al completar cada una.
-- No empezar una fase sin cumplir el criterio "✅ Listo cuando" de la anterior, salvo pedido explícito.
-- Stack fijo: Next.js (App Router) + TypeScript estricto + Tailwind + shadcn/ui, **Firebase** (Auth, Firestore, Storage, Functions 2ª gen en `southamerica-east1`), pnpm workspaces. No agregar dependencias grandes sin justificarlo.
-- Tipos, esquemas zod y cálculo de precios viven en `packages/shared` y se usan igual en front y Functions.
-- Dinero en **pesos enteros**. Fechas con la zona horaria del local.
-- Toda regla nueva de `firestore.rules` o `storage.rules` lleva su test en `tests/reglas/`.
-- El cliente final nunca escribe pedidos ni precios directo en Firestore: siempre vía `crearPedido`.
-- Desarrollar contra los **emuladores**; nunca tocar el proyecto real `silverio-club` (producción) sin pedido explícito.
-- UI del panel en español rioplatense (vos). Código de dominio en español (`pedido`, `producto`).
-- Commits en Conventional Commits.
-- **Consultar antes de:** crear o modificar algo en Firebase real (fuera de emuladores), instalar dependencias que no figuren en el roadmap, hacer deploy y hacer commits (proponer el mensaje).
-- Modelo **un repo por local**. Firestore aplanado: `local/datos` + colecciones en la raíz; claim `{ rol }`. Nada de `locales/{id}`, slugs ni multi-local.
-- Lo **genérico** (panel, Functions, reglas, `packages/shared`) se escribe pensando en que lo usen todas las copias; lo **propio de Silverio** (kit `silverio/`, `components/publico/`, estilos, `.env`) queda separado (ROADMAP §11).
-- **Panel mínimo:** el dueño de un local chico solo ve carta/precios/agotados, promos, banner de fecha especial, QR, contacto, redes y horarios. Diseño, marca, textos y configuración avanzada los maneja DelgadoDev en código/datos (ROADMAP §11). Todas las imágenes se guardan en WebP.
-- Explicar en criollo y corto; ante opciones, recomendar una y decir por qué.
+## Reglas técnicas del proyecto
+- **Stack fijo:** Next.js 16 (App Router) + React 19 + TypeScript estricto + Tailwind v4 + shadcn/ui, **Firebase** (Auth, Firestore, Storage, Functions 2ª gen en `southamerica-east1`), pnpm workspaces.
+- **Dominio compartido (`packages/shared`):** tipos, esquemas Zod y cálculos puros (precios, horarios, caja, cupo del turno) compartidos entre frontend y Cloud Functions.
+- **Dinero en pesos enteros** y fechas con la zona horaria del local (`America/Argentina/Buenos_Aires`, corte de jornada 06:00).
+- **Seguridad:** el cliente público nunca escribe pedidos ni precios directo en Firestore; todo pedido ingresa por la Callable `crearPedido`.
+- **Diseño e iconografía sobria:** prohibido el uso de `Sparkles` y emojis decorativos en botones, etiquetas, subtítulos o píldoras.
+- **Entorno local:** desarrollar y probar contra los emuladores de Firebase (`pnpm dev`); nunca tocar producción sin confirmación explícita del usuario.
 
-## Comandos
-- `pnpm dev`: compila shared + functions, levanta emuladores (UI en http://localhost:4000), corre el seed y arranca Next.js (http://localhost:3000) con watchers.
-- `pnpm seed`: carga el kit del local (`silverio/`) en los emuladores (necesita los emuladores corriendo, p. ej. `pnpm emuladores`). Usuarios: `dueno@local.test`, `encargado@…`, `mozo@…`, `cocina@…`; contraseña `local123`.
-- `pnpm test` (unitarios de shared) · `pnpm test:reglas` (reglas contra emuladores) · `pnpm lint` · `pnpm typecheck` · `pnpm build`.
-- `pnpm deploy:functions` / `pnpm deploy:reglas`: deploy a producción (**solo con OK explícito**). Las Functions se empaquetan con esbuild (`functions/empaquetar.mjs`).
-- TypeScript fijado en 6.0.x hasta que typescript-eslint soporte TS 7.
-
-## Copia vs base (§8b)
-- Antes de comenzar a trabajar, leer `.repo-role` en la raíz.
-- Si dice `rol=copia`, este repositorio es una **copia de local** (ej. Le Piaf, Bautista). Solo está permitido tocar las rutas propias del local:
-  - Su kit (`<kit>/`: textos, fotos, `seed.json`, manual)
-  - Diseño y maquetación web (`apps/web/src/components/publico/**` y `apps/web/src/app/(sitio)/**`)
-  - Assets públicos de la copia (`apps/web/public/**`)
-  - Configuración del proyecto local (`.firebaserc`, `functions/.env.*`, `apps/web/.env*`, `ROADMAP_<LOCAL>*.md`, `PENDIENTES_BASE.md`)
-- Está **terminantemente prohibido** modificar archivos genéricos (panel, Functions, reglas, `packages/shared`, scripts, configs raíz, guardia) en una copia.
-- Si en una copia se detecta un bug o necesidad genérica, **no se arregla ahí**: se anota en `PENDIENTES_BASE.md` y se implementa en la base (`silverio-club`).
-- En la base (`silverio-club`), todo cambio genérico se desarrolla, prueba y sella con `pnpm base:sellar` antes de etiquetar y sincronizar hacia las copias.
+## Regla Base vs. Copia (`scripts/guardia.mjs`)
+- Antes de trabajar, verificar si existe `.repo-role` en la raíz:
+  - Si no existe (o `rol=base`), estamos en la **base (`silverio-club`)**: acá se desarrollan todos los cambios genéricos (panel, Functions, reglas, `packages/shared`, scripts) y al finalizar se sella con `pnpm base:sellar`.
+  - Si dice `rol=copia`, estamos en una **copia de local** (`Le Piaf`, `Bautista`): solo se permite editar su kit (`<kit>/`), el diseño público (`apps/web/src/components/publico/**`, `apps/web/src/app/(sitio)/**`, `apps/web/public/**`) y su configuración local (`.firebaserc`, `.env*`).

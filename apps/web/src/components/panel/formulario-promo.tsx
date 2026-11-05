@@ -119,10 +119,30 @@ function Contenido({
               />
             )}
           </Campo>
-          <div className="flex items-end gap-4">
+          <div className="flex flex-wrap items-end gap-4">
             <Campo etiqueta="Precio" error={f.errores.precio} className="w-40">
               {(i) => (
                 <InputPesos id={i} valor={v.precio} onCambio={(n) => f.cambiar('precio', n)} />
+              )}
+            </Campo>
+            <Campo
+              etiqueta="Cupo que descuenta"
+              ayuda="Ej.: 2 si son 2 pizzas."
+              className="w-36"
+            >
+              {(i) => (
+                <Input
+                  id={i}
+                  type="number"
+                  min={0}
+                  max={100}
+                  placeholder="0"
+                  value={v.pesoCupo ?? ''}
+                  onChange={(e) => {
+                    const val = e.target.value.trim();
+                    f.cambiar('pesoCupo', val === '' ? undefined : Math.max(0, Number(val) || 0));
+                  }}
+                />
               )}
             </Campo>
             <label className="flex items-center gap-2 pb-2 text-sm">

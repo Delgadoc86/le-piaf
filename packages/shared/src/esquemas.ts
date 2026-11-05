@@ -193,6 +193,18 @@ export const bannerSchema = z
     path: ['hasta'],
   });
 
+/**
+ * Configuración del Cupo del Turno (stock operativo simple por jornada/turno:
+ * ej. "50 Pizzas", "40 Lomos"). Desactivado por defecto.
+ */
+export const configCupoTurnoSchema = z.object({
+  habilitado: z.boolean(),
+  nombreItem: textoCorto,
+  cantidadPorDefecto: z.number().int().min(1).max(10_000),
+  categoriaIds: z.array(idSchema),
+  pausarAlAgotar: z.boolean(),
+});
+
 /** Datos del local (documento local/datos). */
 export const localEditableSchema = z.object({
   nombre: textoCorto,
@@ -210,6 +222,7 @@ export const localEditableSchema = z.object({
   pedidos: configPedidosSchema,
   pagos: configPagosSchema,
   banner: bannerSchema.optional(),
+  cupo: configCupoTurnoSchema.optional(),
 });
 
 // ─── Carta ───────────────────────────────────────────────────────────────────
@@ -264,6 +277,8 @@ export const productoSchema = z.object({
   /** Si existen, reemplazan a "precio". */
   variantes: z.array(varianteSchema).optional(),
   gruposExtras: z.array(grupoExtrasSchema).optional(),
+  /** Unidades que descuenta del cupo del turno si pertenece a una categoría alcanzada (default 1). */
+  pesoCupo: z.number().int().min(0).max(100).optional(),
 });
 
 export const promoSchema = z.object({
@@ -290,6 +305,8 @@ export const promoSchema = z.object({
       fechaFin: fechaDiaSchema.optional(),
     })
     .optional(),
+  /** Unidades que descuenta del cupo del turno (default 0; ej. "Promo 2 Pizzas" define 2). */
+  pesoCupo: z.number().int().min(0).max(100).optional(),
 });
 
 export const zonaDeliverySchema = z.object({
@@ -365,6 +382,8 @@ export const crearPedidoInputSchema = z
     pago: z.object({
       medio: z.enum(MEDIOS_PAGO_MANUALES),
       pagaCon: pesosSchema.optional(),
+      /** Solo staff en cobro mixto: importe abonado en efectivo (el resto se imputa a transferencia). */
+      montoEfectivoMixto: pesosSchema.optional(),
     }),
     nota: z.string().trim().max(200).optional(),
     /** Solo staff: el cliente ya pagó (se registra el cobro por el total). */
@@ -382,6 +401,10 @@ export const crearPedidoInputSchema = z
     message: 'Solo el local registra pagos',
     path: ['pagado'],
   })
+  .refine((p) => p.origen !== 'web' || p.pago.montoEfectivoMixto === undefined, {
+    message: 'Solo el local registra pagos mixtos',
+    path: ['pago', 'montoEfectivoMixto'],
+  })
   .refine((p) => p.tipo !== 'delivery' || p.entrega !== undefined, {
     message: 'Falta la dirección de entrega',
     path: ['entrega'],
@@ -389,7 +412,11 @@ export const crearPedidoInputSchema = z
 
 // ─── Caja ────────────────────────────────────────────────────────────────────
 
-export const abrirCajaInputSchema = z.object({ montoInicial: pesosSchema.max(100_000_000) });
+export const abrirCajaInputSchema = z.object({
+  montoInicial: pesosSchema.max(100_000_000),
+  /** Unidades de cupo para este turno (si se omite y el cupo está activo, usa cantidadPorDefecto). */
+  cupoInicial: z.number().int().min(0).max(10_000).optional(),
+});
 
 export const cerrarCajaInputSchema = z.object({
   contado: z.object({ efectivo: pesosSchema, transferencia: pesosSchema }),
@@ -432,6 +459,7 @@ export type ContenidoWeb = z.infer<typeof webSchema>;
 export type Banner = z.infer<typeof bannerSchema>;
 export type ConfigPedidos = z.infer<typeof configPedidosSchema>;
 export type ConfigPagos = z.infer<typeof configPagosSchema>;
+export type ConfigCupoTurno = z.infer<typeof configCupoTurnoSchema>;
 export type LocalEditable = z.infer<typeof localEditableSchema>;
 export type CategoriaDatos = z.infer<typeof categoriaSchema>;
 export type Variante = z.infer<typeof varianteSchema>;
